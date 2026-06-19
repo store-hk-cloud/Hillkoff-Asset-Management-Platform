@@ -48,3 +48,30 @@ both deny disabled profiles.
 
 An administrative provisioning interface should be introduced as a dedicated
 future identity-management feature with audit events and approval controls.
+
+## First administrator
+
+Provision the first administrator from a trusted terminal with Firebase Admin
+credentials or Google Application Default Credentials:
+
+```bash
+npm run auth:provision-admin
+```
+
+The command prompts for the email, display name, and password. Password input is
+masked and is never written to the repository. It creates or updates the
+Firebase Authentication account, applies the `admin` custom claim, and creates
+the matching active Firestore profile.
+
+The command is idempotent and can repair an incomplete administrator account:
+
+```bash
+npm run auth:provision-admin -- \
+  --email admin@hillkoff.com \
+  --display-name "Hillkoff Administrator"
+```
+
+For controlled non-interactive environments, the command also accepts
+`HILLKOFF_ADMIN_EMAIL`, `HILLKOFF_ADMIN_DISPLAY_NAME`, and
+`HILLKOFF_ADMIN_PASSWORD`. Do not store those values in committed files, shell
+history, CI logs, or shared deployment configuration.
