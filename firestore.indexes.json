@@ -1,0 +1,277 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "assets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "branchId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "customerId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "searchKeywords", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "branchId", "order": "ASCENDING" },
+        { "fieldPath": "searchKeywords", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "customerId", "order": "ASCENDING" },
+        { "fieldPath": "searchKeywords", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "branchId", "order": "ASCENDING" },
+        { "fieldPath": "searchKeywords", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "customerId", "order": "ASCENDING" },
+        { "fieldPath": "searchKeywords", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "branchId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "customerId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "searchKeywords", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "asset_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "assetId", "order": "ASCENDING" },
+        { "fieldPath": "occurredAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "asset_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "assetId", "order": "ASCENDING" },
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "occurredAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "movement_logs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "occurredAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "movement_logs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "involvedBranchIds", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "occurredAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "movement_logs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "involvedBranchIds", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "occurredAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "nfc_registrations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "assetId", "order": "ASCENDING" },
+        { "fieldPath": "registeredAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "installations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "scheduledAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "installations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "assignedTechnicianId", "order": "ASCENDING" },
+        { "fieldPath": "scheduledAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "installations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "customerId", "order": "ASCENDING" },
+        { "fieldPath": "scheduledAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "repair_tickets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "assignedTechnicianId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "repair_tickets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "branchId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "repair_tickets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "customerId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pm_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "scheduledAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pm_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "assignedTechnicianId", "order": "ASCENDING" },
+        { "fieldPath": "scheduledAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pm_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "branchId", "order": "ASCENDING" },
+        { "fieldPath": "scheduledAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pm_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "customerId", "order": "ASCENDING" },
+        { "fieldPath": "scheduledAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pm_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "assignedTechnicianId", "order": "ASCENDING" },
+        { "fieldPath": "scheduledAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pm_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "branchId", "order": "ASCENDING" },
+        { "fieldPath": "scheduledAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pm_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "customerId", "order": "ASCENDING" },
+        { "fieldPath": "scheduledAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notification_queue",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "availableAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "command_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "idempotencyKey", "order": "ASCENDING" },
+        { "fieldPath": "occurredAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

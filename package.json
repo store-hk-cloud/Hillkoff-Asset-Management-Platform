@@ -1,0 +1,60 @@
+{
+  "name": "hillkoff-asset-management-platform",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "workspaces": [
+    "functions"
+  ],
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint src tests next.config.ts vitest.config.ts eslint.config.mjs postcss.config.mjs",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write src tests docs scripts functions bigquery package.json next.config.ts vitest.config.ts eslint.config.mjs postcss.config.mjs firebase.json firestore.indexes.json README.md",
+    "format:check": "prettier --check src tests docs scripts functions bigquery package.json next.config.ts vitest.config.ts eslint.config.mjs postcss.config.mjs firebase.json firestore.indexes.json README.md",
+    "test": "vitest run tests/unit",
+    "test:all": "vitest run",
+    "test:rules": "firebase emulators:exec --project demo-hillkoff-auth --only firestore,storage \"vitest run tests/security\"",
+    "identity:backfill": "node scripts/backfill-asset-public-identities.mjs",
+    "functions:build": "npm run build --workspace functions",
+    "functions:typecheck": "npm run typecheck --workspace functions",
+    "check": "npm run typecheck && npm run lint && npm run functions:typecheck"
+  },
+  "dependencies": {
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "firebase": "^12.15.0",
+    "firebase-admin": "^13.10.0",
+    "lucide-react": "^0.468.0",
+    "next": "^16.2.9",
+    "qrcode": "^1.5.4",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tailwind-merge": "^3.3.0",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@types/qrcode": "^1.5.5",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.2.9",
+    "firebase-tools": "^15.22.0",
+    "postcss": "^8.5.6",
+    "prettier": "^3.7.4",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "tailwindcss": "^4.3.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}

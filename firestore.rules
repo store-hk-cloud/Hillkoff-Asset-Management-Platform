@@ -1,0 +1,265 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function currentUserPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function currentUser() {
+      return get(currentUserPath()).data;
+    }
+
+    function hasValidRole(role) {
+      return role in [
+        'admin',
+        'warehouse',
+        'technician',
+        'sales',
+        'branch',
+        'customer',
+        'executive'
+      ];
+    }
+
+    function isActiveUser() {
+      return isSignedIn()
+        && exists(currentUserPath())
+        && currentUser().status == 'active'
+        && currentUser().role == request.auth.token.role;
+    }
+
+    function isAdmin() {
+      return isActiveUser()
+        && request.auth.token.role == 'admin'
+        && currentUser().role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function canReadAsset(data) {
+      return isActiveUser() && (
+        request.auth.token.role in [
+          'admin',
+          'warehouse',
+          'technician',
+          'sales',
+          'executive'
+        ]
+        || (
+          request.auth.token.role == 'branch'
+          && currentUser().branchId != null
+          && data.branchId == currentUser().branchId
+        )
+        || (
+          request.auth.token.role == 'customer'
+          && currentUser().customerId != null
+          && data.customerId == currentUser().customerId
+        )
+      );
+    }
+
+    function hasValidUserShape(data, userId) {
+      return data.keys().hasOnly([
+          'uid',
+          'email',
+          'displayName',
+          'phoneNumber',
+          'photoURL',
+          'role',
+          'status',
+          'branchId',
+          'customerId',
+          'lastLoginAt',
+          'createdAt',
+          'updatedAt',
+          'version'
+        ])
+        && data.uid == userId
+        && data.email is string
+        && data.displayName is string
+        && data.displayName.size() > 0
+        && data.displayName.size() <= 120
+        && (data.phoneNumber == null || data.phoneNumber is string)
+        && (data.photoURL == null || data.photoURL is string)
+        && hasValidRole(data.role)
+        && data.status in ['active', 'disabled']
+        && (data.branchId == null || data.branchId is string)
+        && (data.customerId == null || data.customerId is string)
+        && (data.lastLoginAt == null || data.lastLoginAt is timestamp)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && data.version is int
+        && data.version >= 0;
+    }
+
+    match /users/{userId} {
+      allow get: if (
+          isOwner(userId)
+          && isActiveUser()
+          && resource.data.uid == request.auth.uid
+          && resource.data.email == request.auth.token.email
+          && resource.data.role == request.auth.token.role
+        ) || isAdmin();
+
+      allow list: if isAdmin();
+
+      allow update: if isOwner(userId)
+        && isActiveUser()
+        && hasValidUserShape(request.resource.data, userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName',
+          'phoneNumber',
+          'photoURL',
+          'updatedAt',
+          'version'
+        ])
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.version == resource.data.version + 1;
+
+      allow create, delete: if false;
+    }
+
+    match /assets/{assetId} {
+      allow get, list: if canReadAsset(resource.data);
+      allow create, update, delete: if false;
+    }
+
+    match /asset_events/{eventId} {
+      allow get, list: if isActiveUser()
+        && exists(/databases/$(database)/documents/assets/$(resource.data.assetId))
+        && canReadAsset(
+          get(/databases/$(database)/documents/assets/$(resource.data.assetId)).data
+        );
+      allow create, update, delete: if false;
+    }
+
+    match /audit_logs/{auditId} {
+      allow get, list: if isActiveUser()
+        && request.auth.token.role in ['admin', 'executive'];
+      allow create, update, delete: if false;
+    }
+
+    match /movement_logs/{movementId} {
+      allow get, list: if isActiveUser() && (
+        request.auth.token.role in ['admin', 'warehouse', 'executive']
+        || (
+          request.auth.token.role == 'branch'
+          && currentUser().branchId != null
+          && currentUser().branchId in resource.data.involvedBranchIds
+        )
+      );
+      allow create, update, delete: if false;
+    }
+
+    match /nfc_registrations/{registrationId} {
+      allow get, list: if isActiveUser()
+        && request.auth.token.role in ['admin', 'warehouse', 'technician']
+        && exists(
+          /databases/$(database)/documents/assets/$(resource.data.assetId)
+        )
+        && canReadAsset(
+          get(
+            /databases/$(database)/documents/assets/$(resource.data.assetId)
+          ).data
+        );
+      allow create, update, delete: if false;
+    }
+
+    match /installations/{installationId} {
+      allow get, list: if isActiveUser() && (
+        request.auth.token.role in ['admin', 'sales', 'executive']
+        || (
+          request.auth.token.role == 'technician'
+          && resource.data.assignedTechnicianId == request.auth.uid
+        )
+        || (
+          request.auth.token.role == 'customer'
+          && currentUser().customerId != null
+          && resource.data.customerId == currentUser().customerId
+        )
+      );
+      allow create, update, delete: if false;
+    }
+
+    match /repair_tickets/{repairId} {
+      allow get, list: if isActiveUser() && (
+        request.auth.token.role in ['admin', 'warehouse', 'sales', 'executive']
+        || (
+          request.auth.token.role == 'technician'
+          && resource.data.assignedTechnicianId == request.auth.uid
+        )
+        || (
+          request.auth.token.role == 'branch'
+          && currentUser().branchId != null
+          && resource.data.branchId == currentUser().branchId
+        )
+        || (
+          request.auth.token.role == 'customer'
+          && currentUser().customerId != null
+          && resource.data.customerId == currentUser().customerId
+        )
+      );
+      allow create, update, delete: if false;
+    }
+
+    match /pm_jobs/{pmId} {
+      allow get, list: if isActiveUser() && (
+        request.auth.token.role in ['admin', 'warehouse', 'executive']
+        || (
+          request.auth.token.role == 'technician'
+          && resource.data.assignedTechnicianId == request.auth.uid
+        )
+        || (
+          request.auth.token.role == 'branch'
+          && currentUser().branchId != null
+          && resource.data.branchId == currentUser().branchId
+        )
+        || (
+          request.auth.token.role == 'customer'
+          && currentUser().customerId != null
+          && resource.data.customerId == currentUser().customerId
+        )
+      );
+      allow create, update, delete: if false;
+    }
+
+    match /inventory_parts/{partId} {
+      allow get, list: if isActiveUser()
+        && request.auth.token.role in ['admin', 'warehouse', 'technician', 'executive'];
+      allow create, update, delete: if false;
+    }
+
+    match /inventory_movements/{movementId} {
+      allow get, list: if isActiveUser()
+        && request.auth.token.role in ['admin', 'warehouse', 'executive'];
+      allow create, update, delete: if false;
+    }
+
+    match /notification_queue/{notificationId} {
+      allow get, list: if isActiveUser()
+        && request.auth.token.role in ['admin', 'executive'];
+      allow create, update, delete: if false;
+    }
+
+    match /command_events/{commandId} {
+      allow get, list: if isActiveUser()
+        && request.auth.token.role in ['admin', 'executive'];
+      allow create, update, delete: if false;
+    }
+
+    match /analytics_sync_queue/{syncId} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

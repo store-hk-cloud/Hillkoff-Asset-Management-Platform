@@ -1,0 +1,187 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function currentUser() {
+      return firestore.get(
+        /databases/(default)/documents/users/$(request.auth.uid)
+      ).data;
+    }
+
+    function isActiveUser() {
+      return isSignedIn()
+        && currentUser().status == 'active'
+        && currentUser().role == request.auth.token.role;
+    }
+
+    function isAdmin() {
+      return isActiveUser()
+        && request.auth.token.role == 'admin'
+        && currentUser().role == 'admin';
+    }
+
+    function canReadAsset(assetId) {
+      let asset = firestore.get(
+        /databases/(default)/documents/assets/$(assetId)
+      ).data;
+      return isActiveUser() && (
+        request.auth.token.role in [
+          'admin',
+          'warehouse',
+          'technician',
+          'sales',
+          'executive'
+        ]
+        || (
+          request.auth.token.role == 'branch'
+          && currentUser().branchId != null
+          && asset.branchId == currentUser().branchId
+        )
+        || (
+          request.auth.token.role == 'customer'
+          && currentUser().customerId != null
+          && asset.customerId == currentUser().customerId
+        )
+      );
+    }
+
+    function installation(installationId) {
+      return firestore.get(
+        /databases/(default)/documents/installations/$(installationId)
+      ).data;
+    }
+
+    function canReadInstallation(installationId) {
+      let item = installation(installationId);
+      return isActiveUser() && (
+        request.auth.token.role in ['admin', 'sales', 'executive']
+        || (
+          request.auth.token.role == 'technician'
+          && item.assignedTechnicianId == request.auth.uid
+        )
+        || (
+          request.auth.token.role == 'customer'
+          && currentUser().customerId != null
+          && item.customerId == currentUser().customerId
+        )
+      );
+    }
+
+    function canUploadInstallationEvidence(installationId) {
+      let item = installation(installationId);
+      return isActiveUser() && (
+        isAdmin()
+        || (
+          request.auth.token.role == 'technician'
+          && item.assignedTechnicianId == request.auth.uid
+          && item.status in ['scheduled', 'in_progress']
+        )
+      )
+      && request.resource.metadata.installationId == installationId
+      && request.resource.metadata.uploadedBy == request.auth.uid;
+    }
+
+    function repair(repairId) {
+      return firestore.get(
+        /databases/(default)/documents/repair_tickets/$(repairId)
+      ).data;
+    }
+
+    function canReadRepair(repairId) {
+      let item = repair(repairId);
+      return isActiveUser() && (
+        request.auth.token.role in ['admin', 'warehouse', 'sales', 'executive']
+        || (
+          request.auth.token.role == 'technician'
+          && item.assignedTechnicianId == request.auth.uid
+        )
+        || (
+          request.auth.token.role == 'branch'
+          && currentUser().branchId != null
+          && item.branchId == currentUser().branchId
+        )
+        || (
+          request.auth.token.role == 'customer'
+          && currentUser().customerId != null
+          && item.customerId == currentUser().customerId
+        )
+      );
+    }
+
+    function canUploadRepairEvidence(repairId) {
+      let item = repair(repairId);
+      return isActiveUser() && (
+        isAdmin()
+        || (
+          request.auth.token.role == 'technician'
+          && item.assignedTechnicianId == request.auth.uid
+          && item.status in ['assigned', 'in_progress', 'waiting_parts']
+        )
+      )
+      && request.resource.metadata.repairId == repairId
+      && request.resource.metadata.uploadedBy == request.auth.uid;
+    }
+
+    match /users/{userId}/profile/{fileName} {
+      allow read: if (
+          isActiveUser()
+          && request.auth.uid == userId
+        ) || isAdmin();
+
+      allow create, update: if isActiveUser()
+        && request.auth.uid == userId
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)')
+        && request.resource.metadata.ownerUid == request.auth.uid;
+
+      allow delete: if isActiveUser() && request.auth.uid == userId;
+    }
+
+    match /assets/{assetId}/documents/{fileName} {
+      allow read: if canReadAsset(assetId);
+
+      allow create, update: if isActiveUser()
+        && request.auth.token.role in ['admin', 'warehouse']
+        && request.resource.size < 20 * 1024 * 1024
+        && request.resource.contentType.matches(
+          '(application/pdf|image/(jpeg|png|webp))'
+        );
+
+      allow delete: if isActiveUser()
+        && request.auth.token.role in ['admin', 'warehouse'];
+    }
+
+    match /installations/{installationId}/photos/{fileName} {
+      allow read: if canReadInstallation(installationId);
+      allow create, update: if canUploadInstallationEvidence(installationId)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow delete: if isAdmin();
+    }
+
+    match /installations/{installationId}/signature/{fileName} {
+      allow read: if canReadInstallation(installationId);
+      allow create, update: if canUploadInstallationEvidence(installationId)
+        && fileName == 'customer-signature.png'
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType == 'image/png';
+      allow delete: if isAdmin();
+    }
+
+    match /repairs/{repairId}/photos/{fileName} {
+      allow read: if canReadRepair(repairId);
+      allow create, update: if canUploadRepairEvidence(repairId)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow delete: if isAdmin();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

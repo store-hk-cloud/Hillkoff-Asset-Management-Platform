@@ -1,0 +1,48 @@
+import { NextResponse } from "next/server";
+
+import { completeInstallationSchema } from "@/features/installations/schemas/installation.schema";
+import { getCurrentSession } from "@/lib/auth/dal";
+import { isTrustedMutationRequest } from "@/lib/auth/mutation-security";
+import {
+  createInstallationContext,
+  installationErrorResponse,
+} from "@/lib/installation/route-utils";
+import { InstallationManagementService } from "@/services/installation-management.service";
+
+const service = new InstallationManagementService();
+type Context = { params: Promise<{ installationId: string }> };
+
+export async function POST(request: Request, context: Context) {
+  if (!(await isTrustedMutationRequest(request))) {
+    return NextResponse.json({ success: false }, { status: 403 });
+  }
+  const session = await getCurrentSession();
+  if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  try {
+    const { installationId } = await context.params;
+    const input = completeInstallationSchema.parse(await request.json());
+    const now = new Date();
+    const installation = await service.complete(
+      installationId,
+      {
+        ...input,
+        photos: input.photos.map((photo) => ({
+          ...photo,
+          uploadedAt: now,
+          uploadedBy: session.profile.uid,
+        })),
+        signature: {
+          ...input.signature,
+          signedAt: now,
+        },
+      },
+      createInstallationContext(request, session.profile),
+    );
+    return NextResponse.json({
+      success: true,
+      data: { id: installation.id, status: installation.status },
+    });
+  } catch (error) {
+    return installationErrorResponse(error);
+  }
+}

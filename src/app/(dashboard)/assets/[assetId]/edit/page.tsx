@@ -1,0 +1,72 @@
+import { notFound } from "next/navigation";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { AssetAccessService } from "@/domain/services/asset-access.service";
+import { AssetForm } from "@/features/assets/components/asset-form";
+import { requireSession } from "@/lib/auth/dal";
+import { AssetManagementService } from "@/services/asset-management.service";
+
+const assetService = new AssetManagementService();
+const accessService = new AssetAccessService();
+
+type EditAssetPageProps = {
+  params: Promise<{ assetId: string }>;
+};
+
+export const metadata = {
+  title: "แก้ไขทรัพย์สิน",
+};
+
+export default async function EditAssetPage({ params }: EditAssetPageProps) {
+  const { profile } = await requireSession();
+
+  if (!accessService.canWrite(profile)) {
+    notFound();
+  }
+
+  const { assetId } = await params;
+  const asset = await assetService.get(assetId, profile);
+
+  if (asset.status === "archived") {
+    notFound();
+  }
+
+  return (
+    <section className="mx-auto max-w-3xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>แก้ไข {asset.assetCode}</CardTitle>
+          <CardDescription>
+            ทุกฟิลด์ที่เปลี่ยนจะถูกบันทึกใน Timeline และ Audit Log
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AssetForm
+            initialValues={{
+              id: asset.id,
+              assetCode: asset.assetCode,
+              name: asset.name,
+              description: asset.description,
+              category: asset.category,
+              serialNumber: asset.serialNumber,
+              condition: asset.condition,
+              branchId: asset.branchId,
+              customerId: asset.customerId,
+              locationName: asset.locationName,
+              installedAt: asset.installedAt
+                ? asset.installedAt.toISOString().slice(0, 10)
+                : null,
+              version: asset.version,
+            }}
+          />
+        </CardContent>
+      </Card>
+    </section>
+  );
+}
