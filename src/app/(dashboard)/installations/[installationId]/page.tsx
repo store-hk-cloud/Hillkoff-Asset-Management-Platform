@@ -6,19 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InstallationError } from "@/domain/errors/installation.error";
 import { InstallationWorkForm } from "@/features/installations/components/installation-work-form";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { InstallationManagementService } from "@/services/installation-management.service";
 
 const service = new InstallationManagementService();
-const dateTimeFormatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Bangkok",
-});
-const dateFormatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeZone: "Asia/Bangkok",
-});
-
 type InstallationDetailPageProps = {
   params: Promise<{ installationId: string }>;
 };
@@ -44,10 +35,26 @@ async function loadInstallation(
 export default async function InstallationDetailPage({
   params,
 }: InstallationDetailPageProps) {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   const { installationId } = await params;
   const installation = await loadInstallation(installationId, profile);
   const canExecute = service.canExecute(profile, installation);
+  const dateTimeFormatter = new Intl.DateTimeFormat(
+    locale === "th" ? "th-TH" : "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Bangkok",
+    },
+  );
+  const dateFormatter = new Intl.DateTimeFormat(
+    locale === "th" ? "th-TH" : "en-US",
+    {
+      dateStyle: "medium",
+      timeZone: "Asia/Bangkok",
+    },
+  );
 
   return (
     <section className="mx-auto max-w-4xl space-y-6">
@@ -56,7 +63,7 @@ export default async function InstallationDetailPage({
           className="text-muted-foreground hover:text-foreground text-sm"
           href="/installations"
         >
-          ← Installation Queue
+          ← {t("installations.title")}
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -74,15 +81,21 @@ export default async function InstallationDetailPage({
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Appointment</CardTitle>
+            <CardTitle>{locale === "th" ? "นัดหมาย" : "Appointment"}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <Detail
-              label="กำหนดติดตั้ง"
+              label={locale === "th" ? "กำหนดติดตั้ง" : "Scheduled for"}
               value={dateTimeFormatter.format(installation.scheduledAt)}
             />
-            <Detail label="ลูกค้า" value={installation.customerName} />
-            <Detail label="Customer ID" value={installation.customerId} />
+            <Detail
+              label={locale === "th" ? "ลูกค้า" : "Customer"}
+              value={installation.customerName}
+            />
+            <Detail
+              label={t("field.customerId")}
+              value={installation.customerId}
+            />
             <div className="flex items-start gap-2">
               <MapPin
                 aria-hidden="true"
@@ -94,7 +107,11 @@ export default async function InstallationDetailPage({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Assignment & Warranty</CardTitle>
+            <CardTitle>
+              {locale === "th"
+                ? "ผู้รับผิดชอบและการรับประกัน"
+                : "Assignment & Warranty"}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <div className="flex items-center gap-2">
@@ -109,13 +126,18 @@ export default async function InstallationDetailPage({
                 aria-hidden="true"
                 className="text-muted-foreground size-4"
               />
-              <span>Warranty {installation.warrantyMonths} เดือน</span>
+              <span>
+                {locale === "th" ? "รับประกัน" : "Warranty"}{" "}
+                {installation.warrantyMonths}{" "}
+                {locale === "th" ? "เดือน" : "months"}
+              </span>
             </div>
             {installation.completedAt ? (
               <div className="flex items-center gap-2 text-green-700">
                 <CheckCircle2 aria-hidden="true" className="size-4" />
                 <span>
-                  Completed {dateFormatter.format(installation.completedAt)}
+                  {locale === "th" ? "เสร็จสิ้น" : "Completed"}{" "}
+                  {dateFormatter.format(installation.completedAt)}
                 </span>
               </div>
             ) : null}
@@ -126,7 +148,9 @@ export default async function InstallationDetailPage({
       {canExecute ? (
         <Card>
           <CardHeader>
-            <CardTitle>Installation Work</CardTitle>
+            <CardTitle>
+              {locale === "th" ? "ปฏิบัติงานติดตั้ง" : "Installation Work"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <InstallationWorkForm
@@ -140,8 +164,9 @@ export default async function InstallationDetailPage({
       ) : (
         <Card>
           <CardContent className="text-muted-foreground py-6 text-sm">
-            คุณมีสิทธิ์ดูสถานะงานนี้
-            แต่การปฏิบัติงานต้องดำเนินการโดยช่างที่ได้รับมอบหมายหรือผู้ดูแลระบบ
+            {locale === "th"
+              ? "คุณมีสิทธิ์ดูสถานะงานนี้ แต่การปฏิบัติงานต้องดำเนินการโดยช่างที่ได้รับมอบหมายหรือผู้ดูแลระบบ"
+              : "You may view this job, but only the assigned technician or an administrator can perform the work."}
           </CardContent>
         </Card>
       )}

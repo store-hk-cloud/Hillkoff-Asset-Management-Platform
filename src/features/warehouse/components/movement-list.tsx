@@ -1,26 +1,39 @@
+"use client";
+
+import { useLanguage } from "@/components/providers/language-provider";
 import type { MovementLog } from "@/domain/entities/movement-log";
-
-const dateFormatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Bangkok",
-});
-
-const labels = {
-  received: "รับเข้า",
-  branch_transfer: "โอนสาขา",
-  customer_sale: "ขายลูกค้า",
-} as const;
 
 export function MovementList({
   movements,
 }: {
   movements: readonly MovementLog[];
 }) {
+  const { locale } = useLanguage();
+  const dateFormatter = new Intl.DateTimeFormat(
+    locale === "th" ? "th-TH" : "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Bangkok",
+    },
+  );
+  const labels =
+    locale === "th"
+      ? {
+          received: "รับเข้า",
+          branch_transfer: "โอนสาขา",
+          customer_sale: "ขายลูกค้า",
+        }
+      : {
+          received: "Received",
+          branch_transfer: "Branch transfer",
+          customer_sale: "Customer sale",
+        };
+
   if (movements.length === 0) {
     return (
       <div className="text-muted-foreground rounded-xl border border-dashed p-10 text-center text-sm">
-        ยังไม่มี Movement Log
+        {locale === "th" ? "ยังไม่มีประวัติการเคลื่อนไหว" : "No movement logs"}
       </div>
     );
   }
@@ -43,14 +56,18 @@ export function MovementList({
           </div>
           <div className="mt-4 grid gap-3 border-t pt-4 text-sm sm:grid-cols-2">
             <div>
-              <p className="text-muted-foreground text-xs">ต้นทาง</p>
+              <p className="text-muted-foreground text-xs">
+                {locale === "th" ? "ต้นทาง" : "Source"}
+              </p>
               <p>
                 {movement.source.locationName || "—"} · Branch{" "}
                 {movement.source.branchId ?? "—"}
               </p>
             </div>
             <div>
-              <p className="text-muted-foreground text-xs">ปลายทาง</p>
+              <p className="text-muted-foreground text-xs">
+                {locale === "th" ? "ปลายทาง" : "Destination"}
+              </p>
               <p>
                 {movement.destination.locationName || "—"} ·{" "}
                 {movement.destination.customerId

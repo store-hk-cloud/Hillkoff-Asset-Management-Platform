@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/components/providers/language-provider";
 import type {
   InstallationChecklistItem,
   InstallationLocation,
@@ -40,6 +41,7 @@ export function InstallationWorkForm({
   initialStatus,
   initialChecklist,
 }: InstallationWorkFormProps) {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const [version, setVersion] = useState(initialVersion);
   const [status, setStatus] = useState(initialStatus);
@@ -157,7 +159,9 @@ export function InstallationWorkForm({
   if (status === "completed") {
     return (
       <p className="rounded-lg bg-green-50 p-4 text-sm text-green-800">
-        งานติดตั้งเสร็จสมบูรณ์และเปิด Warranty แล้ว
+        {locale === "th"
+          ? "งานติดตั้งเสร็จสมบูรณ์และเปิด Warranty แล้ว"
+          : "Installation is complete and the warranty is active."}
       </p>
     );
   }
@@ -171,12 +175,14 @@ export function InstallationWorkForm({
           onClick={start}
           type="button"
         >
-          เริ่มงานติดตั้ง
+          {locale === "th" ? "เริ่มงานติดตั้ง" : "Start installation"}
         </Button>
       ) : null}
 
       <section className="space-y-3">
-        <h2 className="font-semibold">Installation Checklist</h2>
+        <h2 className="font-semibold">
+          {locale === "th" ? "รายการตรวจติดตั้ง" : "Installation Checklist"}
+        </h2>
         {checklist.map((item, index) => (
           <label
             className="flex min-h-12 items-start gap-3 rounded-lg border p-3"
@@ -202,10 +208,14 @@ export function InstallationWorkForm({
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">GPS Location</h2>
+        <h2 className="font-semibold">
+          {locale === "th" ? "ตำแหน่ง GPS" : "GPS Location"}
+        </h2>
         <Button onClick={captureLocation} type="button" variant="outline">
           <MapPin aria-hidden="true" className="size-4" />
-          บันทึกตำแหน่งปัจจุบัน
+          {locale === "th"
+            ? "บันทึกตำแหน่งปัจจุบัน"
+            : "Capture current location"}
         </Button>
         {location ? (
           <p className="text-muted-foreground text-sm">
@@ -216,13 +226,15 @@ export function InstallationWorkForm({
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">Installation Photos</h2>
+        <h2 className="font-semibold">
+          {locale === "th" ? "รูปภาพการติดตั้ง" : "Installation Photos"}
+        </h2>
         <Label
           className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-md border"
           htmlFor="installationPhotos"
         >
           <Camera aria-hidden="true" className="size-4" />
-          ถ่ายหรือเลือกรูป
+          {locale === "th" ? "ถ่ายหรือเลือกรูป" : "Take or choose photos"}
         </Label>
         <input
           accept="image/jpeg,image/png,image/webp"
@@ -234,28 +246,52 @@ export function InstallationWorkForm({
           type="file"
         />
         <p className="text-muted-foreground text-sm">
-          อัปโหลดแล้ว {photos.length} รูป
+          {locale === "th" ? "อัปโหลดแล้ว" : "Uploaded"} {photos.length}{" "}
+          {locale === "th" ? "รูป" : "photos"}
         </p>
       </section>
 
       <section className="grid gap-4">
-        <h2 className="font-semibold">Customer Training</h2>
+        <h2 className="font-semibold">
+          {locale === "th" ? "การอบรมลูกค้า" : "Customer Training"}
+        </h2>
         <label className="flex items-center gap-3">
           <input className="size-5" name="trainingCompleted" type="checkbox" />
-          <span className="text-sm">อบรมลูกค้าเสร็จแล้ว</span>
+          <span className="text-sm">
+            {locale === "th"
+              ? "อบรมลูกค้าเสร็จแล้ว"
+              : "Customer training completed"}
+          </span>
         </label>
-        <Field label="ชื่อผู้รับการอบรม" name="traineeName" required />
         <Field
-          label="หัวข้ออบรม (คั่นด้วย comma)"
+          label={locale === "th" ? "ชื่อผู้รับการอบรม" : "Trainee name"}
+          name="traineeName"
+          required
+        />
+        <Field
+          label={
+            locale === "th"
+              ? "หัวข้ออบรม (คั่นด้วย comma)"
+              : "Training topics (comma separated)"
+          }
           name="trainingTopics"
           required
         />
-        <Field label="หมายเหตุการอบรม" name="trainingNotes" />
+        <Field
+          label={locale === "th" ? "หมายเหตุการอบรม" : "Training notes"}
+          name="trainingNotes"
+        />
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-semibold">Customer Signature</h2>
-        <Field label="ชื่อผู้ลงนาม" name="signerName" required />
+        <h2 className="font-semibold">
+          {locale === "th" ? "ลายเซ็นลูกค้า" : "Customer Signature"}
+        </h2>
+        <Field
+          label={locale === "th" ? "ชื่อผู้ลงนาม" : "Signer name"}
+          name="signerName"
+          required
+        />
         <SignaturePad onChange={setSignatureBlob} />
       </section>
 
@@ -270,7 +306,11 @@ export function InstallationWorkForm({
         disabled={busy || status === "scheduled"}
         type="submit"
       >
-        {busy ? "กำลังบันทึก…" : "Complete Installation & Activate Warranty"}
+        {busy
+          ? t("status.loading")
+          : locale === "th"
+            ? "ปิดงานติดตั้งและเปิด Warranty"
+            : "Complete Installation & Activate Warranty"}
       </Button>
     </form>
   );

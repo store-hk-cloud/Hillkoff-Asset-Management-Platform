@@ -5,18 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PmError } from "@/domain/errors/pm.error";
 import { PmCompletionForm } from "@/features/pm/components/pm-completion-form";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { PmManagementService } from "@/services/pm-management.service";
 
 const service = new PmManagementService();
-const formatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Bangkok",
-});
-
 type Props = { params: Promise<{ pmId: string }> };
 
 export default async function PmDetailPage({ params }: Props) {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   const { pmId } = await params;
   let job;
@@ -31,6 +27,14 @@ export default async function PmDetailPage({ params }: Props) {
     }
     throw error;
   }
+  const formatter = new Intl.DateTimeFormat(
+    locale === "th" ? "th-TH" : "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Bangkok",
+    },
+  );
 
   return (
     <section className="mx-auto max-w-4xl space-y-6">
@@ -39,7 +43,7 @@ export default async function PmDetailPage({ params }: Props) {
           className="text-muted-foreground hover:text-foreground text-sm"
           href="/pm"
         >
-          ← Preventive Maintenance
+          ← {t("pm.title")}
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -56,26 +60,44 @@ export default async function PmDetailPage({ params }: Props) {
 
       <Card>
         <CardHeader>
-          <CardTitle>PM Details</CardTitle>
+          <CardTitle>
+            {locale === "th" ? "รายละเอียด PM" : "PM Details"}
+          </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 text-sm sm:grid-cols-2">
-          <Detail label="Asset" value={`${job.assetCode} · ${job.assetName}`} />
-          <Detail label="Scheduled" value={formatter.format(job.scheduledAt)} />
-          <Detail label="Technician" value={job.assignedTechnicianName} />
           <Detail
-            label="Recurrence"
+            label={locale === "th" ? "ทรัพย์สิน" : "Asset"}
+            value={`${job.assetCode} · ${job.assetName}`}
+          />
+          <Detail
+            label={locale === "th" ? "กำหนดวัน" : "Scheduled"}
+            value={formatter.format(job.scheduledAt)}
+          />
+          <Detail
+            label={locale === "th" ? "ช่างผู้รับผิดชอบ" : "Technician"}
+            value={job.assignedTechnicianName}
+          />
+          <Detail
+            label={locale === "th" ? "รอบการทำซ้ำ" : "Recurrence"}
             value={
-              job.recurrenceMonths ? `ทุก ${job.recurrenceMonths} เดือน` : "—"
+              job.recurrenceMonths
+                ? locale === "th"
+                  ? `ทุก ${job.recurrenceMonths} เดือน`
+                  : `Every ${job.recurrenceMonths} months`
+                : "—"
             }
           />
           {job.completedAt ? (
             <Detail
-              label="Completed"
+              label={locale === "th" ? "เสร็จสิ้น" : "Completed"}
               value={formatter.format(job.completedAt)}
             />
           ) : null}
           {job.nextDueAt ? (
-            <Detail label="Next Due" value={formatter.format(job.nextDueAt)} />
+            <Detail
+              label={locale === "th" ? "กำหนดครั้งถัดไป" : "Next Due"}
+              value={formatter.format(job.nextDueAt)}
+            />
           ) : null}
         </CardContent>
       </Card>
@@ -83,7 +105,9 @@ export default async function PmDetailPage({ params }: Props) {
       {job.status === "scheduled" && service.canComplete(profile, job) ? (
         <Card>
           <CardHeader>
-            <CardTitle>PM Completion</CardTitle>
+            <CardTitle>
+              {locale === "th" ? "ปิดงาน PM" : "PM Completion"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <PmCompletionForm
@@ -96,7 +120,9 @@ export default async function PmDetailPage({ params }: Props) {
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>PM Checklist</CardTitle>
+            <CardTitle>
+              {locale === "th" ? "รายการตรวจ PM" : "PM Checklist"}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             {job.checklist.map((item) => (
@@ -112,7 +138,12 @@ export default async function PmDetailPage({ params }: Props) {
             ))}
             {job.completionNotes ? (
               <div className="border-t pt-4">
-                <Detail label="Completion Notes" value={job.completionNotes} />
+                <Detail
+                  label={
+                    locale === "th" ? "หมายเหตุการปิดงาน" : "Completion Notes"
+                  }
+                  value={job.completionNotes}
+                />
               </div>
             ) : null}
           </CardContent>

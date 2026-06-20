@@ -7,18 +7,14 @@ import { RepairError } from "@/domain/errors/repair.error";
 import { AssignRepairForm } from "@/features/repairs/components/assign-repair-form";
 import { RepairWorkForm } from "@/features/repairs/components/repair-work-form";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { RepairManagementService } from "@/services/repair-management.service";
 
 const service = new RepairManagementService();
-const dateFormatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Bangkok",
-});
-
 type Props = { params: Promise<{ repairId: string }> };
 
 export default async function RepairDetailPage({ params }: Props) {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   const { repairId } = await params;
   let ticket;
@@ -39,6 +35,14 @@ export default async function RepairDetailPage({ params }: Props) {
     (total, part) => total + part.quantity * part.unitCost,
     0,
   );
+  const dateFormatter = new Intl.DateTimeFormat(
+    locale === "th" ? "th-TH" : "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Bangkok",
+    },
+  );
 
   return (
     <section className="mx-auto max-w-4xl space-y-6">
@@ -47,7 +51,7 @@ export default async function RepairDetailPage({ params }: Props) {
           className="text-muted-foreground hover:text-foreground text-sm"
           href="/repairs"
         >
-          ← Repair Management
+          ← {t("repairs.title")}
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -65,23 +69,28 @@ export default async function RepairDetailPage({ params }: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Ticket</CardTitle>
+            <CardTitle>{locale === "th" ? "ใบงาน" : "Ticket"}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <Detail
-              label="Asset"
+              label={locale === "th" ? "ทรัพย์สิน" : "Asset"}
               value={`${ticket.assetCode} · ${ticket.assetName}`}
             />
-            <Detail label="อาการ" value={ticket.description} />
             <Detail
-              label="สร้างเมื่อ"
+              label={locale === "th" ? "อาการ" : "Symptoms"}
+              value={ticket.description}
+            />
+            <Detail
+              label={locale === "th" ? "สร้างเมื่อ" : "Created"}
               value={dateFormatter.format(ticket.createdAt)}
             />
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Service Summary</CardTitle>
+            <CardTitle>
+              {locale === "th" ? "สรุปงานบริการ" : "Service Summary"}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <div className="flex items-center gap-2">
@@ -89,14 +98,23 @@ export default async function RepairDetailPage({ params }: Props) {
                 aria-hidden="true"
                 className="text-muted-foreground size-4"
               />
-              <span>{ticket.assignedTechnicianName ?? "Unassigned"}</span>
+              <span>
+                {ticket.assignedTechnicianName ??
+                  (locale === "th" ? "ยังไม่มอบหมาย" : "Unassigned")}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <CircleDollarSign
                 aria-hidden="true"
                 className="text-muted-foreground size-4"
               />
-              <span>Labor {ticket.laborCost.toLocaleString("th-TH")} THB</span>
+              <span>
+                {locale === "th" ? "ค่าแรง" : "Labor"}{" "}
+                {ticket.laborCost.toLocaleString(
+                  locale === "th" ? "th-TH" : "en-US",
+                )}{" "}
+                THB
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <Package
@@ -104,8 +122,9 @@ export default async function RepairDetailPage({ params }: Props) {
                 className="text-muted-foreground size-4"
               />
               <span>
-                Parts {partsTotal.toLocaleString("th-TH")} THB (
-                {ticket.partsUsed.length})
+                {locale === "th" ? "อะไหล่" : "Parts"}{" "}
+                {partsTotal.toLocaleString(locale === "th" ? "th-TH" : "en-US")}{" "}
+                THB ({ticket.partsUsed.length})
               </span>
             </div>
           </CardContent>
@@ -115,7 +134,9 @@ export default async function RepairDetailPage({ params }: Props) {
       {service.canAssign(profile) && ticket.status === "new" ? (
         <Card>
           <CardHeader>
-            <CardTitle>Assign Technician</CardTitle>
+            <CardTitle>
+              {locale === "th" ? "มอบหมายช่าง" : "Assign Technician"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <AssignRepairForm repairId={ticket.id} version={ticket.version} />
@@ -128,7 +149,9 @@ export default async function RepairDetailPage({ params }: Props) {
       ticket.status !== "closed" ? (
         <Card>
           <CardHeader>
-            <CardTitle>Repair Work</CardTitle>
+            <CardTitle>
+              {locale === "th" ? "ปฏิบัติงานซ่อม" : "Repair Work"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <RepairWorkForm
@@ -155,8 +178,14 @@ export default async function RepairDetailPage({ params }: Props) {
       ticket.status !== "new" ? (
         <Card>
           <CardContent className="space-y-4 py-6 text-sm">
-            <Detail label="Root Cause" value={ticket.rootCause || "—"} />
-            <Detail label="Solution" value={ticket.solution || "—"} />
+            <Detail
+              label={locale === "th" ? "สาเหตุหลัก" : "Root Cause"}
+              value={ticket.rootCause || "—"}
+            />
+            <Detail
+              label={locale === "th" ? "วิธีแก้ไข" : "Solution"}
+              value={ticket.solution || "—"}
+            />
           </CardContent>
         </Card>
       ) : null}

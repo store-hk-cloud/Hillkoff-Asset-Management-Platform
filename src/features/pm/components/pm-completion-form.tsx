@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/components/providers/language-provider";
 import type { PmChecklistItem } from "@/domain/entities/pm-job";
 import { completePm } from "@/features/pm/services/pm-api.service";
 
@@ -15,6 +16,7 @@ type Props = Readonly<{
 }>;
 
 export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const [checklist, setChecklist] = useState([...initialChecklist]);
   const [busy, setBusy] = useState(false);
@@ -66,7 +68,7 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
               <span className="text-sm">{item.label}</span>
             </label>
             <input
-              aria-label={`หมายเหตุ ${item.label}`}
+              aria-label={`${locale === "th" ? "หมายเหตุ" : "Notes"} ${item.label}`}
               className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
               onChange={(event) =>
                 setChecklist((current) =>
@@ -77,14 +79,16 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
                   ),
                 )
               }
-              placeholder="หมายเหตุรายการนี้"
+              placeholder={locale === "th" ? "หมายเหตุรายการนี้" : "Item notes"}
               value={item.notes}
             />
           </div>
         ))}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="completionNotes">Completion Notes</Label>
+        <Label htmlFor="completionNotes">
+          {locale === "th" ? "หมายเหตุการปิดงาน" : "Completion Notes"}
+        </Label>
         <textarea
           className="border-input bg-background min-h-28 w-full rounded-md border px-3 py-2 text-sm"
           id="completionNotes"
@@ -98,7 +102,11 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
         </p>
       ) : null}
       <Button className="h-12 w-full" disabled={busy} type="submit">
-        {busy ? "กำลังบันทึก…" : "Complete PM"}
+        {busy
+          ? t("status.loading")
+          : locale === "th"
+            ? "ปิดงาน PM"
+            : "Complete PM"}
       </Button>
     </form>
   );
