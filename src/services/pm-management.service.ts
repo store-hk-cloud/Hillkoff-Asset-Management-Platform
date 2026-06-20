@@ -114,7 +114,7 @@ export class PmManagementService {
     if (!this.canSchedule(context.actor)) {
       throw new PmError("PM_ACCESS_DENIED", "You cannot schedule PM jobs.");
     }
-    const asset = await this.assetRepository.findByCode(input.assetCode);
+    const asset = await this.assetRepository.findByReference(input.assetCode);
     if (!asset) throw new PmError("ASSET_NOT_FOUND", "Asset was not found.");
     if (!this.assetAccessService.canRead(context.actor, asset)) {
       throw new PmError("PM_ACCESS_DENIED", "You cannot access this asset.");

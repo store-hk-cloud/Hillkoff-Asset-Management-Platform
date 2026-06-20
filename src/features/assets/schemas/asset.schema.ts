@@ -36,7 +36,7 @@ export const assetCreateSchema = z.object({
   name: z.string().trim().min(1).max(160),
   description: z.string().trim().max(2000),
   category: z.string().trim().min(1).max(120),
-  serialNumber: nullableTrimmedString,
+  serialNumber: z.string().trim().min(1).max(120),
   condition: z.enum(ASSET_CONDITIONS),
   branchId: nullableTrimmedString,
   customerId: nullableTrimmedString,

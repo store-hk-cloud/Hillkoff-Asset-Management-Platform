@@ -133,7 +133,7 @@ export class RepairManagementService {
         "You cannot create repair tickets.",
       );
     }
-    const asset = await this.assetRepository.findByCode(input.assetCode);
+    const asset = await this.assetRepository.findByReference(input.assetCode);
     if (!asset) {
       throw new RepairError("ASSET_NOT_FOUND", "Asset was not found.");
     }

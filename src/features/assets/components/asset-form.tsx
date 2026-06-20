@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/language-provider";
 import {
   createAsset,
+  findAssetCatalog,
   updateAsset,
 } from "@/features/assets/services/asset-api.service";
 
@@ -35,7 +36,47 @@ export function AssetForm({ initialValues }: AssetFormProps) {
   const { locale, t } = useLanguage();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [name, setName] = useState(initialValues?.name ?? "");
+  const [description, setDescription] = useState(
+    initialValues?.description ?? "",
+  );
+  const [category, setCategory] = useState(initialValues?.category ?? "");
+  const [branchId, setBranchId] = useState(initialValues?.branchId ?? "");
+  const [locationName, setLocationName] = useState(
+    initialValues?.locationName ?? "",
+  );
+
+  async function autofillFromCatalog(assetCode: string) {
+    if (initialValues || !assetCode.trim()) {
+      return;
+    }
+
+    setLoadingCatalog(true);
+    setError(null);
+
+    try {
+      const catalog = await findAssetCatalog(assetCode.trim());
+      if (!catalog) {
+        return;
+      }
+
+      setName(catalog.name);
+      setDescription(catalog.description);
+      setCategory(catalog.category);
+      setBranchId(catalog.defaultBranchId ?? "");
+      setLocationName(catalog.defaultLocationName);
+    } catch (catalogError) {
+      setError(
+        catalogError instanceof Error
+          ? catalogError.message
+          : "Unable to load asset master data.",
+      );
+    } finally {
+      setLoadingCatalog(false);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -89,8 +130,22 @@ export function AssetForm({ initialValues }: AssetFormProps) {
             id="assetCode"
             maxLength={60}
             name="assetCode"
+            onBlur={(event) =>
+              void autofillFromCatalog(event.currentTarget.value)
+            }
             required
           />
+          {!initialValues ? (
+            <p className="text-muted-foreground text-xs">
+              {loadingCatalog
+                ? locale === "th"
+                  ? "กำลังดึงข้อมูลทรัพย์สิน…"
+                  : "Loading asset master data…"
+                : locale === "th"
+                  ? "หากมีรหัสนี้แล้ว ระบบจะเติมข้อมูลถัดไปให้อัตโนมัติ"
+                  : "Existing master data will fill the following fields automatically."}
+            </p>
+          ) : null}
         </div>
 
         <div className="space-y-2">
@@ -98,11 +153,12 @@ export function AssetForm({ initialValues }: AssetFormProps) {
             {locale === "th" ? "ชื่อทรัพย์สิน" : "Asset name"} *
           </Label>
           <Input
-            defaultValue={initialValues?.name}
             id="name"
             maxLength={160}
             name="name"
+            onChange={(event) => setName(event.currentTarget.value)}
             required
+            value={name}
           />
         </div>
 
@@ -111,21 +167,23 @@ export function AssetForm({ initialValues }: AssetFormProps) {
             {locale === "th" ? "หมวดหมู่" : "Category"} *
           </Label>
           <Input
-            defaultValue={initialValues?.category}
             id="category"
             maxLength={120}
             name="category"
+            onChange={(event) => setCategory(event.currentTarget.value)}
             required
+            value={category}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="serialNumber">Serial Number</Label>
+          <Label htmlFor="serialNumber">Serial Number *</Label>
           <Input
             defaultValue={initialValues?.serialNumber ?? ""}
             id="serialNumber"
             maxLength={120}
             name="serialNumber"
+            required
           />
         </div>
 
@@ -156,22 +214,24 @@ export function AssetForm({ initialValues }: AssetFormProps) {
             {locale === "th" ? "สถานที่" : "Location"}
           </Label>
           <Input
-            defaultValue={initialValues?.locationName}
             disabled={Boolean(initialValues)}
             id="locationName"
             maxLength={200}
             name="locationName"
+            onChange={(event) => setLocationName(event.currentTarget.value)}
+            value={locationName}
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="branchId">{t("field.branchId")}</Label>
           <Input
-            defaultValue={initialValues?.branchId ?? ""}
             disabled={Boolean(initialValues)}
             id="branchId"
             maxLength={120}
             name="branchId"
+            onChange={(event) => setBranchId(event.currentTarget.value)}
+            value={branchId}
           />
         </div>
 
@@ -204,10 +264,11 @@ export function AssetForm({ initialValues }: AssetFormProps) {
           </Label>
           <textarea
             className="border-input bg-background focus-visible:ring-ring min-h-28 w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
-            defaultValue={initialValues?.description}
             id="description"
             maxLength={2000}
             name="description"
+            onChange={(event) => setDescription(event.currentTarget.value)}
+            value={description}
           />
         </div>
       </div>

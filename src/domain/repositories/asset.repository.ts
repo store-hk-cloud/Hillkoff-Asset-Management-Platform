@@ -1,4 +1,8 @@
-import type { Asset, AssetSearchCriteria } from "@/domain/entities/asset";
+import type {
+  Asset,
+  AssetCatalog,
+  AssetSearchCriteria,
+} from "@/domain/entities/asset";
 import type { AssetEvent, AssetEventType } from "@/domain/entities/asset-event";
 import type { AuditLog } from "@/domain/entities/audit-log";
 import type { AssetId } from "@/domain/value-objects/asset-id";
@@ -15,7 +19,10 @@ export interface AssetRepository {
   createId(): AssetId;
   findById(id: AssetId): Promise<Asset | null>;
   findByCode(assetCode: string): Promise<Asset | null>;
+  findByReference(reference: string): Promise<Asset | null>;
   findByPublicId(publicId: PublicId): Promise<Asset | null>;
+  findCatalogByCode(assetCode: string): Promise<AssetCatalog | null>;
+  countInStockByCode(assetCode: string): Promise<number>;
   search(criteria: AssetSearchCriteria): Promise<readonly Asset[]>;
   listEvents(
     assetId: AssetId,

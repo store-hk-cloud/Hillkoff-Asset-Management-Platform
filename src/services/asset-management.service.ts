@@ -2,6 +2,7 @@ import "server-only";
 
 import type {
   Asset,
+  AssetCatalog,
   AssetCreateInput,
   AssetSearchCriteria,
   AssetUpdateInput,
@@ -62,6 +63,14 @@ export class AssetManagementService {
 
     this.accessService.requireRead(profile, asset);
     return asset;
+  }
+
+  async getCatalog(
+    assetCode: string,
+    profile: UserProfile,
+  ): Promise<AssetCatalog | null> {
+    this.accessService.requireWrite(profile);
+    return this.repository.findCatalogByCode(assetCode);
   }
 
   async listEvents(

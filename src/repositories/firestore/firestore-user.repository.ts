@@ -39,7 +39,7 @@ interface UserDocument {
 }
 
 function isUserStatus(value: unknown): value is UserStatus {
-  return value === "active" || value === "disabled";
+  return value === "invited" || value === "active" || value === "disabled";
 }
 
 function requireString(data: DocumentData, field: keyof UserDocument): string {

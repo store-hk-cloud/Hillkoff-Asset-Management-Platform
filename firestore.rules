@@ -89,7 +89,7 @@ service cloud.firestore {
         && (data.phoneNumber == null || data.phoneNumber is string)
         && (data.photoURL == null || data.photoURL is string)
         && hasValidRole(data.role)
-        && data.status in ['active', 'disabled']
+        && data.status in ['invited', 'active', 'disabled']
         && (data.branchId == null || data.branchId is string)
         && (data.customerId == null || data.customerId is string)
         && (data.lastLoginAt == null || data.lastLoginAt is timestamp)
@@ -126,9 +126,21 @@ service cloud.firestore {
       allow create, delete: if false;
     }
 
+    match /user_invitations/{invitationId} {
+      allow read, write: if false;
+    }
+
     match /assets/{assetId} {
       allow get, list: if canReadAsset(resource.data);
       allow create, update, delete: if false;
+    }
+
+    match /asset_catalog/{assetCode} {
+      allow read, write: if false;
+    }
+
+    match /asset_serials/{serialKey} {
+      allow read, write: if false;
     }
 
     match /asset_events/{eventId} {

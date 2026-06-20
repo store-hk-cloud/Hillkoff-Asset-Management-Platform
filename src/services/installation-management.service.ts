@@ -97,7 +97,7 @@ export class InstallationManagementService {
         "You cannot schedule installations.",
       );
     }
-    const asset = await this.assetRepository.findByCode(input.assetCode);
+    const asset = await this.assetRepository.findByReference(input.assetCode);
     if (!asset) {
       throw new InstallationError("ASSET_NOT_FOUND", "Asset was not found.");
     }

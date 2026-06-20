@@ -30,6 +30,23 @@ export const serverEnvironmentSchema = z.object({
     .min(1)
     .max(14)
     .default(5),
+  USER_INVITATION_EXPIRES_IN_HOURS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(168)
+    .default(72),
+  SMTP_HOST: z.string().trim().min(1).default("smtp.gmail.com"),
+  SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
+  SMTP_SECURE: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+  SMTP_USER: z.string().trim().min(1).optional(),
+  SMTP_PASSWORD: z.string().min(1).optional(),
+  SMTP_FROM_EMAIL: z.email().optional(),
+  SMTP_FROM_NAME: z.string().trim().min(1).default("Hillkoff Asset Management"),
+  SMTP_REPLY_TO: z.email().optional(),
 });
 
 export function getClientEnvironment() {
@@ -58,5 +75,15 @@ export function getServerEnvironment() {
     BIGQUERY_DATASET_PREFIX: process.env.BIGQUERY_DATASET_PREFIX,
     AUTH_SESSION_COOKIE_NAME: process.env.AUTH_SESSION_COOKIE_NAME,
     AUTH_SESSION_EXPIRES_IN_DAYS: process.env.AUTH_SESSION_EXPIRES_IN_DAYS,
+    USER_INVITATION_EXPIRES_IN_HOURS:
+      process.env.USER_INVITATION_EXPIRES_IN_HOURS,
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT,
+    SMTP_SECURE: process.env.SMTP_SECURE,
+    SMTP_USER: process.env.SMTP_USER,
+    SMTP_PASSWORD: process.env.SMTP_PASSWORD,
+    SMTP_FROM_EMAIL: process.env.SMTP_FROM_EMAIL,
+    SMTP_FROM_NAME: process.env.SMTP_FROM_NAME,
+    SMTP_REPLY_TO: process.env.SMTP_REPLY_TO,
   });
 }

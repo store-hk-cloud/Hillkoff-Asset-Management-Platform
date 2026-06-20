@@ -2,7 +2,7 @@ import type { Entity } from "@/domain/entities/entity";
 import type { UserId } from "@/domain/value-objects/user-id";
 import type { UserRole } from "@/domain/value-objects/user-role";
 
-export const USER_STATUSES = ["active", "disabled"] as const;
+export const USER_STATUSES = ["invited", "active", "disabled"] as const;
 
 export type UserStatus = (typeof USER_STATUSES)[number];
 

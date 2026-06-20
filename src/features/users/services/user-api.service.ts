@@ -4,7 +4,11 @@ async function mutateUser(
   url: string,
   method: "POST" | "PATCH",
   body?: unknown,
-): Promise<{ id: string; version?: number }> {
+): Promise<{
+  id: string;
+  version?: number;
+  invitationSent?: boolean;
+}> {
   const csrfResponse = await fetch("/api/auth/csrf", {
     cache: "no-store",
     credentials: "same-origin",
@@ -22,7 +26,7 @@ async function mutateUser(
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
   const payload = (await response.json()) as {
-    data?: { id: string; version?: number };
+    data?: { id: string; version?: number; invitationSent?: boolean };
     error?: { message?: string };
   };
   if (!response.ok || !payload.data) {
@@ -31,7 +35,7 @@ async function mutateUser(
   return payload.data;
 }
 
-export function createManagedUser(body: unknown) {
+export async function createManagedUser(body: unknown) {
   return mutateUser("/api/users", "POST", body);
 }
 

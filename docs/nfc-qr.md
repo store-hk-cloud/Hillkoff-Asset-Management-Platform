@@ -15,11 +15,16 @@ Firestore ID.
 ## Public lookup
 
 Public lookup runs through a server repository. Anonymous Firestore access
-remains denied. It exposes only Asset Code, name, category, condition,
-lifecycle status, and NFC verification status.
+remains denied.
 
-Serial number, customer, branch, precise location, documents, internal ID, and
-history are never returned publicly.
+- Anonymous visitors see only the machine Serial Number and operational status
+  (`in_stock`, `sold`, `in_use`, or `archived`).
+- Signed-in users see Asset Code, name, category, condition, NFC status,
+  current branch/location, and the number of active machines with the same
+  Asset Code that remain in branch stock.
+
+Customer identity, documents, internal history, and internal Asset ID are never
+returned by the verification projection.
 
 ## QR generation
 

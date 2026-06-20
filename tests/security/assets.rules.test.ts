@@ -180,4 +180,20 @@ describe("Asset security rules", () => {
       }),
     );
   });
+
+  it("keeps asset catalog and serial registry server-only", async () => {
+    const firestore = testEnvironment
+      .authenticatedContext("admin", {
+        role: "admin",
+        email: "admin@example.com",
+      })
+      .firestore();
+
+    await assertFails(getDoc(doc(firestore, "asset_catalog", "ASSET-A")));
+    await assertFails(
+      setDoc(doc(firestore, "asset_serials", "SN-001"), {
+        assetId: "asset-a",
+      }),
+    );
+  });
 });

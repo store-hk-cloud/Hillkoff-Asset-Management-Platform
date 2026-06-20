@@ -34,12 +34,18 @@ export async function POST(request: Request) {
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
 
   try {
-    const user = await service.create(
+    const result = await service.create(
       managedUserCreateSchema.parse(await request.json()),
       createUserManagementContext(request, session.profile),
     );
     return NextResponse.json(
-      { success: true, data: { id: user.uid } },
+      {
+        success: true,
+        data: {
+          id: result.profile.uid,
+          invitationSent: result.invitationSent,
+        },
+      },
       { status: 201 },
     );
   } catch (error) {

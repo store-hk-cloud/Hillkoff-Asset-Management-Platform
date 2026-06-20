@@ -59,8 +59,8 @@ const translations = {
   "users.add": { th: "เพิ่มผู้ใช้งาน", en: "Add user" },
   "users.empty": { th: "ยังไม่มีบัญชีผู้ใช้งาน", en: "No user accounts" },
   "users.resetPassword": {
-    th: "ส่งลิงก์ตั้งรหัสผ่านใหม่",
-    en: "Send password reset",
+    th: "ส่งคำเชิญตั้งรหัสผ่าน",
+    en: "Send password invitation",
   },
   "assets.title": { th: "ทรัพย์สิน", en: "Assets" },
   "assets.management": { th: "จัดการทรัพย์สิน", en: "Asset Management" },

@@ -3,6 +3,8 @@ import { DomainError } from "@/domain/errors/domain-error";
 export type AssetErrorCode =
   | "ASSET_NOT_FOUND"
   | "ASSET_CODE_CONFLICT"
+  | "ASSET_SERIAL_CONFLICT"
+  | "ASSET_REFERENCE_AMBIGUOUS"
   | "ASSET_ARCHIVED"
   | "ASSET_ALREADY_ARCHIVED"
   | "ASSET_VERSION_CONFLICT"

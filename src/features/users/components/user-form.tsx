@@ -74,7 +74,11 @@ export function UserForm({
           ...common,
           email: form.get("email"),
         });
-        router.replace(`/users/${result.id}`);
+        router.replace(
+          `/users/${result.id}?invitation=${
+            result.invitationSent === false ? "failed" : "sent"
+          }`,
+        );
         router.refresh();
       }
     } catch (submitError) {
@@ -95,7 +99,9 @@ export function UserForm({
     setMessage(null);
     try {
       await sendManagedUserPasswordReset(initialValues.uid);
-      setMessage(`ส่งอีเมลตั้งรหัสผ่านไปที่ ${initialValues.email} แล้ว`);
+      setMessage(
+        `ส่งคำเชิญตั้งรหัสผ่านอายุ 72 ชั่วโมงไปที่ ${initialValues.email} แล้ว`,
+      );
     } catch (resetError) {
       setError(
         resetError instanceof Error
@@ -161,6 +167,9 @@ export function UserForm({
               id="status"
               name="status"
             >
+              <option value="invited">
+                {locale === "th" ? "รอตั้งรหัสผ่าน" : "Invited"}
+              </option>
               <option value="active">
                 {locale === "th" ? "ใช้งานอยู่" : "Active"}
               </option>
@@ -214,12 +223,14 @@ export function UserForm({
         <div>
           {initialValues ? (
             <Button
-              disabled={busy}
+              disabled={busy || initialValues.status === "disabled"}
               onClick={handlePasswordReset}
               type="button"
               variant="outline"
             >
-              {t("users.resetPassword")}
+              {locale === "th"
+                ? "ส่งคำเชิญตั้งรหัสผ่าน"
+                : "Send password invitation"}
             </Button>
           ) : null}
         </div>

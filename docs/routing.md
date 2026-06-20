@@ -43,7 +43,9 @@ data-access layer and route handlers.
 | `/users/{id}`                      | Administrator access management                        |
 | `/api/users`                       | Admin-only list/create                                 |
 | `/api/users/{id}`                  | Admin-only detail/update                               |
-| `/api/users/{id}/password-reset`   | Admin-only password reset email                        |
+| `/api/users/{id}/password-reset`   | Admin-only resend of the 72-hour password invitation   |
+| `/set-password`                    | Public one-time employee invitation landing page       |
+| `/api/auth/invitations/redeem`     | Exchanges an invitation for a fresh Firebase reset URL |
 | `/assets`                          | Authenticated and scope-filtered                       |
 | `/assets/new`                      | Admin or warehouse                                     |
 | `/assets/{id}`                     | Authenticated and scope-filtered                       |

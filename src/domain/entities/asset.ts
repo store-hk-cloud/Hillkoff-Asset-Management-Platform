@@ -21,6 +21,22 @@ export type AssetNfcStatus =
   | "mismatch"
   | "revoked";
 
+export type AssetOperationalStatus =
+  | "in_stock"
+  | "sold"
+  | "in_use"
+  | "archived";
+
+export interface AssetCatalog {
+  readonly assetCode: string;
+  readonly name: string;
+  readonly description: string;
+  readonly category: string;
+  readonly defaultBranchId: string | null;
+  readonly defaultLocationName: string;
+  readonly updatedAt: Date;
+}
+
 export interface AssetWarranty {
   readonly status: "inactive" | "active" | "expired";
   readonly startedAt: Date | null;
@@ -77,7 +93,7 @@ export interface AssetCreateInput {
   readonly name: string;
   readonly description: string;
   readonly category: string;
-  readonly serialNumber: string | null;
+  readonly serialNumber: string;
   readonly condition: AssetCondition;
   readonly custodyType?: AssetCustodyType;
   readonly branchId: string | null;

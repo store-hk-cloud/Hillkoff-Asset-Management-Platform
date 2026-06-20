@@ -97,12 +97,18 @@ export class AssetLifecycleService implements DomainService {
       );
     }
 
+    const serialNumber = input.serialNumber.trim().toUpperCase();
+
+    if (!serialNumber) {
+      throw new AssetError("INVALID_ASSET", "Serial number is required.");
+    }
+
     const normalizedInput = {
       assetCode,
       name,
       description: input.description.trim(),
       category,
-      serialNumber: input.serialNumber?.trim() || null,
+      serialNumber,
       condition: input.condition,
       custodyType:
         input.custodyType ?? (input.customerId?.trim() ? "customer" : "branch"),
@@ -175,7 +181,7 @@ export class AssetLifecycleService implements DomainService {
       name: input.name.trim(),
       description: input.description.trim(),
       category: input.category.trim(),
-      serialNumber: input.serialNumber?.trim() || null,
+      serialNumber: input.serialNumber.trim().toUpperCase(),
       condition: input.condition,
       installedAt: input.installedAt,
     };

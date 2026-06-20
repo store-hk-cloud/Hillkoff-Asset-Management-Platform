@@ -58,7 +58,11 @@ export function SchedulePmForm() {
     <form className="space-y-6" onSubmit={submit}>
       <div className="grid gap-5 sm:grid-cols-2">
         <Field
-          label={locale === "th" ? "รหัสทรัพย์สิน" : "Asset Code"}
+          label={
+            locale === "th"
+              ? "Serial Number / Asset ID / รหัสทรัพย์สิน"
+              : "Serial number / Asset ID / Asset code"
+          }
           name="assetCode"
           required
         />

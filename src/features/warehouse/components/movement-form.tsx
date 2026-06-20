@@ -152,7 +152,9 @@ export function MovementForm({ action }: MovementFormProps) {
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-2">
         <Label htmlFor="assetCode">
-          {locale === "th" ? "รหัสทรัพย์สิน / สแกน QR" : "Asset code / Scan QR"}{" "}
+          {locale === "th"
+            ? "Serial Number / Asset ID / รหัสทรัพย์สิน"
+            : "Serial number / Asset ID / Asset code"}{" "}
           *
         </Label>
         <div className="flex gap-2">
@@ -166,7 +168,13 @@ export function MovementForm({ action }: MovementFormProps) {
               autoFocus
               className="pl-9"
               id="assetCode"
+              name="assetCode"
               onChange={() => setAsset(null)}
+              placeholder={
+                locale === "th"
+                  ? "แนะนำให้ใช้ Serial Number หรือสแกน QR"
+                  : "Serial number or QR scan is recommended"
+              }
               ref={assetCodeInputRef}
             />
           </div>

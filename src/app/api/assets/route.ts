@@ -32,6 +32,8 @@ function assetErrorResponse(error: unknown) {
       error.code === "ASSET_ACCESS_DENIED"
         ? 403
         : error.code === "ASSET_CODE_CONFLICT" ||
+            error.code === "ASSET_SERIAL_CONFLICT" ||
+            error.code === "ASSET_REFERENCE_AMBIGUOUS" ||
             error.code === "ASSET_VERSION_CONFLICT"
           ? 409
           : error.code === "ASSET_NOT_FOUND"

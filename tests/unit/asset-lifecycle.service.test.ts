@@ -50,11 +50,23 @@ describe("AssetLifecycleService", () => {
     const transition = service.create(assetId, createInput, actorId, now);
 
     expect(transition.asset.assetCode).toBe("HK-001");
+    expect(transition.asset.serialNumber).toBe("SN-001");
     expect(transition.asset.name).toBe("Coffee Machine");
     expect(transition.asset.status).toBe("active");
     expect(transition.asset.version).toBe(0);
     expect(transition.asset.searchKeywords).toContain("hk-001");
     expect(transition.changes).toHaveProperty("created");
+  });
+
+  it("requires a serial number for every newly created machine", () => {
+    expect(() =>
+      service.create(
+        assetId,
+        { ...createInput, serialNumber: " " },
+        actorId,
+        now,
+      ),
+    ).toThrowError(AssetError);
   });
 
   it("updates editable fields without leaking expectedVersion", () => {

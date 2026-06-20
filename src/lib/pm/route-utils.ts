@@ -3,6 +3,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import type { UserProfile } from "@/domain/entities/user-profile";
+import { AssetError } from "@/domain/errors/asset.error";
 import { PmError } from "@/domain/errors/pm.error";
 import type { PmRequestContext } from "@/services/pm-management.service";
 
@@ -20,6 +21,13 @@ export function createPmContext(
 }
 
 export function pmErrorResponse(error: unknown) {
+  if (error instanceof AssetError) {
+    return NextResponse.json(
+      { success: false, error: { code: error.code, message: error.message } },
+      { status: error.code === "ASSET_NOT_FOUND" ? 404 : 409 },
+    );
+  }
+
   if (error instanceof PmError) {
     const status =
       error.code === "PM_ACCESS_DENIED"

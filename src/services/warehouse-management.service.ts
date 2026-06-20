@@ -67,7 +67,7 @@ export class WarehouseManagementService {
       );
     }
 
-    const asset = await this.assetRepository.findByCode(assetCode);
+    const asset = await this.assetRepository.findByReference(assetCode);
 
     if (!asset) {
       throw new WarehouseError("ASSET_NOT_FOUND", "Asset was not found.");

@@ -45,7 +45,9 @@ export function UserList({ users }: { users: readonly UserProfile[] }) {
                 {locale === "th"
                   ? user.status === "active"
                     ? "ใช้งานอยู่"
-                    : "ปิดใช้งาน"
+                    : user.status === "invited"
+                      ? "รอตั้งรหัสผ่าน"
+                      : "ปิดใช้งาน"
                   : user.status}
               </span>
             </CardContent>

@@ -57,8 +57,11 @@ movement history from being bypassed.
 
 ## Mobile workflow
 
-Each action starts with Asset Code input suitable for keyboard, barcode, or QR
-scanner integration. The current asset state is shown before confirmation.
+Each action accepts Serial Number, internal Asset ID, or Asset Code and is
+suitable for keyboard, barcode, or QR scanner integration. Serial Number or QR
+is recommended. Asset Code remains supported only when exactly one machine uses
+that code; an ambiguous code is rejected instead of selecting an arbitrary
+machine. The current asset state is shown before confirmation.
 Forms use a single-column mobile layout, large touch targets, and disable repeat
 submission while a transaction is pending.
 

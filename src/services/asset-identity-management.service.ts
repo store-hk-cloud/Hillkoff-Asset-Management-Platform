@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Asset } from "@/domain/entities/asset";
+import type { Asset, AssetOperationalStatus } from "@/domain/entities/asset";
 import type { AssetEvent } from "@/domain/entities/asset-event";
 import type { AuditLog } from "@/domain/entities/audit-log";
 import type {
@@ -12,6 +12,7 @@ import { AssetIdentityError } from "@/domain/errors/asset-identity.error";
 import type { AssetIdentityCommit } from "@/domain/repositories/asset-identity.repository";
 import { AssetIdentityService } from "@/domain/services/asset-identity.service";
 import { AssetAccessService } from "@/domain/services/asset-access.service";
+import { AssetVerificationService } from "@/domain/services/asset-verification.service";
 import { StaticNdefUrlStrategy } from "@/domain/services/nfc-verification-strategy";
 import { createPublicId } from "@/domain/value-objects/public-id";
 import { createAssetId } from "@/domain/value-objects/asset-id";
@@ -27,12 +28,19 @@ export interface IdentityRequestContext {
 
 export interface PublicAssetProjection {
   readonly publicId: string;
-  readonly assetCode: string;
-  readonly name: string;
-  readonly category: string;
-  readonly condition: Asset["condition"];
-  readonly status: Asset["status"];
-  readonly nfcStatus: Asset["nfcStatus"];
+  readonly serialNumber: string;
+  readonly operationalStatus: AssetOperationalStatus;
+  readonly details: {
+    readonly assetCode: string;
+    readonly name: string;
+    readonly category: string;
+    readonly condition: Asset["condition"];
+    readonly lifecycleStatus: Asset["status"];
+    readonly nfcStatus: Asset["nfcStatus"];
+    readonly branchId: string | null;
+    readonly locationName: string;
+    readonly inStockQuantity: number;
+  } | null;
 }
 
 export class AssetIdentityManagementService {
@@ -42,6 +50,7 @@ export class AssetIdentityManagementService {
     private readonly identityService = new AssetIdentityService(),
     private readonly accessService = new AssetAccessService(),
     private readonly staticStrategy = new StaticNdefUrlStrategy(),
+    private readonly verificationService = new AssetVerificationService(),
   ) {}
 
   async get(
@@ -75,7 +84,10 @@ export class AssetIdentityManagementService {
     );
   }
 
-  async lookupPublic(publicIdValue: string): Promise<PublicAssetProjection> {
+  async lookupPublic(
+    publicIdValue: string,
+    includeInternalDetails = false,
+  ): Promise<PublicAssetProjection> {
     const asset = await this.assetRepository.findByPublicId(
       createPublicId(publicIdValue),
     );
@@ -87,14 +99,28 @@ export class AssetIdentityManagementService {
       );
     }
 
+    const operationalStatus =
+      this.verificationService.getOperationalStatus(asset);
+
     return {
       publicId: publicIdValue,
-      assetCode: asset.assetCode,
-      name: asset.name,
-      category: asset.category,
-      condition: asset.condition,
-      status: asset.status,
-      nfcStatus: asset.nfcStatus,
+      serialNumber: asset.serialNumber ?? "",
+      operationalStatus,
+      details: includeInternalDetails
+        ? {
+            assetCode: asset.assetCode,
+            name: asset.name,
+            category: asset.category,
+            condition: asset.condition,
+            lifecycleStatus: asset.status,
+            nfcStatus: asset.nfcStatus,
+            branchId: asset.branchId,
+            locationName: asset.locationName,
+            inStockQuantity: await this.assetRepository.countInStockByCode(
+              asset.assetCode,
+            ),
+          }
+        : null,
     };
   }
 
