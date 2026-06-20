@@ -46,8 +46,9 @@ Disable the Firebase Authentication account, set the Firestore profile status
 to `disabled`, and revoke refresh tokens. The application and Security Rules
 both deny disabled profiles.
 
-An administrative provisioning interface should be introduced as a dedicated
-future identity-management feature with audit events and approval controls.
+Administrators can provision and manage accounts through `/users`. The
+server-only workflow synchronizes Firebase Authentication, custom claims, and
+Firestore profiles, and records privileged changes in `audit_logs`.
 
 ## First administrator
 

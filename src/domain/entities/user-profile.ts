@@ -27,3 +27,20 @@ export interface UserProfileUpdate {
   readonly photoURL: string | null;
   readonly expectedVersion: number;
 }
+
+export interface ManagedUserCreateInput {
+  readonly email: string;
+  readonly displayName: string;
+  readonly role: UserRole;
+  readonly branchId: string | null;
+  readonly customerId: string | null;
+}
+
+export interface ManagedUserUpdateInput {
+  readonly displayName: string;
+  readonly role: UserRole;
+  readonly status: UserStatus;
+  readonly branchId: string | null;
+  readonly customerId: string | null;
+  readonly expectedVersion: number;
+}

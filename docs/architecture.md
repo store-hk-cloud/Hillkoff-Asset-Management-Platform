@@ -43,3 +43,11 @@ Firebase Authentication custom claims carry the canonical application role.
 Next.js uses Firebase server session cookies, while Firestore and Storage Rules
 validate Firebase ID-token claims for direct client access. Detailed behavior
 is documented in [Authentication](authentication.md).
+
+# Progressive Web App
+
+The web application is installable on Android and iOS through a Web App
+Manifest and a narrowly scoped service worker. The service worker caches only
+the offline shell, icons, manifest, and immutable framework assets. Protected
+pages, APIs, sessions, Firebase data, and business transactions remain
+network-only. See `docs/pwa-installation.md`.

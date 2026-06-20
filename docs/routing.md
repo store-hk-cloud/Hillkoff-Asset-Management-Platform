@@ -37,6 +37,13 @@ data-access layer and route handlers.
 | `/login`                           | Public; verified sessions redirect to dashboard        |
 | `/dashboard`                       | Authenticated                                          |
 | `/profile`                         | Authenticated                                          |
+| `/offline`                         | Public PWA offline fallback                            |
+| `/users`                           | Administrator user list                                |
+| `/users/new`                       | Administrator account provisioning                     |
+| `/users/{id}`                      | Administrator access management                        |
+| `/api/users`                       | Admin-only list/create                                 |
+| `/api/users/{id}`                  | Admin-only detail/update                               |
+| `/api/users/{id}/password-reset`   | Admin-only password reset email                        |
 | `/assets`                          | Authenticated and scope-filtered                       |
 | `/assets/new`                      | Admin or warehouse                                     |
 | `/assets/{id}`                     | Authenticated and scope-filtered                       |
