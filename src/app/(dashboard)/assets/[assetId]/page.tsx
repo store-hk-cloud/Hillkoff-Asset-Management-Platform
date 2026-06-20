@@ -13,6 +13,7 @@ import { ArchiveAssetButton } from "@/features/assets/components/archive-asset-b
 import { AssetEventList } from "@/features/assets/components/asset-event-list";
 import { AssetStatusBadge } from "@/features/assets/components/asset-status-badge";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 import { AssetManagementService } from "@/services/asset-management.service";
 
@@ -34,11 +35,6 @@ type AssetDetailPageProps = {
   params: Promise<{ assetId: string }>;
   searchParams: Promise<{ tab?: string }>;
 };
-
-const dateFormatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeZone: "Asia/Bangkok",
-});
 
 function isAssetTab(value: string | undefined): value is AssetTab {
   return tabs.some(([tab]) => tab === value);
@@ -67,6 +63,7 @@ export default async function AssetDetailPage({
   params,
   searchParams,
 }: AssetDetailPageProps) {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   const { assetId } = await params;
   const requestedTab = (await searchParams).tab;
@@ -83,6 +80,31 @@ export default async function AssetDetailPage({
         : activeTab === "installation"
           ? events.filter((event) => event.type === "installation")
           : events;
+  const dateFormatter = new Intl.DateTimeFormat(
+    locale === "th" ? "th-TH" : "en-US",
+    {
+      dateStyle: "medium",
+      timeZone: "Asia/Bangkok",
+    },
+  );
+  const tabLabels: Record<AssetTab, string> =
+    locale === "th"
+      ? {
+          overview: "ภาพรวม",
+          timeline: "ไทม์ไลน์",
+          repair: "ประวัติซ่อม",
+          pm: "ประวัติ PM",
+          installation: "ประวัติติดตั้ง",
+          documents: "เอกสาร",
+        }
+      : {
+          overview: "Overview",
+          timeline: "Timeline",
+          repair: "Repair History",
+          pm: "PM History",
+          installation: "Installation History",
+          documents: "Documents",
+        };
 
   return (
     <section className="space-y-6">
@@ -92,7 +114,7 @@ export default async function AssetDetailPage({
             className="text-muted-foreground hover:text-foreground text-sm"
             href="/assets"
           >
-            ← ทรัพย์สินทั้งหมด
+            {t("assets.back")}
           </Link>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -111,7 +133,7 @@ export default async function AssetDetailPage({
             <Button asChild variant="outline">
               <Link href={`/assets/${asset.id}/edit`}>
                 <Pencil aria-hidden="true" className="size-4" />
-                แก้ไข
+                {t("action.edit")}
               </Link>
             </Button>
             <ArchiveAssetButton
@@ -138,7 +160,7 @@ export default async function AssetDetailPage({
       ) : null}
 
       <nav
-        aria-label="Asset detail"
+        aria-label={locale === "th" ? "รายละเอียดทรัพย์สิน" : "Asset detail"}
         className="flex gap-1 overflow-x-auto border-b"
       >
         {tabs.map(([tab, label]) => (
@@ -152,7 +174,7 @@ export default async function AssetDetailPage({
             href={`/assets/${asset.id}?tab=${tab}`}
             key={tab}
           >
-            {label}
+            {tabLabels[tab] ?? label}
           </Link>
         ))}
       </nav>
@@ -161,20 +183,42 @@ export default async function AssetDetailPage({
         <div className="grid gap-4 lg:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>ข้อมูลหลัก</CardTitle>
+              <CardTitle>
+                {locale === "th" ? "ข้อมูลหลัก" : "Core information"}
+              </CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 text-sm sm:grid-cols-2">
-              <Detail label="หมวดหมู่" value={asset.category} />
-              <Detail label="Serial Number" value={asset.serialNumber ?? "—"} />
-              <Detail label="สถานที่" value={asset.locationName || "—"} />
-              <Detail label="Branch ID" value={asset.branchId ?? "—"} />
-              <Detail label="Customer ID" value={asset.customerId ?? "—"} />
               <Detail
-                label="Custody"
-                value={asset.custodyType === "customer" ? "Customer" : "Branch"}
+                label={locale === "th" ? "หมวดหมู่" : "Category"}
+                value={asset.category}
+              />
+              <Detail label="Serial Number" value={asset.serialNumber ?? "—"} />
+              <Detail
+                label={locale === "th" ? "สถานที่" : "Location"}
+                value={asset.locationName || "—"}
               />
               <Detail
-                label="วันที่ติดตั้ง"
+                label={t("field.branchId")}
+                value={asset.branchId ?? "—"}
+              />
+              <Detail
+                label={t("field.customerId")}
+                value={asset.customerId ?? "—"}
+              />
+              <Detail
+                label={locale === "th" ? "ผู้ครอบครอง" : "Custody"}
+                value={
+                  asset.custodyType === "customer"
+                    ? locale === "th"
+                      ? "ลูกค้า"
+                      : "Customer"
+                    : locale === "th"
+                      ? "สาขา"
+                      : "Branch"
+                }
+              />
+              <Detail
+                label={locale === "th" ? "วันที่ติดตั้ง" : "Installation date"}
                 value={
                   asset.installedAt
                     ? dateFormatter.format(asset.installedAt)
@@ -182,15 +226,15 @@ export default async function AssetDetailPage({
                 }
               />
               <Detail
-                label="Warranty"
+                label={locale === "th" ? "การรับประกัน" : "Warranty"}
                 value={
                   asset.warranty.status === "active" && asset.warranty.expiresAt
-                    ? `Active until ${dateFormatter.format(asset.warranty.expiresAt)}`
+                    ? `${locale === "th" ? "ใช้งานถึง" : "Active until"} ${dateFormatter.format(asset.warranty.expiresAt)}`
                     : asset.warranty.status
                 }
               />
               <Detail
-                label="Installation GPS"
+                label={locale === "th" ? "GPS ติดตั้ง" : "Installation GPS"}
                 value={
                   asset.installationLatitude !== null &&
                   asset.installationLongitude !== null
@@ -203,23 +247,29 @@ export default async function AssetDetailPage({
 
           <Card>
             <CardHeader>
-              <CardTitle>รายละเอียด</CardTitle>
+              <CardTitle>
+                {locale === "th" ? "รายละเอียด" : "Description"}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <p className="text-muted-foreground whitespace-pre-wrap">
-                {asset.description || "ไม่มีรายละเอียด"}
+                {asset.description ||
+                  (locale === "th" ? "ไม่มีรายละเอียด" : "No description")}
               </p>
               <div className="grid gap-4 border-t pt-4 sm:grid-cols-2">
                 <Detail
-                  label="สร้างเมื่อ"
+                  label={locale === "th" ? "สร้างเมื่อ" : "Created"}
                   value={dateFormatter.format(asset.createdAt)}
                 />
                 <Detail
                   label="Public ID"
-                  value={asset.publicId ?? "Pending migration"}
+                  value={
+                    asset.publicId ??
+                    (locale === "th" ? "รอการย้ายข้อมูล" : "Pending migration")
+                  }
                 />
                 <Detail
-                  label="แก้ไขล่าสุด"
+                  label={locale === "th" ? "แก้ไขล่าสุด" : "Last updated"}
                   value={dateFormatter.format(asset.updatedAt)}
                 />
               </div>
@@ -230,28 +280,40 @@ export default async function AssetDetailPage({
 
       {activeTab === "timeline" ? (
         <AssetEventList
-          emptyMessage="ยังไม่มี Timeline"
+          emptyMessage={
+            locale === "th" ? "ยังไม่มีไทม์ไลน์" : "No timeline events"
+          }
           events={filteredEvents}
         />
       ) : null}
 
       {activeTab === "repair" ? (
         <AssetEventList
-          emptyMessage="ยังไม่มีประวัติการซ่อม"
+          emptyMessage={
+            locale === "th" ? "ยังไม่มีประวัติการซ่อม" : "No repair history"
+          }
           events={filteredEvents}
         />
       ) : null}
 
       {activeTab === "pm" ? (
         <AssetEventList
-          emptyMessage="ยังไม่มีประวัติ Preventive Maintenance"
+          emptyMessage={
+            locale === "th"
+              ? "ยังไม่มีประวัติ Preventive Maintenance"
+              : "No preventive maintenance history"
+          }
           events={filteredEvents}
         />
       ) : null}
 
       {activeTab === "installation" ? (
         <AssetEventList
-          emptyMessage="ยังไม่มีประวัติการติดตั้ง"
+          emptyMessage={
+            locale === "th"
+              ? "ยังไม่มีประวัติการติดตั้ง"
+              : "No installation history"
+          }
           events={filteredEvents}
         />
       ) : null}
@@ -264,7 +326,9 @@ export default async function AssetDetailPage({
               className="text-muted-foreground mx-auto mb-3 size-8"
             />
             <p className="text-muted-foreground text-sm">
-              ยังไม่มีเอกสารสำหรับทรัพย์สินนี้
+              {locale === "th"
+                ? "ยังไม่มีเอกสารสำหรับทรัพย์สินนี้"
+                : "No documents for this asset"}
             </p>
           </div>
         ) : (

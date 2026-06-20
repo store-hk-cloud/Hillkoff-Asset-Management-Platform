@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/components/providers/language-provider";
 import type {
   RepairPartUsed,
   RepairStatus,
@@ -56,6 +57,7 @@ export function RepairWorkForm({
   initialLaborCost,
   initialParts,
 }: RepairWorkFormProps) {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const [version, setVersion] = useState(initialVersion);
   const [status, setStatus] = useState(initialStatus);
@@ -154,13 +156,15 @@ export function RepairWorkForm({
   return (
     <form className="space-y-8" onSubmit={submit}>
       <section className="space-y-3">
-        <h2 className="font-semibold">Repair Photos</h2>
+        <h2 className="font-semibold">
+          {locale === "th" ? "รูปภาพงานซ่อม" : "Repair Photos"}
+        </h2>
         <Label
           className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-md border"
           htmlFor="repairPhotos"
         >
           <Camera aria-hidden="true" className="size-4" />
-          ถ่ายหรือเลือกรูป
+          {locale === "th" ? "ถ่ายหรือเลือกรูป" : "Take or choose photos"}
         </Label>
         <input
           accept="image/jpeg,image/png,image/webp"
@@ -172,13 +176,16 @@ export function RepairWorkForm({
           type="file"
         />
         <p className="text-muted-foreground text-sm">
-          แนบแล้ว {photos.length} รูป
+          {locale === "th" ? "แนบแล้ว" : "Attached"} {photos.length}{" "}
+          {locale === "th" ? "รูป" : "photos"}
         </p>
       </section>
 
       <section className="grid gap-4">
         <div className="space-y-2">
-          <Label htmlFor="rootCause">Root Cause</Label>
+          <Label htmlFor="rootCause">
+            {locale === "th" ? "สาเหตุหลัก" : "Root Cause"}
+          </Label>
           <textarea
             className="border-input bg-background min-h-28 w-full rounded-md border px-3 py-2 text-sm"
             defaultValue={initialRootCause}
@@ -188,7 +195,9 @@ export function RepairWorkForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="solution">Solution</Label>
+          <Label htmlFor="solution">
+            {locale === "th" ? "วิธีแก้ไข" : "Solution"}
+          </Label>
           <textarea
             className="border-input bg-background min-h-32 w-full rounded-md border px-3 py-2 text-sm"
             defaultValue={initialSolution}
@@ -198,7 +207,9 @@ export function RepairWorkForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="laborCost">Labor Cost (THB)</Label>
+          <Label htmlFor="laborCost">
+            {locale === "th" ? "ค่าแรง (บาท)" : "Labor Cost (THB)"}
+          </Label>
           <Input
             defaultValue={initialLaborCost}
             id="laborCost"
@@ -212,14 +223,18 @@ export function RepairWorkForm({
 
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-semibold">Parts Used</h2>
+          <h2 className="font-semibold">
+            {locale === "th" ? "อะไหล่ที่ใช้" : "Parts Used"}
+          </h2>
           <Button onClick={addPart} size="sm" type="button" variant="outline">
             <Plus aria-hidden="true" className="size-4" />
-            Add Part
+            {locale === "th" ? "เพิ่มอะไหล่" : "Add Part"}
           </Button>
         </div>
         {parts.length === 0 ? (
-          <p className="text-muted-foreground text-sm">ไม่ได้ใช้อะไหล่</p>
+          <p className="text-muted-foreground text-sm">
+            {locale === "th" ? "ไม่ได้ใช้อะไหล่" : "No parts used"}
+          </p>
         ) : (
           <div className="space-y-4">
             {parts.map((part, index) => (
@@ -228,24 +243,24 @@ export function RepairWorkForm({
                 key={part.id}
               >
                 <Input
-                  aria-label="Part number"
+                  aria-label={locale === "th" ? "รหัสอะไหล่" : "Part number"}
                   onChange={(event) =>
                     updatePart(index, "partNumber", event.target.value)
                   }
-                  placeholder="Part Number"
+                  placeholder={locale === "th" ? "รหัสอะไหล่" : "Part Number"}
                   value={part.partNumber}
                 />
                 <Input
-                  aria-label="Part name"
+                  aria-label={locale === "th" ? "ชื่ออะไหล่" : "Part name"}
                   onChange={(event) =>
                     updatePart(index, "name", event.target.value)
                   }
-                  placeholder="Part Name"
+                  placeholder={locale === "th" ? "ชื่ออะไหล่" : "Part Name"}
                   required
                   value={part.name}
                 />
                 <Input
-                  aria-label="Quantity"
+                  aria-label={locale === "th" ? "จำนวน" : "Quantity"}
                   min="0.01"
                   onChange={(event) =>
                     updatePart(index, "quantity", event.target.value)
@@ -256,7 +271,9 @@ export function RepairWorkForm({
                 />
                 <div className="flex gap-2">
                   <Input
-                    aria-label="Unit cost"
+                    aria-label={
+                      locale === "th" ? "ต้นทุนต่อหน่วย" : "Unit cost"
+                    }
                     min="0"
                     onChange={(event) =>
                       updatePart(index, "unitCost", event.target.value)
@@ -266,7 +283,7 @@ export function RepairWorkForm({
                     value={part.unitCost}
                   />
                   <Button
-                    aria-label="Remove part"
+                    aria-label={locale === "th" ? "ลบอะไหล่" : "Remove part"}
                     onClick={() =>
                       setParts((current) =>
                         current.filter((_, itemIndex) => itemIndex !== index),
@@ -287,7 +304,9 @@ export function RepairWorkForm({
 
       {NEXT_STATUSES[status].length > 0 ? (
         <div className="space-y-2">
-          <Label htmlFor="targetStatus">เปลี่ยนสถานะ</Label>
+          <Label htmlFor="targetStatus">
+            {locale === "th" ? "เปลี่ยนสถานะ" : "Change status"}
+          </Label>
           <select
             className="border-input bg-background h-11 w-full rounded-md border px-3 text-sm"
             id="targetStatus"
@@ -296,7 +315,11 @@ export function RepairWorkForm({
             }
             value={targetStatus}
           >
-            <option value="">บันทึกข้อมูลโดยไม่เปลี่ยนสถานะ</option>
+            <option value="">
+              {locale === "th"
+                ? "บันทึกข้อมูลโดยไม่เปลี่ยนสถานะ"
+                : "Save without changing status"}
+            </option>
             {NEXT_STATUSES[status].map((nextStatus) => (
               <option key={nextStatus} value={nextStatus}>
                 {STATUS_LABELS[nextStatus]}
@@ -312,7 +335,11 @@ export function RepairWorkForm({
         </p>
       ) : null}
       <Button className="h-12 w-full" disabled={busy} type="submit">
-        {busy ? "กำลังบันทึก…" : "Save Repair"}
+        {busy
+          ? t("status.loading")
+          : locale === "th"
+            ? "บันทึกงานซ่อม"
+            : "Save Repair"}
       </Button>
     </form>
   );

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/components/providers/language-provider";
 import { assignRepairTicket } from "@/features/repairs/services/repair-api.service";
 
 type AssignRepairFormProps = Readonly<{
@@ -14,6 +15,7 @@ type AssignRepairFormProps = Readonly<{
 }>;
 
 export function AssignRepairForm({ repairId, version }: AssignRepairFormProps) {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,11 +46,15 @@ export function AssignRepairForm({ repairId, version }: AssignRepairFormProps) {
   return (
     <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit}>
       <div className="space-y-2">
-        <Label htmlFor="technicianId">Technician User ID</Label>
+        <Label htmlFor="technicianId">
+          {locale === "th" ? "รหัสผู้ใช้ของช่าง" : "Technician User ID"}
+        </Label>
         <Input id="technicianId" name="technicianId" required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="technicianName">ชื่อช่าง</Label>
+        <Label htmlFor="technicianName">
+          {locale === "th" ? "ชื่อช่าง" : "Technician name"}
+        </Label>
         <Input id="technicianName" name="technicianName" required />
       </div>
       {error ? (
@@ -61,7 +67,11 @@ export function AssignRepairForm({ repairId, version }: AssignRepairFormProps) {
         disabled={busy}
         type="submit"
       >
-        {busy ? "กำลังมอบหมาย…" : "Assign Technician"}
+        {busy
+          ? t("status.loading")
+          : locale === "th"
+            ? "มอบหมายช่าง"
+            : "Assign Technician"}
       </Button>
     </form>
   );

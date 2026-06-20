@@ -6,19 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { PmJob } from "@/domain/entities/pm-job";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { PmManagementService } from "@/services/pm-management.service";
 
 const service = new PmManagementService();
-const monthFormatter = new Intl.DateTimeFormat("th-TH", {
-  month: "long",
-  year: "numeric",
-  timeZone: "Asia/Bangkok",
-});
-const timeFormatter = new Intl.DateTimeFormat("th-TH", {
-  timeStyle: "short",
-  timeZone: "Asia/Bangkok",
-});
-
 type Props = { searchParams: Promise<{ month?: string }> };
 
 function selectedMonth(value: string | undefined): {
@@ -58,6 +49,7 @@ function bangkokDay(date: Date): number {
 }
 
 export default async function PmCalendarPage({ searchParams }: Props) {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   if (!service.canView(profile)) notFound();
   const { year, month } = selectedMonth((await searchParams).month);
@@ -75,6 +67,16 @@ export default async function PmCalendarPage({ searchParams }: Props) {
     const day = bangkokDay(job.scheduledAt);
     jobsByDay.set(day, [...(jobsByDay.get(day) ?? []), job]);
   }
+  const formatterLocale = locale === "th" ? "th-TH" : "en-US";
+  const monthFormatter = new Intl.DateTimeFormat(formatterLocale, {
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Bangkok",
+  });
+  const timeFormatter = new Intl.DateTimeFormat(formatterLocale, {
+    timeStyle: "short",
+    timeZone: "Asia/Bangkok",
+  });
 
   return (
     <section className="space-y-6">
@@ -83,16 +85,18 @@ export default async function PmCalendarPage({ searchParams }: Props) {
           className="text-muted-foreground hover:text-foreground text-sm"
           href="/pm"
         >
-          ← Preventive Maintenance
+          ← {t("pm.title")}
         </Link>
         <div className="mt-3 flex items-center justify-between gap-3">
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            PM Calendar
+            {locale === "th" ? "ปฏิทิน PM" : "PM Calendar"}
           </h1>
           <div className="flex gap-2">
             <Button asChild size="icon" variant="outline">
               <Link
-                aria-label="Previous month"
+                aria-label={
+                  locale === "th" ? "เดือนก่อนหน้า" : "Previous month"
+                }
                 href={`/pm/calendar?month=${monthKey(year, month - 1)}`}
               >
                 <ChevronLeft aria-hidden="true" className="size-4" />
@@ -100,7 +104,7 @@ export default async function PmCalendarPage({ searchParams }: Props) {
             </Button>
             <Button asChild size="icon" variant="outline">
               <Link
-                aria-label="Next month"
+                aria-label={locale === "th" ? "เดือนถัดไป" : "Next month"}
                 href={`/pm/calendar?month=${monthKey(year, month + 1)}`}
               >
                 <ChevronRight aria-hidden="true" className="size-4" />

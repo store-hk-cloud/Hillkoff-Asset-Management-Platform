@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/providers/language-provider";
 
 type SignaturePadProps = Readonly<{
   onChange: (blob: Blob | null) => void;
 }>;
 
 export function SignaturePad({ onChange }: SignaturePadProps) {
+  const { locale } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
   const [hasSignature, setHasSignature] = useState(false);
@@ -71,7 +73,9 @@ export function SignaturePad({ onChange }: SignaturePadProps) {
   return (
     <div className="space-y-2">
       <canvas
-        aria-label="พื้นที่ลงลายเซ็นลูกค้า"
+        aria-label={
+          locale === "th" ? "พื้นที่ลงลายเซ็นลูกค้า" : "Customer signature area"
+        }
         className="h-44 w-full touch-none rounded-lg border bg-white"
         onPointerDown={start}
         onPointerMove={draw}
@@ -85,7 +89,7 @@ export function SignaturePad({ onChange }: SignaturePadProps) {
         type="button"
         variant="outline"
       >
-        ล้างลายเซ็น
+        {locale === "th" ? "ล้างลายเซ็น" : "Clear signature"}
       </Button>
     </div>
   );

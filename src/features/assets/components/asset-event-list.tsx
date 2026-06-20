@@ -1,10 +1,7 @@
-import type { AssetEvent } from "@/domain/entities/asset-event";
+"use client";
 
-const dateFormatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Bangkok",
-});
+import { useLanguage } from "@/components/providers/language-provider";
+import type { AssetEvent } from "@/domain/entities/asset-event";
 
 type AssetEventListProps = Readonly<{
   events: readonly AssetEvent[];
@@ -12,6 +9,16 @@ type AssetEventListProps = Readonly<{
 }>;
 
 export function AssetEventList({ events, emptyMessage }: AssetEventListProps) {
+  const { locale } = useLanguage();
+  const dateFormatter = new Intl.DateTimeFormat(
+    locale === "th" ? "th-TH" : "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Bangkok",
+    },
+  );
+
   if (events.length === 0) {
     return (
       <div className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
@@ -36,7 +43,8 @@ export function AssetEventList({ events, emptyMessage }: AssetEventListProps) {
               {event.description}
             </p>
             <p className="text-muted-foreground mt-2 text-xs">
-              โดย {event.actorDisplayName} · {event.actorRole}
+              {locale === "th" ? "โดย" : "By"} {event.actorDisplayName} ·{" "}
+              {event.actorRole}
             </p>
           </div>
         </li>

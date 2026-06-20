@@ -5,6 +5,7 @@ import { Radio, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/providers/language-provider";
 import {
   Card,
   CardContent,
@@ -37,6 +38,7 @@ export function NfcRegistration({
   canRegister,
   canVerify,
 }: NfcRegistrationProps) {
+  const { locale } = useLanguage();
   const router = useRouter();
   const [tagType, setTagType] = useState("ntag213");
   const [busy, setBusy] = useState(false);
@@ -100,11 +102,16 @@ export function NfcRegistration({
           <Radio aria-hidden="true" className="size-5" />
           NFC
         </CardTitle>
-        <CardDescription>NTAG213 และ NTAG215 · สถานะ {status}</CardDescription>
+        <CardDescription>
+          NTAG213 {locale === "th" ? "และ" : "and"} NTAG215 ·{" "}
+          {locale === "th" ? "สถานะ" : "Status"} {status}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
-          Web NFC ต้องใช้ Chrome บน Android ผ่าน HTTPS และเปิด NFC
+          {locale === "th"
+            ? "Web NFC ต้องใช้ Chrome บน Android ผ่าน HTTPS และเปิด NFC"
+            : "Web NFC requires Chrome on Android over HTTPS with NFC enabled."}
         </p>
         <p className="text-muted-foreground text-xs break-all">{nfcUrl}</p>
         {canRegister ? (
@@ -123,7 +130,9 @@ export function NfcRegistration({
               onClick={handleRegister}
               type="button"
             >
-              เขียน URL และลงทะเบียน
+              {locale === "th"
+                ? "เขียน URL และลงทะเบียน"
+                : "Write URL and register"}
             </Button>
           </div>
         ) : null}
@@ -136,7 +145,7 @@ export function NfcRegistration({
             variant="outline"
           >
             <ShieldCheck aria-hidden="true" className="size-4" />
-            Verify NFC
+            {locale === "th" ? "ตรวจสอบ NFC" : "Verify NFC"}
           </Button>
         ) : null}
         {message ? (
