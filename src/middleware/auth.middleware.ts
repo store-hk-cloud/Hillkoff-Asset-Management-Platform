@@ -12,6 +12,7 @@ const PROTECTED_ROUTE_PREFIXES = [
   "/pm",
   "/inventory",
   "/notifications",
+  "/users",
 ] as const;
 
 export function applyAuthenticationBoundary(request: NextRequest) {

@@ -5,6 +5,7 @@ import { Archive } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/providers/language-provider";
 import { archiveAsset } from "@/features/assets/services/asset-api.service";
 
 type ArchiveAssetButtonProps = Readonly<{
@@ -16,12 +17,15 @@ export function ArchiveAssetButton({
   assetId,
   assetCode,
 }: ArchiveAssetButtonProps) {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
   async function handleArchive() {
     const confirmed = window.confirm(
-      `ยืนยันการ Archive ทรัพย์สิน ${assetCode}?`,
+      locale === "th"
+        ? `ยืนยันการเก็บทรัพย์สิน ${assetCode} เป็นรายการถาวร?`
+        : `Archive asset ${assetCode}?`,
     );
 
     if (!confirmed) {
@@ -52,7 +56,7 @@ export function ArchiveAssetButton({
       variant="destructive"
     >
       <Archive aria-hidden="true" className="size-4" />
-      Archive
+      {t("action.archive")}
     </Button>
   );
 }

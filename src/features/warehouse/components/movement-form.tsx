@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/components/providers/language-provider";
 import type { Asset } from "@/domain/entities/asset";
 import { MovementSummary } from "@/features/warehouse/components/movement-summary";
 import {
@@ -20,43 +21,69 @@ type MovementFormProps = Readonly<{
   action: MovementAction;
 }>;
 
-const labels: Record<
-  MovementAction,
-  {
-    title: string;
-    destinationLabel: string;
-    destinationName: "destinationBranchId" | "customerId";
-    locationLabel: string;
-  }
-> = {
-  receive: {
-    title: "รับเข้าคลัง/สาขา",
-    destinationLabel: "Branch ID ปลายทาง",
-    destinationName: "destinationBranchId",
-    locationLabel: "สถานที่รับเข้า",
+const labels = {
+  th: {
+    receive: {
+      title: "รับเข้าคลัง/สาขา",
+      destinationLabel: "รหัสสาขาปลายทาง",
+      destinationName: "destinationBranchId",
+      locationLabel: "สถานที่รับเข้า",
+    },
+    transfer: {
+      title: "โอนสาขา",
+      destinationLabel: "รหัสสาขาปลายทาง",
+      destinationName: "destinationBranchId",
+      locationLabel: "สถานที่ปลายทาง",
+    },
+    sale: {
+      title: "ขายลูกค้า",
+      destinationLabel: "รหัสลูกค้า",
+      destinationName: "customerId",
+      locationLabel: "สถานที่ส่งมอบ/ติดตั้ง",
+    },
   },
-  transfer: {
-    title: "โอนสาขา",
-    destinationLabel: "Branch ID ปลายทาง",
-    destinationName: "destinationBranchId",
-    locationLabel: "สถานที่ปลายทาง",
+  en: {
+    receive: {
+      title: "Receive asset",
+      destinationLabel: "Destination branch ID",
+      destinationName: "destinationBranchId",
+      locationLabel: "Receiving location",
+    },
+    transfer: {
+      title: "Transfer asset",
+      destinationLabel: "Destination branch ID",
+      destinationName: "destinationBranchId",
+      locationLabel: "Destination location",
+    },
+    sale: {
+      title: "Sell asset",
+      destinationLabel: "Customer ID",
+      destinationName: "customerId",
+      locationLabel: "Delivery / installation location",
+    },
   },
-  sale: {
-    title: "ขายลูกค้า",
-    destinationLabel: "Customer ID",
-    destinationName: "customerId",
-    locationLabel: "สถานที่ส่งมอบ/ติดตั้ง",
-  },
-};
+} as const satisfies Record<
+  "th" | "en",
+  Record<
+    MovementAction,
+    {
+      title: string;
+      destinationLabel: string;
+      destinationName: "destinationBranchId" | "customerId";
+      locationLabel: string;
+    }
+  >
+>;
 
 export function MovementForm({ action }: MovementFormProps) {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const assetCodeInputRef = useRef<HTMLInputElement>(null);
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loadingAsset, setLoadingAsset] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const config = labels[action];
+  const config = labels[locale][action];
 
   async function lookupAsset() {
     const assetCode = assetCodeInputRef.current?.value.trim();
@@ -124,7 +151,10 @@ export function MovementForm({ action }: MovementFormProps) {
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-2">
-        <Label htmlFor="assetCode">รหัสทรัพย์สิน / สแกน QR *</Label>
+        <Label htmlFor="assetCode">
+          {locale === "th" ? "รหัสทรัพย์สิน / สแกน QR" : "Asset code / Scan QR"}{" "}
+          *
+        </Label>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <ScanLine
@@ -147,7 +177,7 @@ export function MovementForm({ action }: MovementFormProps) {
             variant="outline"
           >
             <Search aria-hidden="true" className="size-4" />
-            <span className="hidden sm:inline">ค้นหา</span>
+            <span className="hidden sm:inline">{t("action.search")}</span>
           </Button>
         </div>
       </div>
@@ -178,7 +208,9 @@ export function MovementForm({ action }: MovementFormProps) {
           />
         </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="referenceNumber">เลขที่เอกสารอ้างอิง</Label>
+          <Label htmlFor="referenceNumber">
+            {locale === "th" ? "เลขที่เอกสารอ้างอิง" : "Reference number"}
+          </Label>
           <Input
             disabled={!asset}
             id="referenceNumber"
@@ -186,7 +218,9 @@ export function MovementForm({ action }: MovementFormProps) {
           />
         </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="notes">หมายเหตุ</Label>
+          <Label htmlFor="notes">
+            {locale === "th" ? "หมายเหตุ" : "Notes"}
+          </Label>
           <textarea
             className="border-input bg-background min-h-24 w-full rounded-md border px-3 py-2 text-sm disabled:opacity-50"
             disabled={!asset}
@@ -207,7 +241,11 @@ export function MovementForm({ action }: MovementFormProps) {
         disabled={!asset || submitting}
         type="submit"
       >
-        {submitting ? "กำลังบันทึก Transaction…" : `ยืนยัน${config.title}`}
+        {submitting
+          ? t("status.loading")
+          : locale === "th"
+            ? `ยืนยัน${config.title}`
+            : `Confirm ${config.title.toLowerCase()}`}
       </Button>
     </form>
   );

@@ -9,12 +9,14 @@ import {
 } from "@/components/ui/card";
 import { MovementForm } from "@/features/warehouse/components/movement-form";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { WarehouseManagementService } from "@/services/warehouse-management.service";
 
 const warehouseService = new WarehouseManagementService();
 export const metadata = { title: "ขายลูกค้า" };
 
 export default async function SalePage() {
+  const { locale } = await getServerTranslator();
   const { profile } = await requireSession();
   if (!warehouseService.canSell(profile)) notFound();
 
@@ -22,9 +24,15 @@ export default async function SalePage() {
     <section className="mx-auto max-w-3xl">
       <Card>
         <CardHeader>
-          <CardTitle>ขายและส่งมอบให้ลูกค้า</CardTitle>
+          <CardTitle>
+            {locale === "th"
+              ? "ขายและส่งมอบให้ลูกค้า"
+              : "Sell and deliver to customer"}
+          </CardTitle>
           <CardDescription>
-            เปลี่ยน Custody เป็นลูกค้าและเก็บสาขาผู้ขายใน Movement Log
+            {locale === "th"
+              ? "เปลี่ยน Custody เป็นลูกค้าและเก็บสาขาผู้ขายใน Movement Log"
+              : "Changes custody to the customer and records the selling branch in the Movement Log."}
           </CardDescription>
         </CardHeader>
         <CardContent>

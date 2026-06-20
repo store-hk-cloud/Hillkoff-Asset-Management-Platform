@@ -10,6 +10,7 @@ import {
 import { AssetAccessService } from "@/domain/services/asset-access.service";
 import { AssetForm } from "@/features/assets/components/asset-form";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 
 const accessService = new AssetAccessService();
 
@@ -18,6 +19,7 @@ export const metadata = {
 };
 
 export default async function NewAssetPage() {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
 
   if (!accessService.canWrite(profile)) {
@@ -28,9 +30,11 @@ export default async function NewAssetPage() {
     <section className="mx-auto max-w-3xl">
       <Card>
         <CardHeader>
-          <CardTitle>เพิ่มทรัพย์สิน</CardTitle>
+          <CardTitle>{t("assets.add")}</CardTitle>
           <CardDescription>
-            การสร้างรายการจะบันทึก Asset Event และ Audit Log โดยอัตโนมัติ
+            {locale === "th"
+              ? "การสร้างรายการจะบันทึก Asset Event และ Audit Log โดยอัตโนมัติ"
+              : "Creating an asset automatically records an Asset Event and Audit Log."}
           </CardDescription>
         </CardHeader>
         <CardContent>

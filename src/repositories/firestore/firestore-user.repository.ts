@@ -9,11 +9,14 @@ import {
 } from "firebase-admin/firestore";
 
 import type {
+  ManagedUserUpdateInput,
   UserProfile,
   UserProfileUpdate,
   UserStatus,
 } from "@/domain/entities/user-profile";
+import type { AuditLog } from "@/domain/entities/audit-log";
 import { AuthenticationError } from "@/domain/errors/authentication.error";
+import { UserManagementError } from "@/domain/errors/user-management.error";
 import type { UserRepository } from "@/domain/repositories/user.repository";
 import { createUserId, type UserId } from "@/domain/value-objects/user-id";
 import { isUserRole } from "@/domain/value-objects/user-role";
@@ -126,6 +129,91 @@ export class FirestoreUserRepository implements UserRepository {
     return snapshot.exists ? mapUserDocument(snapshot.data() ?? {}) : null;
   }
 
+  async list(): Promise<readonly UserProfile[]> {
+    const snapshot = await this.firestore
+      .collection("users")
+      .orderBy("displayName")
+      .limit(500)
+      .get();
+    return snapshot.docs.map((document) => mapUserDocument(document.data()));
+  }
+
+  async createManaged(profile: UserProfile, auditLog: AuditLog): Promise<void> {
+    const reference = this.getReference(profile.uid);
+    const auditReference = this.firestore
+      .collection("audit_logs")
+      .doc(auditLog.id);
+
+    await this.firestore.runTransaction(async (transaction) => {
+      const existing = await transaction.get(reference);
+      if (existing.exists) {
+        throw new UserManagementError(
+          "USER_EMAIL_CONFLICT",
+          "A user profile already exists for this account.",
+        );
+      }
+
+      transaction.create(reference, mapManagedProfile(profile));
+      transaction.create(auditReference, mapAuditLog(auditLog));
+    });
+  }
+
+  async updateManaged(
+    id: UserId,
+    update: ManagedUserUpdateInput,
+    auditLog: AuditLog,
+  ): Promise<UserProfile> {
+    const reference = this.getReference(id);
+    const auditReference = this.firestore
+      .collection("audit_logs")
+      .doc(auditLog.id);
+
+    await this.firestore.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(reference);
+      if (!snapshot.exists) {
+        throw new UserManagementError(
+          "USER_NOT_FOUND",
+          "User profile was not found.",
+        );
+      }
+
+      const current = mapUserDocument(snapshot.data() ?? {});
+      if (current.version !== update.expectedVersion) {
+        throw new UserManagementError(
+          "USER_VERSION_CONFLICT",
+          "The user changed. Reload and try again.",
+        );
+      }
+
+      transaction.update(reference, {
+        displayName: update.displayName,
+        role: update.role,
+        status: update.status,
+        branchId: update.branchId,
+        customerId: update.customerId,
+        updatedAt: FieldValue.serverTimestamp(),
+        version: current.version + 1,
+      });
+      transaction.create(auditReference, mapAuditLog(auditLog));
+    });
+
+    const profile = await this.findById(id);
+    if (!profile) {
+      throw new UserManagementError(
+        "USER_NOT_FOUND",
+        "User profile was not found after update.",
+      );
+    }
+    return profile;
+  }
+
+  async recordAudit(auditLog: AuditLog): Promise<void> {
+    await this.firestore
+      .collection("audit_logs")
+      .doc(auditLog.id)
+      .create(mapAuditLog(auditLog));
+  }
+
   async updateProfile(
     id: UserId,
     update: UserProfileUpdate,
@@ -183,4 +271,32 @@ export class FirestoreUserRepository implements UserRepository {
   private getReference(id: UserId): DocumentReference {
     return this.firestore.collection("users").doc(id);
   }
+}
+
+function mapManagedProfile(profile: UserProfile): UserDocument {
+  return {
+    uid: profile.uid,
+    email: profile.email,
+    displayName: profile.displayName,
+    phoneNumber: profile.phoneNumber,
+    photoURL: profile.photoURL,
+    role: profile.role,
+    status: profile.status,
+    branchId: profile.branchId,
+    customerId: profile.customerId,
+    lastLoginAt: profile.lastLoginAt
+      ? Timestamp.fromDate(profile.lastLoginAt)
+      : null,
+    createdAt: Timestamp.fromDate(profile.createdAt),
+    updatedAt: Timestamp.fromDate(profile.updatedAt),
+    version: profile.version,
+  };
+}
+
+function mapAuditLog(auditLog: AuditLog) {
+  return {
+    ...auditLog,
+    actorId: String(auditLog.actorId),
+    occurredAt: Timestamp.fromDate(auditLog.occurredAt),
+  };
 }

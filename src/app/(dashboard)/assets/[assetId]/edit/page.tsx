@@ -10,6 +10,7 @@ import {
 import { AssetAccessService } from "@/domain/services/asset-access.service";
 import { AssetForm } from "@/features/assets/components/asset-form";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { AssetManagementService } from "@/services/asset-management.service";
 
 const assetService = new AssetManagementService();
@@ -24,6 +25,7 @@ export const metadata = {
 };
 
 export default async function EditAssetPage({ params }: EditAssetPageProps) {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
 
   if (!accessService.canWrite(profile)) {
@@ -41,9 +43,13 @@ export default async function EditAssetPage({ params }: EditAssetPageProps) {
     <section className="mx-auto max-w-3xl">
       <Card>
         <CardHeader>
-          <CardTitle>แก้ไข {asset.assetCode}</CardTitle>
+          <CardTitle>
+            {t("action.edit")} {asset.assetCode}
+          </CardTitle>
           <CardDescription>
-            ทุกฟิลด์ที่เปลี่ยนจะถูกบันทึกใน Timeline และ Audit Log
+            {locale === "th"
+              ? "ทุกฟิลด์ที่เปลี่ยนจะถูกบันทึกใน Timeline และ Audit Log"
+              : "Every changed field is recorded in the Timeline and Audit Log."}
           </CardDescription>
         </CardHeader>
         <CardContent>

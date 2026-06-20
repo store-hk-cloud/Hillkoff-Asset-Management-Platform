@@ -67,6 +67,13 @@ The route group layout calls `requireSession()`. API routes use
 operations. `RoleGuard` is available for conditional server-rendered UI, but UI
 visibility is never considered an authorization boundary.
 
+## User administration
+
+Active administrators manage accounts through `/users`. Creation, role changes,
+scope changes, disabling, and password-reset requests are server-only
+operations. Every access change revokes refresh tokens and writes an audit log.
+See `docs/user-access-management.md`.
+
 ## Logout
 
 Logout clears both the Firebase Web SDK session and the server session cookie.

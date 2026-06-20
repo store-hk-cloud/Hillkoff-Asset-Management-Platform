@@ -19,6 +19,7 @@
     "test": "vitest run tests/unit",
     "test:all": "vitest run",
     "test:rules": "firebase emulators:exec --project demo-hillkoff-auth --only firestore,storage \"vitest run tests/security\"",
+    "auth:provision-admin": "node scripts/provision-admin.mjs",
     "identity:backfill": "node scripts/backfill-asset-public-identities.mjs",
     "functions:build": "npm run build --workspace functions",
     "functions:typecheck": "npm run typecheck --workspace functions",

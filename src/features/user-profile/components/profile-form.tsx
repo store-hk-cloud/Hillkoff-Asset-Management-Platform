@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/components/providers/language-provider";
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { profileUpdateSchema } from "@/features/user-profile/schemas/profile.schema";
 import {
@@ -20,6 +21,7 @@ type ProfileFormProps = Readonly<{
 }>;
 
 export function ProfileForm({ profile }: ProfileFormProps) {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoURL, setPhotoURL] = useState(profile.photoURL);
@@ -109,7 +111,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             variant="outline"
           >
             <Camera aria-hidden="true" className="size-4" />
-            เปลี่ยนรูป
+            {locale === "th" ? "เปลี่ยนรูป" : "Change photo"}
           </Button>
           <input
             accept="image/jpeg,image/png,image/webp"
@@ -119,14 +121,16 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             type="file"
           />
           <p className="text-muted-foreground mt-2 text-xs">
-            JPG, PNG หรือ WebP สูงสุด 5 MB
+            {locale === "th"
+              ? "JPG, PNG หรือ WebP สูงสุด 5 MB"
+              : "JPG, PNG, or WebP up to 5 MB"}
           </p>
         </div>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="displayName">ชื่อที่แสดง</Label>
+          <Label htmlFor="displayName">{t("field.displayName")}</Label>
           <Input
             defaultValue={profile.displayName}
             id="displayName"
@@ -137,17 +141,17 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">อีเมล</Label>
+          <Label htmlFor="email">{t("field.email")}</Label>
           <Input disabled id="email" value={profile.email} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="role">บทบาท</Label>
+          <Label htmlFor="role">{t("field.role")}</Label>
           <Input disabled id="role" value={profile.role} />
         </div>
 
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="phoneNumber">เบอร์โทรศัพท์</Label>
+          <Label htmlFor="phoneNumber">{t("field.phone")}</Label>
           <Input
             defaultValue={profile.phoneNumber ?? ""}
             id="phoneNumber"
@@ -170,7 +174,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       ) : null}
 
       <Button disabled={submitting} type="submit">
-        {submitting ? "กำลังบันทึก…" : "บันทึกโปรไฟล์"}
+        {submitting
+          ? t("status.loading")
+          : locale === "th"
+            ? "บันทึกโปรไฟล์"
+            : "Save profile"}
       </Button>
     </form>
   );

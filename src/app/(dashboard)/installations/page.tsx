@@ -6,48 +6,63 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { InstallationStatus } from "@/domain/entities/installation";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 import { InstallationManagementService } from "@/services/installation-management.service";
 
 const service = new InstallationManagementService();
-const dateTimeFormatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Bangkok",
-});
-
-const statusLabels: Record<InstallationStatus, string> = {
-  scheduled: "Scheduled",
-  in_progress: "In progress",
-  completed: "Completed",
-  cancelled: "Cancelled",
-};
-
 export const metadata = { title: "Installation Queue" };
 
 export default async function InstallationsPage() {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   if (!service.canView(profile)) notFound();
 
   const installations = await service.listQueue(profile);
+  const dateTimeFormatter = new Intl.DateTimeFormat(
+    locale === "th" ? "th-TH" : "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Bangkok",
+    },
+  );
+  const statusLabels: Record<InstallationStatus, string> =
+    locale === "th"
+      ? {
+          scheduled: "นัดหมายแล้ว",
+          in_progress: "กำลังดำเนินงาน",
+          completed: "เสร็จสิ้น",
+          cancelled: "ยกเลิก",
+        }
+      : {
+          scheduled: "Scheduled",
+          in_progress: "In progress",
+          completed: "Completed",
+          cancelled: "Cancelled",
+        };
 
   return (
     <section className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-muted-foreground text-sm">Field Operations</p>
+          <p className="text-muted-foreground text-sm">
+            {t("nav.installations")}
+          </p>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Installation Queue
+            {t("installations.title")}
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            คิวงานติดตั้งที่รอดำเนินการและกำลังทำงาน
+            {locale === "th"
+              ? "คิวงานติดตั้งที่รอดำเนินการและกำลังทำงาน"
+              : "Installation work that is scheduled or currently in progress"}
           </p>
         </div>
         {service.canSchedule(profile) ? (
           <Button asChild className="h-11 w-full sm:w-auto">
             <Link href="/installations/schedule">
               <Plus aria-hidden="true" className="size-4" />
-              Schedule Installation
+              {t("installations.schedule")}
             </Link>
           </Button>
         ) : null}
@@ -59,7 +74,11 @@ export default async function InstallationsPage() {
             aria-hidden="true"
             className="text-muted-foreground mx-auto mb-3 size-8"
           />
-          <p className="text-muted-foreground text-sm">ไม่มีงานติดตั้งในคิว</p>
+          <p className="text-muted-foreground text-sm">
+            {locale === "th"
+              ? "ไม่มีงานติดตั้งในคิว"
+              : "No installations in the queue"}
+          </p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -75,7 +94,10 @@ export default async function InstallationsPage() {
                     <CardTitle className="text-base">
                       {installation.assetName}
                     </CardTitle>
-                    <Status status={installation.status} />
+                    <Status
+                      label={statusLabels[installation.status]}
+                      status={installation.status}
+                    />
                   </div>
                   <p className="text-muted-foreground font-mono text-xs">
                     {installation.assetCode}
@@ -121,7 +143,13 @@ function Row({
   );
 }
 
-function Status({ status }: { status: InstallationStatus }) {
+function Status({
+  label,
+  status,
+}: {
+  label: string;
+  status: InstallationStatus;
+}) {
   return (
     <span
       className={cn(
@@ -131,7 +159,7 @@ function Status({ status }: { status: InstallationStatus }) {
           : "bg-amber-100 text-amber-800",
       )}
     >
-      {statusLabels[status]}
+      {label}
     </span>
   );
 }

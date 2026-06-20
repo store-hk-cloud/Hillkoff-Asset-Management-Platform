@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/components/providers/language-provider";
 import { createRepairTicket } from "@/features/repairs/services/repair-api.service";
 
 export function CreateRepairForm() {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,15 +42,21 @@ export function CreateRepairForm() {
   return (
     <form className="space-y-5" onSubmit={submit}>
       <div className="space-y-2">
-        <Label htmlFor="assetCode">Asset Code</Label>
+        <Label htmlFor="assetCode">
+          {locale === "th" ? "รหัสทรัพย์สิน" : "Asset Code"}
+        </Label>
         <Input id="assetCode" name="assetCode" required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="title">หัวข้อปัญหา</Label>
+        <Label htmlFor="title">
+          {locale === "th" ? "หัวข้อปัญหา" : "Issue title"}
+        </Label>
         <Input id="title" maxLength={200} name="title" required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="description">รายละเอียดอาการ</Label>
+        <Label htmlFor="description">
+          {locale === "th" ? "รายละเอียดอาการ" : "Problem description"}
+        </Label>
         <textarea
           className="border-input bg-background min-h-32 w-full rounded-md border px-3 py-2 text-sm"
           id="description"
@@ -63,7 +71,7 @@ export function CreateRepairForm() {
         </p>
       ) : null}
       <Button className="h-12 w-full sm:w-auto" disabled={busy} type="submit">
-        {busy ? "กำลังสร้าง…" : "Create Repair Ticket"}
+        {busy ? t("status.loading") : t("repairs.create")}
       </Button>
     </form>
   );

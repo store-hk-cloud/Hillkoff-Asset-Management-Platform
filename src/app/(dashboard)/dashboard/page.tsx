@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { AnalyticsManagementService } from "@/services/analytics-management.service";
 
 const analytics = new AnalyticsManagementService();
@@ -10,13 +11,16 @@ const analytics = new AnalyticsManagementService();
 export const metadata = { title: "Executive Dashboard" };
 
 export default async function DashboardPage() {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
 
   if (!analytics.canView(profile)) {
     return (
       <section className="space-y-6">
         <div>
-          <p className="text-muted-foreground text-sm">Welcome</p>
+          <p className="text-muted-foreground text-sm">
+            {t("dashboard.welcome")}
+          </p>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
             {profile.displayName}
           </h1>
@@ -38,26 +42,36 @@ export default async function DashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-muted-foreground text-sm">
-            Executive Analytics · {snapshot.source}
+            {locale === "th"
+              ? "ข้อมูลวิเคราะห์ผู้บริหาร"
+              : "Executive Analytics"}{" "}
+            · {snapshot.source}
           </p>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Executive Dashboard
+            {t("dashboard.title")}
           </h1>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
-            <Link href="/api/analytics/export/excel">Export Excel</Link>
+            <Link href="/api/analytics/export/excel">
+              {locale === "th" ? "ส่งออก Excel" : "Export Excel"}
+            </Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href="/api/analytics/export/pdf">Export PDF</Link>
+            <Link href="/api/analytics/export/pdf">
+              {locale === "th" ? "ส่งออก PDF" : "Export PDF"}
+            </Link>
           </Button>
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric title="Total Assets" value={snapshot.totalAssets.toString()} />
         <Metric
-          title="Repair Cost"
+          title={locale === "th" ? "ทรัพย์สินทั้งหมด" : "Total Assets"}
+          value={snapshot.totalAssets.toString()}
+        />
+        <Metric
+          title={locale === "th" ? "ค่าซ่อม" : "Repair Cost"}
           value={`${snapshot.repairCost.toLocaleString("th-TH")} THB`}
         />
         <Metric
@@ -69,7 +83,9 @@ export default async function DashboardPage() {
           }
         />
         <Metric
-          title="PM Completion Rate"
+          title={
+            locale === "th" ? "อัตราการทำ PM สำเร็จ" : "PM Completion Rate"
+          }
           value={`${snapshot.pmCompletionRate.toFixed(1)}%`}
         />
       </div>
@@ -79,28 +95,30 @@ export default async function DashboardPage() {
           items={Object.entries(snapshot.assetsByStatus).map(
             ([label, value]) => ({ label, value: value.toString() }),
           )}
-          title="Assets By Status"
+          title={locale === "th" ? "ทรัพย์สินตามสถานะ" : "Assets By Status"}
         />
         <ListCard
           items={snapshot.lowStockParts.map((part) => ({
             label: `${part.partNumber} · ${part.name}`,
             value: `${part.quantityOnHand}/${part.reorderPoint}`,
           }))}
-          title="Low Stock Parts"
+          title={locale === "th" ? "อะไหล่ใกล้หมด" : "Low Stock Parts"}
         />
         <ListCard
           items={snapshot.topFailureAssets.map((asset) => ({
             label: `${asset.assetCode} · ${asset.assetName}`,
             value: asset.value.toString(),
           }))}
-          title="Top Failure Assets"
+          title={
+            locale === "th" ? "ทรัพย์สินที่เสียบ่อย" : "Top Failure Assets"
+          }
         />
         <ListCard
           items={snapshot.topRepairCost.map((asset) => ({
             label: `${asset.assetCode} · ${asset.assetName}`,
             value: `${asset.value.toLocaleString("th-TH")} THB`,
           }))}
-          title="Top Repair Cost"
+          title={locale === "th" ? "ทรัพย์สินค่าซ่อมสูง" : "Top Repair Cost"}
         />
       </div>
     </section>
@@ -132,7 +150,9 @@ function ListCard({
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
         {items.length === 0 ? (
-          <p className="text-muted-foreground">No data</p>
+          <p className="text-muted-foreground">
+            {items.length === 0 ? (title ? "—" : "—") : null}
+          </p>
         ) : (
           items.map((item) => (
             <div

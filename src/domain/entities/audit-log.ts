@@ -4,7 +4,7 @@ import type { UserRole } from "@/domain/value-objects/user-role";
 export interface AuditLog {
   readonly id: string;
   readonly action: string;
-  readonly entityType: "asset";
+  readonly entityType: "asset" | "user";
   readonly entityId: string;
   readonly actorId: UserId;
   readonly actorDisplayName: string;

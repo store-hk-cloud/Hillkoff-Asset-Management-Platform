@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { QrCodeCard } from "@/features/asset-identity/components/qr-code-card";
 import { NfcRegistration } from "@/features/asset-identity/components/nfc-registration";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { AssetIdentityManagementService } from "@/services/asset-identity-management.service";
 
 const service = new AssetIdentityManagementService();
@@ -11,6 +12,7 @@ type IdentityPageProps = { params: Promise<{ assetId: string }> };
 export const metadata = { title: "QR และ NFC" };
 
 export default async function IdentityPage({ params }: IdentityPageProps) {
+  const { locale } = await getServerTranslator();
   const { profile } = await requireSession();
   const { assetId } = await params;
   const { asset } = await service.get(assetId, profile);
@@ -26,7 +28,7 @@ export default async function IdentityPage({ params }: IdentityPageProps) {
           {asset.assetCode}
         </p>
         <h1 className="text-2xl font-semibold tracking-tight">
-          QR และ NFC · {asset.name}
+          {locale === "th" ? "QR และ NFC" : "QR and NFC"} · {asset.name}
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">
           Public ID: {asset.publicId}

@@ -3,29 +3,37 @@ import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { NotificationManagementService } from "@/services/notification-management.service";
 
 const service = new NotificationManagementService();
-const formatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Bangkok",
-});
-
 export default async function NotificationsPage() {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   if (!service.canView(profile)) notFound();
   const items = await service.list(profile);
+  const formatter = new Intl.DateTimeFormat(
+    locale === "th" ? "th-TH" : "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Bangkok",
+    },
+  );
 
   return (
     <section className="space-y-6">
       <div>
-        <p className="text-muted-foreground text-sm">Background Processing</p>
+        <p className="text-muted-foreground text-sm">
+          {t("nav.notifications")}
+        </p>
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          Notification Center
+          {t("notifications.title")}
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          Queue นี้เป็น read-only จาก UI การส่งทั้งหมดทำผ่าน Cloud Functions
+          {locale === "th"
+            ? "คิวนี้เป็นแบบอ่านอย่างเดียวจากหน้าเว็บ การส่งทั้งหมดทำผ่าน Cloud Functions"
+            : "This queue is read-only in the UI. All delivery is handled by Cloud Functions."}
         </p>
       </div>
       {items.length === 0 ? (
@@ -35,7 +43,9 @@ export default async function NotificationsPage() {
             className="text-muted-foreground mx-auto mb-3 size-8"
           />
           <p className="text-muted-foreground text-sm">
-            Notification queue empty
+            {locale === "th"
+              ? "ยังไม่มีรายการแจ้งเตือน"
+              : "Notification queue is empty"}
           </p>
         </div>
       ) : (
@@ -53,7 +63,8 @@ export default async function NotificationsPage() {
               <CardContent className="space-y-2 text-sm">
                 <p>{item.body}</p>
                 <p className="text-muted-foreground">
-                  {item.type} · attempts {item.attempts}/{item.maxAttempts}
+                  {item.type} · {locale === "th" ? "จำนวนครั้ง" : "attempts"}{" "}
+                  {item.attempts}/{item.maxAttempts}
                 </p>
                 <p className="text-muted-foreground text-xs">
                   {formatter.format(item.createdAt)}

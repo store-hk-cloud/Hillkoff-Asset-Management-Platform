@@ -9,9 +9,9 @@ export default function GlobalError({ reset }: GlobalErrorProps) {
     <html lang="th">
       <body>
         <main>
-          <h1>Application error</h1>
+          <h1>แอปพลิเคชันขัดข้อง / Application error</h1>
           <button onClick={reset} type="button">
-            Try again
+            ลองอีกครั้ง / Try again
           </button>
         </main>
       </body>
