@@ -17,8 +17,8 @@ Firestore ID.
 Public lookup runs through a server repository. Anonymous Firestore access
 remains denied.
 
-- Anonymous visitors see only the machine Serial Number and operational status
-  (`in_stock`, `sold`, `in_use`, or `archived`).
+- Anonymous visitors see the asset name, machine Serial Number, and operational
+  status (`in_stock`, `sold`, `in_use`, or `archived`).
 - Signed-in users see Asset Code, name, category, condition, NFC status,
   current branch/location, and the number of active machines with the same
   Asset Code that remain in branch stock.

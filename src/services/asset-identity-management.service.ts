@@ -28,6 +28,7 @@ export interface IdentityRequestContext {
 
 export interface PublicAssetProjection {
   readonly publicId: string;
+  readonly name: string;
   readonly serialNumber: string;
   readonly operationalStatus: AssetOperationalStatus;
   readonly details: {
@@ -104,6 +105,7 @@ export class AssetIdentityManagementService {
 
     return {
       publicId: publicIdValue,
+      name: asset.name,
       serialNumber: asset.serialNumber ?? "",
       operationalStatus,
       details: includeInternalDetails

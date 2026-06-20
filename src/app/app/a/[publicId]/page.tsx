@@ -48,6 +48,10 @@ export default async function PublicAssetPage({
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 text-sm sm:grid-cols-2">
+          <Detail
+            label={locale === "th" ? "ชื่อทรัพย์สิน" : "Asset Name"}
+            value={asset.name}
+          />
           <Detail label="Serial Number" value={asset.serialNumber || "—"} />
           <Detail
             label={locale === "th" ? "สถานะทรัพย์สิน" : "Asset Status"}
@@ -55,10 +59,6 @@ export default async function PublicAssetPage({
           />
           {asset.details ? (
             <>
-              <Detail
-                label={locale === "th" ? "ชื่อทรัพย์สิน" : "Asset Name"}
-                value={asset.details.name}
-              />
               <Detail
                 label={locale === "th" ? "รหัสทรัพย์สิน" : "Asset Code"}
                 value={asset.details.assetCode}
