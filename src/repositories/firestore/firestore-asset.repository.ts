@@ -413,6 +413,16 @@ export class FirestoreAssetRepository implements AssetRepository {
       return mapAsset(serialDocument.data());
     }
 
+    const publicIdSnapshot = await this.firestore
+      .collection("assets")
+      .where("publicId", "==", normalized)
+      .limit(1)
+      .get();
+    const publicIdDocument = publicIdSnapshot.docs[0];
+    if (publicIdDocument) {
+      return mapAsset(publicIdDocument.data());
+    }
+
     return this.findByCode(normalized);
   }
 

@@ -104,6 +104,19 @@ function mapTicket(data: DocumentData): RepairTicket {
       ? createUserId(requireString(data, "assignedTechnicianId"))
       : null,
     assignedTechnicianName: nullableString(data, "assignedTechnicianName"),
+    assignmentStatus:
+      data.assignmentStatus === "pending" ||
+      data.assignmentStatus === "accepted" ||
+      data.assignmentStatus === "rejected"
+        ? data.assignmentStatus
+        : data.assignedTechnicianId
+          ? "accepted"
+          : null,
+    assignmentRespondedAt: mapDate(data.assignmentRespondedAt),
+    assignmentRejectionReason: nullableString(
+      data,
+      "assignmentRejectionReason",
+    ),
     photos: Array.isArray(data.photos) ? data.photos.map(mapPhoto) : [],
     rootCause: requireString(data, "rootCause"),
     solution: requireString(data, "solution"),
@@ -130,6 +143,9 @@ function serialize(ticket: RepairTicket): DocumentData {
       ? Timestamp.fromDate(ticket.completedAt)
       : null,
     closedAt: ticket.closedAt ? Timestamp.fromDate(ticket.closedAt) : null,
+    assignmentRespondedAt: ticket.assignmentRespondedAt
+      ? Timestamp.fromDate(ticket.assignmentRespondedAt)
+      : null,
     createdAt: Timestamp.fromDate(ticket.createdAt),
     updatedAt: Timestamp.fromDate(ticket.updatedAt),
   };

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/language-provider";
 import { assignRepairTicket } from "@/features/repairs/services/repair-api.service";
+import { TechnicianSelect } from "@/features/technician/components/technician-select";
 
 type AssignRepairFormProps = Readonly<{
   repairId: string;
@@ -19,6 +20,7 @@ export function AssignRepairForm({ repairId, version }: AssignRepairFormProps) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [technicianName, setTechnicianName] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -49,13 +51,25 @@ export function AssignRepairForm({ repairId, version }: AssignRepairFormProps) {
         <Label htmlFor="technicianId">
           {locale === "th" ? "รหัสผู้ใช้ของช่าง" : "Technician User ID"}
         </Label>
-        <Input id="technicianId" name="technicianId" required />
+        <TechnicianSelect
+          id="technicianId"
+          name="technicianId"
+          onTechnicianChange={(technician) =>
+            setTechnicianName(technician?.displayName ?? "")
+          }
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="technicianName">
           {locale === "th" ? "ชื่อช่าง" : "Technician name"}
         </Label>
-        <Input id="technicianName" name="technicianName" required />
+        <Input
+          id="technicianName"
+          name="technicianName"
+          readOnly
+          required
+          value={technicianName}
+        />
       </div>
       {error ? (
         <p className="text-destructive text-sm sm:col-span-2" role="alert">

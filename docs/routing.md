@@ -81,6 +81,8 @@ data-access layer and route handlers.
 | `/api/inventory/parts/{id}`        | Admin/warehouse update or deactivate                   |
 | `/api/inventory/movements`         | Scoped history; admin/warehouse mutations              |
 | `/notifications`                   | Admin or executive read-only queue                     |
+| `/technician`                      | Technician mobile workspace and assigned work          |
+| `/technicians/[technicianId]`      | Admin/executive technician workload and history        |
 | `/api/analytics/export/excel`      | Admin or executive Excel export                        |
 | `/api/analytics/export/pdf`        | Admin or executive PDF export                          |
 | `/api/agent/commands`              | Admin command dispatcher with CSRF and idempotency     |

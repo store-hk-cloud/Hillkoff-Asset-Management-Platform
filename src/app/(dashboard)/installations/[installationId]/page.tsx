@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InstallationError } from "@/domain/errors/installation.error";
 import { InstallationWorkForm } from "@/features/installations/components/installation-work-form";
+import { TechnicianAssignmentForm } from "@/features/technician/components/technician-assignment-form";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { InstallationManagementService } from "@/services/installation-management.service";
@@ -77,6 +78,24 @@ export default async function InstallationDetailPage({
           {installation.assetCode} · {installation.installationNumber}
         </p>
       </div>
+
+      {service.canSchedule(profile) &&
+      installation.assignmentStatus === "rejected" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {locale === "th" ? "มอบหมายช่างใหม่" : "Reassign technician"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TechnicianAssignmentForm
+              type="installation"
+              version={installation.version}
+              workId={installation.id}
+            />
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>

@@ -57,6 +57,9 @@ export class PmDomainService {
       scheduledAt: input.scheduledAt,
       assignedTechnicianId: input.assignedTechnicianId,
       assignedTechnicianName: input.assignedTechnicianName.trim(),
+      assignmentStatus: "pending",
+      assignmentRespondedAt: null,
+      assignmentRejectionReason: null,
       status: "scheduled",
       checklist: input.checklistLabels.map((label, index) => ({
         id: `pm-check-${index + 1}`,

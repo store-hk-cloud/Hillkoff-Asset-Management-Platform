@@ -1,5 +1,6 @@
 import type { AssetId } from "@/domain/value-objects/asset-id";
 import type { UserId } from "@/domain/value-objects/user-id";
+import type { TechnicianAssignmentStatus } from "@/domain/entities/technician-work";
 
 export const PM_STATUSES = ["scheduled", "completed", "cancelled"] as const;
 export type PmStatus = (typeof PM_STATUSES)[number];
@@ -24,6 +25,9 @@ export interface PmJob {
   readonly scheduledAt: Date;
   readonly assignedTechnicianId: UserId;
   readonly assignedTechnicianName: string;
+  readonly assignmentStatus: TechnicianAssignmentStatus;
+  readonly assignmentRespondedAt: Date | null;
+  readonly assignmentRejectionReason: string | null;
   readonly status: PmStatus;
   readonly checklist: readonly PmChecklistItem[];
   readonly completionNotes: string;

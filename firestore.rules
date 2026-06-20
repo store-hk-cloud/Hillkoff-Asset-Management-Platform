@@ -267,8 +267,13 @@ service cloud.firestore {
     }
 
     match /notification_queue/{notificationId} {
-      allow get, list: if isActiveUser()
-        && request.auth.token.role in ['admin', 'executive'];
+      allow get, list: if isActiveUser() && (
+        request.auth.token.role in ['admin', 'executive']
+        || (
+          request.auth.token.role == 'technician'
+          && request.auth.uid in resource.data.recipientUserIds
+        )
+      );
       allow create, update, delete: if false;
     }
 

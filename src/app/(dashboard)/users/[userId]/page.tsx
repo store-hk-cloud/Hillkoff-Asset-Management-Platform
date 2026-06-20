@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -34,6 +36,13 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
           <CardDescription>{user.email}</CardDescription>
         </CardHeader>
         <CardContent>
+          {user.role === "technician" ? (
+            <Button asChild className="mb-5" variant="outline">
+              <Link href={`/technicians/${user.uid}`}>
+                ดู Dashboard และประวัติงานช่าง
+              </Link>
+            </Button>
+          ) : null}
           {invitation === "sent" ? (
             <p className="mb-5 text-sm text-emerald-700">
               สร้างบัญชีและส่งคำเชิญตั้งรหัสผ่านแล้ว

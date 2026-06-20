@@ -71,6 +71,16 @@ function mapJob(data: DocumentData): PmJob {
     scheduledAt,
     assignedTechnicianId: createUserId(string(data, "assignedTechnicianId")),
     assignedTechnicianName: string(data, "assignedTechnicianName"),
+    assignmentStatus:
+      data.assignmentStatus === "pending" ||
+      data.assignmentStatus === "rejected"
+        ? data.assignmentStatus
+        : "accepted",
+    assignmentRespondedAt: date(data.assignmentRespondedAt),
+    assignmentRejectionReason: nullableString(
+      data,
+      "assignmentRejectionReason",
+    ),
     status: status(data.status),
     checklist: Array.isArray(data.checklist)
       ? data.checklist.map(checklistItem)
@@ -95,6 +105,9 @@ function serialize(job: PmJob): DocumentData {
     scheduledAt: Timestamp.fromDate(job.scheduledAt),
     nextDueAt: job.nextDueAt ? Timestamp.fromDate(job.nextDueAt) : null,
     completedAt: job.completedAt ? Timestamp.fromDate(job.completedAt) : null,
+    assignmentRespondedAt: job.assignmentRespondedAt
+      ? Timestamp.fromDate(job.assignmentRespondedAt)
+      : null,
     createdAt: Timestamp.fromDate(job.createdAt),
     updatedAt: Timestamp.fromDate(job.updatedAt),
   };

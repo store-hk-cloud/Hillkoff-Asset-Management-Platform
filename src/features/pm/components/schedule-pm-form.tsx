@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/language-provider";
 import { schedulePm } from "@/features/pm/services/pm-api.service";
+import { TechnicianSelect } from "@/features/technician/components/technician-select";
 
 const DEFAULT_CHECKLIST = [
   "ตรวจสอบสภาพและทำความสะอาดเครื่อง",
@@ -21,6 +22,7 @@ export function SchedulePmForm() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [technicianName, setTechnicianName] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -88,15 +90,22 @@ export function SchedulePmForm() {
           }
           type="number"
         />
-        <Field
-          label={locale === "th" ? "รหัสผู้ใช้ของช่าง" : "Technician User ID"}
-          name="assignedTechnicianId"
-          required
-        />
+        <div className="space-y-2">
+          <Label htmlFor="assignedTechnicianId">
+            {locale === "th" ? "ช่างผู้รับผิดชอบ" : "Assigned technician"}
+          </Label>
+          <TechnicianSelect
+            onTechnicianChange={(technician) =>
+              setTechnicianName(technician?.displayName ?? "")
+            }
+          />
+        </div>
         <Field
           label={locale === "th" ? "ชื่อช่าง" : "Technician name"}
           name="assignedTechnicianName"
+          readOnly
           required
+          value={technicianName}
         />
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="checklist">

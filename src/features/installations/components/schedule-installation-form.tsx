@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/language-provider";
 import { scheduleInstallation } from "@/features/installations/services/installation-api.service";
+import { TechnicianSelect } from "@/features/technician/components/technician-select";
 
 export function ScheduleInstallationForm() {
   const { locale, t } = useLanguage();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [technicianName, setTechnicianName] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -72,15 +74,22 @@ export function ScheduleInstallationForm() {
           required
           type="datetime-local"
         />
-        <Field
-          label={locale === "th" ? "รหัสผู้ใช้ของช่าง" : "Technician User ID"}
-          name="assignedTechnicianId"
-          required
-        />
+        <div className="space-y-2">
+          <Label htmlFor="assignedTechnicianId">
+            {locale === "th" ? "ช่างผู้รับผิดชอบ" : "Assigned technician"}
+          </Label>
+          <TechnicianSelect
+            onTechnicianChange={(technician) =>
+              setTechnicianName(technician?.displayName ?? "")
+            }
+          />
+        </div>
         <Field
           label={locale === "th" ? "ชื่อช่าง" : "Technician name"}
           name="assignedTechnicianName"
+          readOnly
           required
+          value={technicianName}
         />
         <Field
           defaultValue="12"

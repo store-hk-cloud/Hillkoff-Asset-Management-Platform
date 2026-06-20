@@ -33,6 +33,7 @@ npm run functions:build
 - [Preventive maintenance](docs/preventive-maintenance.md)
 - [Inventory](docs/inventory.md)
 - [Notification center](docs/notification-center.md)
+- [Technician workspace](docs/technician-workspace.md)
 - [BigQuery analytics](docs/bigquery-analytics.md)
 - [AI integration blueprint](docs/ai-integration-blueprint.md)
 

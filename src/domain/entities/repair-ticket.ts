@@ -1,5 +1,6 @@
 import type { AssetId } from "@/domain/value-objects/asset-id";
 import type { UserId } from "@/domain/value-objects/user-id";
+import type { TechnicianAssignmentStatus } from "@/domain/entities/technician-work";
 
 export const REPAIR_STATUSES = [
   "new",
@@ -43,6 +44,9 @@ export interface RepairTicket {
   readonly status: RepairStatus;
   readonly assignedTechnicianId: UserId | null;
   readonly assignedTechnicianName: string | null;
+  readonly assignmentStatus: TechnicianAssignmentStatus | null;
+  readonly assignmentRespondedAt: Date | null;
+  readonly assignmentRejectionReason: string | null;
   readonly photos: readonly RepairPhoto[];
   readonly rootCause: string;
   readonly solution: string;

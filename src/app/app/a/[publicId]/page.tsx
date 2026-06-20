@@ -1,13 +1,17 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AssetIdentityError } from "@/domain/errors/asset-identity.error";
 import { AssetStatusBadge } from "@/features/assets/components/asset-status-badge";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { getCurrentSession } from "@/lib/auth/dal";
 import { AssetIdentityManagementService } from "@/services/asset-identity-management.service";
+import { TechnicianWorkspaceService } from "@/services/technician-workspace.service";
 
 const service = new AssetIdentityManagementService();
+const technicianService = new TechnicianWorkspaceService();
 type PublicAssetPageProps = { params: Promise<{ publicId: string }> };
 
 export const metadata = {
@@ -23,9 +27,19 @@ export default async function PublicAssetPage({
   const session = await getCurrentSession();
   const { publicId } = await params;
   let asset;
+  let assignedWork: readonly {
+    id: string;
+    href: string;
+    number: string;
+    title: string;
+  }[] = [];
 
   try {
     asset = await service.lookupPublic(publicId, Boolean(session));
+    if (session?.profile.role === "technician") {
+      assignedWork = (await technicianService.lookup(publicId, session.profile))
+        .work;
+    }
   } catch (error) {
     if (
       error instanceof AssetIdentityError &&
@@ -103,6 +117,32 @@ export default async function PublicAssetPage({
                 : "Staff can sign in to view warehouse and stock information."}
             </p>
           )}
+          {session?.profile.role === "technician" ? (
+            <div className="space-y-2 sm:col-span-2">
+              <p className="text-muted-foreground text-xs">
+                {locale === "th"
+                  ? "งานที่ได้รับมอบหมายสำหรับทรัพย์สินนี้"
+                  : "Your assigned work for this asset"}
+              </p>
+              {assignedWork.length ? (
+                <div className="grid gap-2">
+                  {assignedWork.map((work) => (
+                    <Button asChild key={work.id} variant="outline">
+                      <Link href={work.href}>
+                        {work.number} · {work.title}
+                      </Link>
+                    </Button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm">
+                  {locale === "th"
+                    ? "ยังไม่มีใบงานที่มอบหมายให้คุณสำหรับเครื่องนี้"
+                    : "No work is currently assigned to you for this asset."}
+                </p>
+              )}
+            </div>
+          ) : null}
         </CardContent>
       </Card>
     </main>

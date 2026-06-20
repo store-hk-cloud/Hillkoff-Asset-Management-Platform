@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useState,
   type ChangeEvent,
   type ComponentProps,
@@ -27,6 +28,14 @@ import {
   uploadInstallationPhoto,
   type UploadedInstallationFile,
 } from "@/features/installations/services/installation-storage.service";
+import { OfflineWorkStatus } from "@/features/technician/components/offline-work-status";
+import {
+  clearOfflineFiles,
+  deleteOfflineDraft,
+  loadOfflineDraft,
+  queueOfflineFiles,
+  saveOfflinePayload,
+} from "@/features/technician/services/offline-work.service";
 
 type InstallationWorkFormProps = Readonly<{
   installationId: string;
@@ -51,6 +60,55 @@ export function InstallationWorkForm({
   const [signatureBlob, setSignatureBlob] = useState<Blob | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingFiles, setPendingFiles] = useState(0);
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const draftKey = `installation:${installationId}`;
+
+  useEffect(() => {
+    let active = true;
+    async function restoreAndFlush() {
+      const draft = await loadOfflineDraft<{
+        checklist: readonly InstallationChecklistItem[];
+        photos: readonly UploadedInstallationFile[];
+      }>(draftKey);
+      if (!active) return;
+      if (!draft) {
+        setDraftLoaded(true);
+        return;
+      }
+      setChecklist([...draft.payload.checklist]);
+      setPhotos([...draft.payload.photos]);
+      setPendingFiles(draft.files.length);
+      setDraftLoaded(true);
+      if (!navigator.onLine || draft.files.length === 0) return;
+      const uploaded: UploadedInstallationFile[] = [];
+      for (const file of draft.files) {
+        uploaded.push(await uploadInstallationPhoto(installationId, file));
+      }
+      if (!active) return;
+      const nextPhotos = [...draft.payload.photos, ...uploaded];
+      setPhotos(nextPhotos);
+      await saveOfflinePayload(draftKey, {
+        checklist: draft.payload.checklist,
+        photos: nextPhotos,
+      });
+      await clearOfflineFiles(draftKey);
+      setPendingFiles(0);
+    }
+    void restoreAndFlush().catch((reason: unknown) =>
+      setError(reason instanceof Error ? reason.message : "Photo sync failed."),
+    );
+    window.addEventListener("online", restoreAndFlush);
+    return () => {
+      active = false;
+      window.removeEventListener("online", restoreAndFlush);
+    };
+  }, [draftKey, installationId]);
+
+  useEffect(() => {
+    if (!draftLoaded) return;
+    void saveOfflinePayload(draftKey, { checklist, photos });
+  }, [checklist, draftKey, draftLoaded, photos]);
 
   async function start() {
     setBusy(true);
@@ -90,13 +148,27 @@ export function InstallationWorkForm({
   async function uploadPhotos(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
     if (files.length === 0) return;
+    if (!navigator.onLine) {
+      const count = await queueOfflineFiles(draftKey, files, {
+        checklist,
+        photos,
+      });
+      setPendingFiles(count);
+      event.target.value = "";
+      return;
+    }
     setBusy(true);
     try {
       const uploaded: UploadedInstallationFile[] = [];
       for (const file of files) {
         uploaded.push(await uploadInstallationPhoto(installationId, file));
       }
-      setPhotos((current) => [...current, ...uploaded]);
+      const nextPhotos = [...photos, ...uploaded];
+      setPhotos(nextPhotos);
+      await saveOfflinePayload(draftKey, {
+        checklist,
+        photos: nextPhotos,
+      });
     } catch (uploadError) {
       setError(
         uploadError instanceof Error ? uploadError.message : "อัปโหลดรูปไม่ได้",
@@ -143,6 +215,7 @@ export function InstallationWorkForm({
           storagePath: signaturePath,
         },
       });
+      await deleteOfflineDraft(draftKey);
       router.replace(`/installations/${installationId}?completed=1`);
       router.refresh();
     } catch (completeError) {
@@ -168,6 +241,7 @@ export function InstallationWorkForm({
 
   return (
     <form className="space-y-8" onSubmit={submit}>
+      <OfflineWorkStatus pendingFiles={pendingFiles} />
       {status === "scheduled" ? (
         <Button
           className="h-12 w-full"

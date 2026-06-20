@@ -6,6 +6,7 @@ const translations = {
     en: "Hillkoff Asset Management",
   },
   "nav.dashboard": { th: "ภาพรวม", en: "Dashboard" },
+  "nav.technician": { th: "งานของช่าง", en: "Technician Work" },
   "nav.assets": { th: "ทรัพย์สิน", en: "Assets" },
   "nav.warehouse": { th: "คลังสินค้า", en: "Warehouse" },
   "nav.installations": { th: "งานติดตั้ง", en: "Installations" },

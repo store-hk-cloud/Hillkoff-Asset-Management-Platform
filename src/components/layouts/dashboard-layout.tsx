@@ -49,6 +49,11 @@ const navigation: readonly {
     ],
   },
   {
+    href: "/technician",
+    labelKey: "nav.technician",
+    roles: ["technician"],
+  },
+  {
     href: "/warehouse",
     labelKey: "nav.warehouse",
     roles: ["admin", "warehouse", "sales", "branch", "executive"],
@@ -91,7 +96,7 @@ const navigation: readonly {
   {
     href: "/notifications",
     labelKey: "nav.notifications",
-    roles: ["admin", "executive"],
+    roles: ["admin", "technician", "executive"],
   },
   {
     href: "/users",

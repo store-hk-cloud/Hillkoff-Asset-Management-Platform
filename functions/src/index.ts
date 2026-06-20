@@ -1,6 +1,9 @@
 export {
   enqueueLowStockNotification,
   enqueuePmNotification,
+  enqueuePmAssignmentNotification,
+  enqueueInstallationAssignmentNotification,
+  enqueueInstallationUpdateNotification,
   enqueueRepairNotification,
 } from "./notifications/triggers.js";
 export { processNotificationQueue } from "./notifications/worker.js";
