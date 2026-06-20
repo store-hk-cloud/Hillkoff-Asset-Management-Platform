@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/components/providers/language-provider";
 import {
   createAsset,
   updateAsset,
@@ -31,6 +32,7 @@ type AssetFormProps = Readonly<{
 }>;
 
 export function AssetForm({ initialValues }: AssetFormProps) {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +81,9 @@ export function AssetForm({ initialValues }: AssetFormProps) {
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="assetCode">รหัสทรัพย์สิน *</Label>
+          <Label htmlFor="assetCode">
+            {locale === "th" ? "รหัสทรัพย์สิน" : "Asset code"} *
+          </Label>
           <Input
             defaultValue={initialValues?.assetCode}
             id="assetCode"
@@ -90,7 +94,9 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="name">ชื่อทรัพย์สิน *</Label>
+          <Label htmlFor="name">
+            {locale === "th" ? "ชื่อทรัพย์สิน" : "Asset name"} *
+          </Label>
           <Input
             defaultValue={initialValues?.name}
             id="name"
@@ -101,7 +107,9 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="category">หมวดหมู่ *</Label>
+          <Label htmlFor="category">
+            {locale === "th" ? "หมวดหมู่" : "Category"} *
+          </Label>
           <Input
             defaultValue={initialValues?.category}
             id="category"
@@ -122,21 +130,31 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="condition">สภาพ</Label>
+          <Label htmlFor="condition">
+            {locale === "th" ? "สภาพ" : "Condition"}
+          </Label>
           <select
             className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
             defaultValue={initialValues?.condition ?? "operational"}
             id="condition"
             name="condition"
           >
-            <option value="operational">พร้อมใช้งาน</option>
-            <option value="needs_repair">ต้องซ่อม</option>
-            <option value="out_of_service">หยุดใช้งาน</option>
+            <option value="operational">
+              {locale === "th" ? "พร้อมใช้งาน" : "Operational"}
+            </option>
+            <option value="needs_repair">
+              {locale === "th" ? "ต้องซ่อม" : "Needs repair"}
+            </option>
+            <option value="out_of_service">
+              {locale === "th" ? "หยุดใช้งาน" : "Out of service"}
+            </option>
           </select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="locationName">สถานที่</Label>
+          <Label htmlFor="locationName">
+            {locale === "th" ? "สถานที่" : "Location"}
+          </Label>
           <Input
             defaultValue={initialValues?.locationName}
             disabled={Boolean(initialValues)}
@@ -147,7 +165,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="branchId">Branch ID</Label>
+          <Label htmlFor="branchId">{t("field.branchId")}</Label>
           <Input
             defaultValue={initialValues?.branchId ?? ""}
             disabled={Boolean(initialValues)}
@@ -158,7 +176,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="customerId">Customer ID</Label>
+          <Label htmlFor="customerId">{t("field.customerId")}</Label>
           <Input
             defaultValue={initialValues?.customerId ?? ""}
             disabled={Boolean(initialValues)}
@@ -169,7 +187,9 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="installedAt">วันที่ติดตั้ง</Label>
+          <Label htmlFor="installedAt">
+            {locale === "th" ? "วันที่ติดตั้ง" : "Installation date"}
+          </Label>
           <Input
             defaultValue={initialValues?.installedAt ?? ""}
             id="installedAt"
@@ -179,7 +199,9 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="description">รายละเอียด</Label>
+          <Label htmlFor="description">
+            {locale === "th" ? "รายละเอียด" : "Description"}
+          </Label>
           <textarea
             className="border-input bg-background focus-visible:ring-ring min-h-28 w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
             defaultValue={initialValues?.description}
@@ -203,10 +225,10 @@ export function AssetForm({ initialValues }: AssetFormProps) {
           type="button"
           variant="outline"
         >
-          ยกเลิก
+          {t("action.cancel")}
         </Button>
         <Button disabled={submitting} type="submit">
-          {submitting ? "กำลังบันทึก…" : "บันทึก"}
+          {submitting ? t("status.loading") : t("action.save")}
         </Button>
       </div>
     </form>

@@ -1,13 +1,18 @@
+"use client";
+
 import Link from "next/link";
 
+import { useLanguage } from "@/components/providers/language-provider";
 import { Card, CardContent } from "@/components/ui/card";
 import type { UserProfile } from "@/domain/entities/user-profile";
 
 export function UserList({ users }: { users: readonly UserProfile[] }) {
+  const { locale, t } = useLanguage();
+
   if (users.length === 0) {
     return (
       <div className="text-muted-foreground rounded-xl border border-dashed p-10 text-center text-sm">
-        ยังไม่มีบัญชีผู้ใช้งาน
+        {t("users.empty")}
       </div>
     );
   }
@@ -25,7 +30,9 @@ export function UserList({ users }: { users: readonly UserProfile[] }) {
               <div>
                 <p className="text-sm font-medium">{user.role}</p>
                 <p className="text-muted-foreground text-xs">
-                  {user.branchId ?? user.customerId ?? "All scope"}
+                  {user.branchId ??
+                    user.customerId ??
+                    (locale === "th" ? "ทุกขอบเขต" : "All scope")}
                 </p>
               </div>
               <span
@@ -35,7 +42,11 @@ export function UserList({ users }: { users: readonly UserProfile[] }) {
                     : "text-muted-foreground text-sm font-medium"
                 }
               >
-                {user.status}
+                {locale === "th"
+                  ? user.status === "active"
+                    ? "ใช้งานอยู่"
+                    : "ปิดใช้งาน"
+                  : user.status}
               </span>
             </CardContent>
           </Card>

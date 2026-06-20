@@ -23,6 +23,7 @@ npm run functions:build
 - [Environment setup](docs/environment.md)
 - [Authentication](docs/authentication.md)
 - [User provisioning](docs/user-provisioning.md)
+- [Localization and theme](docs/localization-and-theme.md)
 - [Asset management](docs/asset-management.md)
 - [Warehouse](docs/warehouse.md)
 - [NFC and QR](docs/nfc-qr.md)

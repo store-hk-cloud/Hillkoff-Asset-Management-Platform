@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import Script from "next/script";
 
 import { AppProviders } from "@/components/providers/app-providers";
+import { getServerLocale } from "@/lib/i18n/server";
 
 import "./globals.css";
 
@@ -37,11 +39,16 @@ type RootLayoutProps = Readonly<{
   children: ReactNode;
 }>;
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default async function RootLayout({ children }: RootLayoutProps) {
+  const locale = await getServerLocale();
+
   return (
-    <html lang="th" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body>
-        <AppProviders>{children}</AppProviders>
+        <Script id="hillkoff-theme" strategy="beforeInteractive">
+          {`try{var t=localStorage.getItem("hillkoff_theme");var d=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);document.documentElement.style.colorScheme=d?"dark":"light"}catch(e){}`}
+        </Script>
+        <AppProviders locale={locale}>{children}</AppProviders>
       </body>
     </html>
   );

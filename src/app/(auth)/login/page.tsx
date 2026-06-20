@@ -11,6 +11,7 @@ import {
 import { LoginForm } from "@/features/auth/components/login-form";
 import { getCurrentSession } from "@/lib/auth/dal";
 import { DEFAULT_AUTHENTICATED_ROUTE } from "@/lib/constants";
+import { getServerTranslator } from "@/lib/i18n/server";
 
 export const metadata = {
   title: "เข้าสู่ระบบ",
@@ -18,6 +19,7 @@ export const metadata = {
 
 export default async function LoginPage() {
   const session = await getCurrentSession();
+  const { t } = await getServerTranslator();
 
   if (session) {
     redirect(DEFAULT_AUTHENTICATED_ROUTE);
@@ -26,13 +28,11 @@ export default async function LoginPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">เข้าสู่ระบบ</CardTitle>
-        <CardDescription>
-          ใช้บัญชีที่ผู้ดูแลระบบ Hillkoff จัดเตรียมให้
-        </CardDescription>
+        <CardTitle className="text-2xl">{t("login.title")}</CardTitle>
+        <CardDescription>{t("login.description")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Suspense fallback={<p className="text-sm">กำลังโหลด…</p>}>
+        <Suspense fallback={<p className="text-sm">{t("status.loading")}</p>}>
           <LoginForm />
         </Suspense>
       </CardContent>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/components/providers/language-provider";
 import type { UserStatus } from "@/domain/entities/user-profile";
 import { USER_ROLES, type UserRole } from "@/domain/value-objects/user-role";
 import {
@@ -32,6 +33,7 @@ export function UserForm({
   initialValues?: ManagedUserFormValues;
   currentUserId: string;
 }) {
+  const { locale, t } = useLanguage();
   const router = useRouter();
   const [role, setRole] = useState<UserRole>(
     initialValues?.role ?? "technician",
@@ -109,7 +111,7 @@ export function UserForm({
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="email">อีเมล *</Label>
+          <Label htmlFor="email">{t("field.email")} *</Label>
           <Input
             defaultValue={initialValues?.email}
             disabled={Boolean(initialValues)}
@@ -120,7 +122,7 @@ export function UserForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="displayName">ชื่อผู้ใช้งาน *</Label>
+          <Label htmlFor="displayName">{t("field.displayName")} *</Label>
           <Input
             defaultValue={initialValues?.displayName}
             id="displayName"
@@ -130,7 +132,7 @@ export function UserForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="role">Role *</Label>
+          <Label htmlFor="role">{t("field.role")} *</Label>
           <select
             className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
             disabled={editingSelf}
@@ -151,7 +153,7 @@ export function UserForm({
         </div>
         {initialValues ? (
           <div className="space-y-2">
-            <Label htmlFor="status">สถานะ *</Label>
+            <Label htmlFor="status">{t("field.status")} *</Label>
             <select
               className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
               defaultValue={initialValues.status}
@@ -159,8 +161,12 @@ export function UserForm({
               id="status"
               name="status"
             >
-              <option value="active">active</option>
-              <option value="disabled">disabled</option>
+              <option value="active">
+                {locale === "th" ? "ใช้งานอยู่" : "Active"}
+              </option>
+              <option value="disabled">
+                {locale === "th" ? "ปิดใช้งาน" : "Disabled"}
+              </option>
             </select>
             {editingSelf ? (
               <input name="status" type="hidden" value="active" />
@@ -169,7 +175,7 @@ export function UserForm({
         ) : null}
         {role === "branch" ? (
           <div className="space-y-2">
-            <Label htmlFor="branchId">Branch ID *</Label>
+            <Label htmlFor="branchId">{t("field.branchId")} *</Label>
             <Input
               defaultValue={initialValues?.branchId ?? ""}
               id="branchId"
@@ -181,7 +187,7 @@ export function UserForm({
         ) : null}
         {role === "customer" ? (
           <div className="space-y-2">
-            <Label htmlFor="customerId">Customer ID *</Label>
+            <Label htmlFor="customerId">{t("field.customerId")} *</Label>
             <Input
               defaultValue={initialValues?.customerId ?? ""}
               id="customerId"
@@ -213,7 +219,7 @@ export function UserForm({
               type="button"
               variant="outline"
             >
-              ส่ง Password Reset
+              {t("users.resetPassword")}
             </Button>
           ) : null}
         </div>
@@ -224,10 +230,16 @@ export function UserForm({
             type="button"
             variant="outline"
           >
-            ยกเลิก
+            {t("action.cancel")}
           </Button>
           <Button disabled={busy} type="submit">
-            {busy ? "กำลังบันทึก…" : initialValues ? "บันทึก" : "สร้างบัญชี"}
+            {busy
+              ? t("status.loading")
+              : initialValues
+                ? t("action.save")
+                : locale === "th"
+                  ? "สร้างบัญชี"
+                  : "Create account"}
           </Button>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { MovementList } from "@/features/warehouse/components/movement-list";
 import { movementSearchSchema } from "@/features/warehouse/schemas/movement.schema";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { WarehouseManagementService } from "@/services/warehouse-management.service";
 
 const warehouseService = new WarehouseManagementService();
@@ -16,6 +17,7 @@ export const metadata = { title: "Movement Logs" };
 export default async function MovementsPage({
   searchParams,
 }: MovementsPageProps) {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   if (!warehouseService.canView(profile)) notFound();
 
@@ -28,9 +30,9 @@ export default async function MovementsPage({
   return (
     <section className="space-y-6">
       <div>
-        <p className="text-muted-foreground text-sm">Warehouse</p>
+        <p className="text-muted-foreground text-sm">{t("warehouse.title")}</p>
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          Movement Logs
+          {t("warehouse.movements")}
         </h1>
       </div>
       {params.success ? (
@@ -38,7 +40,9 @@ export default async function MovementsPage({
           className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800"
           role="status"
         >
-          บันทึก Transaction {params.success} สำเร็จ
+          {locale === "th"
+            ? `บันทึกธุรกรรม ${params.success} สำเร็จ`
+            : `Transaction ${params.success} was recorded successfully`}
         </p>
       ) : null}
       <form
@@ -51,16 +55,18 @@ export default async function MovementsPage({
           defaultValue={type}
           name="type"
         >
-          <option value="all">ทุก Movement</option>
-          <option value="received">รับเข้า</option>
-          <option value="branch_transfer">โอนสาขา</option>
-          <option value="customer_sale">ขายลูกค้า</option>
+          <option value="all">
+            {locale === "th" ? "ทุกการเคลื่อนไหว" : "All movements"}
+          </option>
+          <option value="received">{t("warehouse.receive")}</option>
+          <option value="branch_transfer">{t("warehouse.transfer")}</option>
+          <option value="customer_sale">{t("warehouse.sale")}</option>
         </select>
         <button
           className="bg-primary text-primary-foreground h-10 rounded-md px-4 text-sm font-medium"
           type="submit"
         >
-          กรองรายการ
+          {locale === "th" ? "กรองรายการ" : "Apply filter"}
         </button>
       </form>
       <MovementList movements={movements} />

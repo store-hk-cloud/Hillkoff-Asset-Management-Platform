@@ -6,48 +6,64 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { RepairStatus } from "@/domain/entities/repair-ticket";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 import { RepairManagementService } from "@/services/repair-management.service";
 
 const service = new RepairManagementService();
-const dateFormatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Bangkok",
-});
-const labels: Record<RepairStatus, string> = {
-  new: "New",
-  assigned: "Assigned",
-  in_progress: "In Progress",
-  waiting_parts: "Waiting Parts",
-  completed: "Completed",
-  closed: "Closed",
-};
-
 export const metadata = { title: "Repair Management" };
 
 export default async function RepairsPage() {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   if (!service.canView(profile)) notFound();
   const tickets = await service.list(profile);
+  const dateFormatter = new Intl.DateTimeFormat(
+    locale === "th" ? "th-TH" : "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Bangkok",
+    },
+  );
+  const labels: Record<RepairStatus, string> =
+    locale === "th"
+      ? {
+          new: "ใหม่",
+          assigned: "มอบหมายแล้ว",
+          in_progress: "กำลังซ่อม",
+          waiting_parts: "รออะไหล่",
+          completed: "เสร็จสิ้น",
+          closed: "ปิดงาน",
+        }
+      : {
+          new: "New",
+          assigned: "Assigned",
+          in_progress: "In Progress",
+          waiting_parts: "Waiting Parts",
+          completed: "Completed",
+          closed: "Closed",
+        };
 
   return (
     <section className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-muted-foreground text-sm">Service Operations</p>
+          <p className="text-muted-foreground text-sm">{t("nav.repairs")}</p>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Repair Management
+            {t("repairs.title")}
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            ติดตามงานซ่อม สาเหตุ วิธีแก้ไข ค่าแรง และอะไหล่
+            {locale === "th"
+              ? "ติดตามงานซ่อม สาเหตุ วิธีแก้ไข ค่าแรง และอะไหล่"
+              : "Track repairs, root causes, solutions, labor, and parts."}
           </p>
         </div>
         {service.canCreate(profile) ? (
           <Button asChild className="h-11 w-full sm:w-auto">
             <Link href="/repairs/new">
               <Plus aria-hidden="true" className="size-4" />
-              Create Ticket
+              {t("repairs.create")}
             </Link>
           </Button>
         ) : null}
@@ -59,7 +75,9 @@ export default async function RepairsPage() {
             aria-hidden="true"
             className="text-muted-foreground mx-auto mb-3 size-8"
           />
-          <p className="text-muted-foreground text-sm">ไม่มี Repair Ticket</p>
+          <p className="text-muted-foreground text-sm">
+            {locale === "th" ? "ไม่มีใบงานซ่อม" : "No repair tickets"}
+          </p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -73,7 +91,10 @@ export default async function RepairsPage() {
                 <CardHeader className="gap-2">
                   <div className="flex items-start justify-between gap-3">
                     <CardTitle className="text-base">{ticket.title}</CardTitle>
-                    <Status status={ticket.status} />
+                    <Status
+                      label={labels[ticket.status]}
+                      status={ticket.status}
+                    />
                   </div>
                   <p className="text-muted-foreground font-mono text-xs">
                     {ticket.ticketNumber}
@@ -92,11 +113,15 @@ export default async function RepairsPage() {
                       className="text-muted-foreground size-4"
                     />
                     <span>
-                      {ticket.assignedTechnicianName ?? "ยังไม่มอบหมายช่าง"}
+                      {ticket.assignedTechnicianName ??
+                        (locale === "th"
+                          ? "ยังไม่มอบหมายช่าง"
+                          : "Technician not assigned")}
                     </span>
                   </div>
                   <p className="text-muted-foreground border-t pt-3 text-xs">
-                    Updated {dateFormatter.format(ticket.updatedAt)}
+                    {locale === "th" ? "แก้ไขล่าสุด" : "Updated"}{" "}
+                    {dateFormatter.format(ticket.updatedAt)}
                   </p>
                 </CardContent>
               </Card>
@@ -108,7 +133,7 @@ export default async function RepairsPage() {
   );
 }
 
-function Status({ status }: { status: RepairStatus }) {
+function Status({ label, status }: { label: string; status: RepairStatus }) {
   return (
     <span
       className={cn(
@@ -122,7 +147,7 @@ function Status({ status }: { status: RepairStatus }) {
               : "bg-muted text-muted-foreground",
       )}
     >
-      {labels[status]}
+      {label}
     </span>
   );
 }

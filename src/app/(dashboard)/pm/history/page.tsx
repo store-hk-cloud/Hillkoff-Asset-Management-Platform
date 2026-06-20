@@ -4,19 +4,23 @@ import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { PmManagementService } from "@/services/pm-management.service";
 
 const service = new PmManagementService();
-const formatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Bangkok",
-});
-
 export default async function PmHistoryPage() {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   if (!service.canView(profile)) notFound();
   const jobs = await service.list(profile, { status: "completed" });
+  const formatter = new Intl.DateTimeFormat(
+    locale === "th" ? "th-TH" : "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Bangkok",
+    },
+  );
 
   return (
     <section className="space-y-6">
@@ -25,10 +29,10 @@ export default async function PmHistoryPage() {
           className="text-muted-foreground hover:text-foreground text-sm"
           href="/pm"
         >
-          ← Preventive Maintenance
+          ← {t("pm.title")}
         </Link>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-          PM History
+          {locale === "th" ? "ประวัติ PM" : "PM History"}
         </h1>
       </div>
       {jobs.length === 0 ? (
@@ -37,7 +41,9 @@ export default async function PmHistoryPage() {
             aria-hidden="true"
             className="text-muted-foreground mx-auto mb-3 size-8"
           />
-          <p className="text-muted-foreground text-sm">ยังไม่มีประวัติ PM</p>
+          <p className="text-muted-foreground text-sm">
+            {locale === "th" ? "ยังไม่มีประวัติ PM" : "No PM history"}
+          </p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
@@ -52,11 +58,11 @@ export default async function PmHistoryPage() {
                     {job.assetCode} · {job.assetName}
                   </p>
                   <p className="text-muted-foreground">
-                    Completed{" "}
+                    {locale === "th" ? "เสร็จสิ้น" : "Completed"}{" "}
                     {job.completedAt ? formatter.format(job.completedAt) : "—"}
                   </p>
                   <p className="text-muted-foreground">
-                    Next due{" "}
+                    {locale === "th" ? "กำหนดครั้งถัดไป" : "Next due"}{" "}
                     {job.nextDueAt ? formatter.format(job.nextDueAt) : "—"}
                   </p>
                 </CardContent>

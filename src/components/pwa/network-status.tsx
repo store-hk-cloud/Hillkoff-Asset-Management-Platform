@@ -2,9 +2,11 @@
 
 import { WifiOff } from "lucide-react";
 
+import { useLanguage } from "@/components/providers/language-provider";
 import { usePwa } from "@/components/pwa/pwa-provider";
 
 export function NetworkStatus() {
+  const { t } = useLanguage();
   const { isOnline } = usePwa();
   if (isOnline) return null;
 
@@ -14,7 +16,7 @@ export function NetworkStatus() {
       role="status"
     >
       <WifiOff aria-hidden="true" className="size-4" />
-      Offline — การบันทึกข้อมูลจะใช้งานไม่ได้
+      {t("status.offline")}
     </div>
   );
 }

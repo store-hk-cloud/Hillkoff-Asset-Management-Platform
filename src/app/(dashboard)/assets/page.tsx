@@ -8,6 +8,7 @@ import { AssetSearchForm } from "@/features/assets/components/asset-search-form"
 import { AssetStatusBadge } from "@/features/assets/components/asset-status-badge";
 import { assetSearchSchema } from "@/features/assets/schemas/asset.schema";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { AssetManagementService } from "@/services/asset-management.service";
 
 const assetService = new AssetManagementService();
@@ -25,6 +26,7 @@ export const metadata = {
 };
 
 export default async function AssetsPage({ searchParams }: AssetsPageProps) {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   const params = await searchParams;
   const criteria = assetSearchSchema.parse({
@@ -39,16 +41,18 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
     <section className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-muted-foreground text-sm">Asset Management</p>
+          <p className="text-muted-foreground text-sm">
+            {t("assets.management")}
+          </p>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            ทรัพย์สิน
+            {t("assets.title")}
           </h1>
         </div>
         {canWrite ? (
           <Button asChild>
             <Link href="/assets/new">
               <Plus aria-hidden="true" className="size-4" />
-              เพิ่มทรัพย์สิน
+              {t("assets.add")}
             </Link>
           </Button>
         ) : null}
@@ -58,7 +62,7 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
 
       {assets.length === 0 ? (
         <div className="text-muted-foreground rounded-xl border border-dashed p-10 text-center text-sm">
-          ไม่พบทรัพย์สินตามเงื่อนไข
+          {t("assets.empty")}
         </div>
       ) : (
         <div className="grid gap-3">
@@ -77,7 +81,10 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
                   <div>
                     <p className="font-medium">{asset.name}</p>
                     <p className="text-muted-foreground text-sm">
-                      {asset.locationName || "ไม่ระบุสถานที่"}
+                      {asset.locationName ||
+                        (locale === "th"
+                          ? "ไม่ระบุสถานที่"
+                          : "Location not specified")}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">

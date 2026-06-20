@@ -1,5 +1,8 @@
+"use client";
+
 import { Search } from "lucide-react";
 
+import { useLanguage } from "@/components/providers/language-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -9,6 +12,8 @@ type AssetSearchFormProps = Readonly<{
 }>;
 
 export function AssetSearchForm({ query, status }: AssetSearchFormProps) {
+  const { locale, t } = useLanguage();
+
   return (
     <form
       action="/assets"
@@ -24,7 +29,11 @@ export function AssetSearchForm({ query, status }: AssetSearchFormProps) {
           className="pl-9"
           defaultValue={query}
           name="query"
-          placeholder="ค้นหารหัส ชื่อ หมวดหมู่ Serial หรือสถานที่"
+          placeholder={
+            locale === "th"
+              ? "ค้นหารหัส ชื่อ หมวดหมู่ Serial หรือสถานที่"
+              : "Search code, name, category, serial, or location"
+          }
         />
       </div>
       <select
@@ -32,11 +41,15 @@ export function AssetSearchForm({ query, status }: AssetSearchFormProps) {
         defaultValue={status}
         name="status"
       >
-        <option value="active">ใช้งานอยู่</option>
-        <option value="archived">Archived</option>
-        <option value="all">ทั้งหมด</option>
+        <option value="active">
+          {locale === "th" ? "ใช้งานอยู่" : "Active"}
+        </option>
+        <option value="archived">
+          {locale === "th" ? "เก็บถาวร" : "Archived"}
+        </option>
+        <option value="all">{locale === "th" ? "ทั้งหมด" : "All"}</option>
       </select>
-      <Button type="submit">ค้นหา</Button>
+      <Button type="submit">{t("action.search")}</Button>
     </form>
   );
 }

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScheduleInstallationForm } from "@/features/installations/components/schedule-installation-form";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { InstallationManagementService } from "@/services/installation-management.service";
 
 const service = new InstallationManagementService();
@@ -11,6 +12,7 @@ const service = new InstallationManagementService();
 export const metadata = { title: "Schedule Installation" };
 
 export default async function ScheduleInstallationPage() {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   if (!service.canSchedule(profile)) notFound();
 
@@ -21,18 +23,22 @@ export default async function ScheduleInstallationPage() {
           className="text-muted-foreground hover:text-foreground text-sm"
           href="/installations"
         >
-          ← Installation Queue
+          ← {t("installations.title")}
         </Link>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-          Schedule Installation
+          {t("installations.schedule")}
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          Asset ต้องขายและผูกกับ Customer ID นี้แล้วก่อนสร้างนัดหมาย
+          {locale === "th"
+            ? "Asset ต้องขายและผูกกับ Customer ID นี้แล้วก่อนสร้างนัดหมาย"
+            : "The asset must be sold and linked to this Customer ID before scheduling."}
         </p>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Installation Details</CardTitle>
+          <CardTitle>
+            {locale === "th" ? "รายละเอียดการติดตั้ง" : "Installation Details"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <ScheduleInstallationForm />

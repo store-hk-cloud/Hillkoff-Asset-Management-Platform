@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/components/providers/language-provider";
 import { loginSchema } from "@/features/auth/schemas/auth.schema";
 import { login } from "@/features/auth/services/auth.service";
 import { DEFAULT_AUTHENTICATED_ROUTE } from "@/lib/constants";
@@ -17,6 +18,7 @@ function getSafeNextPath(value: string | null): string {
 }
 
 export function LoginForm() {
+  const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +59,7 @@ export function LoginForm() {
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
       <div className="space-y-2">
-        <Label htmlFor="email">อีเมล</Label>
+        <Label htmlFor="email">{t("field.email")}</Label>
         <Input
           autoComplete="email"
           id="email"
@@ -69,7 +71,7 @@ export function LoginForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">รหัสผ่าน</Label>
+        <Label htmlFor="password">{t("field.password")}</Label>
         <Input
           autoComplete="current-password"
           id="password"
@@ -86,7 +88,7 @@ export function LoginForm() {
       ) : null}
 
       <Button className="w-full" disabled={submitting} type="submit">
-        {submitting ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}
+        {submitting ? t("status.loading") : t("action.login")}
       </Button>
     </form>
   );

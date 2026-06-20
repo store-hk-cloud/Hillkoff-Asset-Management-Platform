@@ -1,9 +1,15 @@
+"use client";
+
 import type { ReactNode } from "react";
 import Link from "next/link";
 
+import { useLanguage } from "@/components/providers/language-provider";
 import { InstallAppButton } from "@/components/pwa/install-app-button";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import type { UserRole } from "@/domain/value-objects/user-role";
 import { LogoutButton } from "@/features/auth/components/logout-button";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 
 type DashboardLayoutProps = Readonly<{
   children: ReactNode;
@@ -13,12 +19,12 @@ type DashboardLayoutProps = Readonly<{
 
 const navigation: readonly {
   href: string;
-  label: string;
+  labelKey: TranslationKey;
   roles: readonly UserRole[];
 }[] = [
   {
     href: "/dashboard",
-    label: "Dashboard",
+    labelKey: "nav.dashboard",
     roles: [
       "admin",
       "warehouse",
@@ -31,7 +37,7 @@ const navigation: readonly {
   },
   {
     href: "/assets",
-    label: "Assets",
+    labelKey: "nav.assets",
     roles: [
       "admin",
       "warehouse",
@@ -44,17 +50,17 @@ const navigation: readonly {
   },
   {
     href: "/warehouse",
-    label: "Warehouse",
+    labelKey: "nav.warehouse",
     roles: ["admin", "warehouse", "sales", "branch", "executive"],
   },
   {
     href: "/installations",
-    label: "Installations",
+    labelKey: "nav.installations",
     roles: ["admin", "technician", "sales", "customer", "executive"],
   },
   {
     href: "/repairs",
-    label: "Repairs",
+    labelKey: "nav.repairs",
     roles: [
       "admin",
       "warehouse",
@@ -67,7 +73,7 @@ const navigation: readonly {
   },
   {
     href: "/pm",
-    label: "PM",
+    labelKey: "nav.pm",
     roles: [
       "admin",
       "warehouse",
@@ -79,17 +85,17 @@ const navigation: readonly {
   },
   {
     href: "/inventory",
-    label: "Inventory",
+    labelKey: "nav.inventory",
     roles: ["admin", "warehouse", "technician", "executive"],
   },
   {
     href: "/notifications",
-    label: "Notifications",
+    labelKey: "nav.notifications",
     roles: ["admin", "executive"],
   },
   {
     href: "/users",
-    label: "Users",
+    labelKey: "nav.users",
     roles: ["admin"],
   },
 ];
@@ -99,6 +105,7 @@ export function DashboardLayout({
   displayName,
   role,
 }: DashboardLayoutProps) {
+  const { t } = useLanguage();
   const visibleNavigation = navigation.filter((item) =>
     item.roles.includes(role),
   );
@@ -109,7 +116,7 @@ export function DashboardLayout({
         <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex items-center gap-5">
             <Link className="text-sm font-semibold" href="/dashboard">
-              Hillkoff Asset Management
+              {t("app.name")}
             </Link>
             <nav className="hidden items-center gap-4 text-sm sm:flex">
               {visibleNavigation
@@ -120,13 +127,15 @@ export function DashboardLayout({
                     href={item.href}
                     key={item.href}
                   >
-                    {item.label}
+                    {t(item.labelKey)}
                   </Link>
                 ))}
             </nav>
           </div>
           <div className="flex items-center gap-2">
             <InstallAppButton />
+            <LanguageSwitcher />
+            <ThemeToggle />
             <Link
               className="hidden text-right text-xs sm:block"
               href="/profile"
@@ -138,12 +147,12 @@ export function DashboardLayout({
           </div>
         </div>
         <nav
-          aria-label="Mobile navigation"
+          aria-label={t("nav.mobile")}
           className="mx-auto flex max-w-7xl gap-1 overflow-x-auto border-t px-4 sm:hidden"
         >
           {visibleNavigation.map((item) => (
             <MobileLink href={item.href} key={item.href}>
-              {item.label}
+              {t(item.labelKey)}
             </MobileLink>
           ))}
         </nav>
