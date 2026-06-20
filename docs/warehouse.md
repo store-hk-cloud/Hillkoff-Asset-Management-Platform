@@ -21,6 +21,25 @@ Every warehouse command uses one Firestore transaction:
 
 No partial result is committed.
 
+## Branch transfer custody
+
+Branch transfers use `asset_transfers` and require two-sided confirmation:
+
+1. The source creates a transfer. The Asset remains in source stock but is
+   locked by `activeTransferId`.
+2. The source confirms dispatch. Custody becomes `in_transit`, `branchId`
+   becomes null, and the Asset is not counted in any branch stock.
+3. The destination scans QR/NFC, Asset ID, or Serial Number and confirms
+   receipt. Only then does the destination `branchId` become active and the
+   Asset enter destination stock.
+4. A pending transfer can be cancelled. An in-transit transfer can be rejected
+   with a reason, remains outside every branch stock while returning, and enters
+   source stock only after the source confirms receipt.
+
+Every transition writes the Asset, transfer aggregate, Asset Event, and Audit
+Log atomically. The immutable branch-transfer Movement Log is created when the
+destination successfully receives the Asset.
+
 ## Domain ownership
 
 - `WarehouseMovementService` validates movement state transitions.
@@ -34,7 +53,7 @@ No partial result is committed.
 | Type              | Effect                                                          |
 | ----------------- | --------------------------------------------------------------- |
 | `received`        | Custody becomes branch and customer assignment is cleared       |
-| `branch_transfer` | Branch and location change                                      |
+| `branch_transfer` | Completed after destination scan and receipt confirmation       |
 | `customer_sale`   | Custody becomes customer while source branch remains in history |
 
 ## Permissions
@@ -70,3 +89,7 @@ submission while a transaction is pending.
 Assets created before Phase 4 may not contain `custodyType` or
 `lastMovementAt`. Repository mapping infers custody from `customerId` and treats
 the missing movement timestamp as null.
+Canonical Hillkoff branch IDs are `HK1`, `Pa-Pang`, `HQ`, `MHD`, `TD`, and
+`Ratika`. Branch selection derives the Thai location name from this master data.
+Branch transfers always derive the source from the current Asset. Receiving is
+reserved for an external source and records its type and name.

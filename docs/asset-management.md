@@ -45,6 +45,11 @@ never copied and must be entered for each machine.
 The catalog and serial registry are server-only collections. Browser access is
 denied by Firestore Rules.
 
+Categories use the stable keys `coffee_machine`, `grinder`, `blender`,
+`milling_machine`, `roaster`, and `other`. The `other` key retains a custom
+display name. Asset list category cards use Firestore aggregate counts rather
+than counting only the currently displayed page.
+
 ## Permissions
 
 | Role       | Read scope            | Create/Edit/Archive |
@@ -63,9 +68,10 @@ SDK.
 
 ## Search
 
-The aggregate stores normalized `searchKeywords` derived from asset code, name,
-category, serial number, and location. Firestore uses exact token matching with
-scope/status filters and reviewed composite indexes.
+The aggregate stores normalized `searchKeywords` and `searchPrefixes` derived
+from asset code, name, category, serial number, and location. Firestore uses
+prefix matching for search suggestions and the asset list.
+Search retains scope/status filters and uses reviewed composite indexes.
 
 This avoids loading an unbounded collection. A dedicated search platform can
 replace the repository implementation later without changing domain contracts.

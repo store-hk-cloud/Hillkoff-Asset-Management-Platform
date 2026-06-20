@@ -20,9 +20,10 @@ const createInput: AssetCreateInput = {
   name: " Coffee Machine ",
   description: " Main machine ",
   category: " Equipment ",
+  categoryKey: "other",
   serialNumber: " SN-001 ",
   condition: "operational",
-  branchId: " branch-a ",
+  branchId: " HK1 ",
   customerId: null,
   locationName: " Chiang Mai ",
   installedAt: now,
@@ -34,6 +35,7 @@ function updateInput(expectedVersion: number): AssetUpdateInput {
     name: createInput.name,
     description: createInput.description,
     category: createInput.category,
+    categoryKey: createInput.categoryKey,
     serialNumber: createInput.serialNumber,
     condition: createInput.condition,
     installedAt: createInput.installedAt,
@@ -55,6 +57,7 @@ describe("AssetLifecycleService", () => {
     expect(transition.asset.status).toBe("active");
     expect(transition.asset.version).toBe(0);
     expect(transition.asset.searchKeywords).toContain("hk-001");
+    expect(transition.asset.searchPrefixes).toContain("cof");
     expect(transition.changes).toHaveProperty("created");
   });
 

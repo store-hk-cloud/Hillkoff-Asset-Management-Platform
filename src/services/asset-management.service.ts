@@ -3,6 +3,7 @@ import "server-only";
 import type {
   Asset,
   AssetCatalog,
+  AssetCategoryCounts,
   AssetCreateInput,
   AssetSearchCriteria,
   AssetUpdateInput,
@@ -52,6 +53,31 @@ export class AssetManagementService {
     }
 
     return this.repository.search(scopedCriteria);
+  }
+
+  async getCategoryCounts(
+    criteria: Pick<AssetSearchCriteria, "status">,
+    profile: UserProfile,
+  ): Promise<AssetCategoryCounts> {
+    if (
+      (profile.role === "branch" && !profile.branchId) ||
+      (profile.role === "customer" && !profile.customerId)
+    ) {
+      return {
+        coffee_machine: 0,
+        grinder: 0,
+        blender: 0,
+        milling_machine: 0,
+        roaster: 0,
+        other: 0,
+      };
+    }
+
+    return this.repository.countByCategory({
+      status: criteria.status,
+      branchId: profile.role === "branch" ? profile.branchId : null,
+      customerId: profile.role === "customer" ? profile.customerId : null,
+    });
   }
 
   async get(id: string, profile: UserProfile): Promise<Asset> {

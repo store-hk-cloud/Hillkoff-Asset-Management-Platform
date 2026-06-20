@@ -9,8 +9,12 @@ export const MOVEMENT_TYPES = [
 ] as const;
 
 export type MovementType = (typeof MOVEMENT_TYPES)[number];
+export type MovementEndpointType = "branch" | "customer" | "external";
 
 export interface MovementEndpoint {
+  readonly type: MovementEndpointType;
+  readonly name: string;
+  readonly externalType: "supplier" | "external" | "other" | null;
   readonly branchId: string | null;
   readonly customerId: string | null;
   readonly locationName: string;
@@ -38,6 +42,8 @@ export interface ReceiveAssetInput {
   readonly assetCode: string;
   readonly destinationBranchId: string;
   readonly destinationLocationName: string;
+  readonly sourceType: "supplier" | "external" | "other";
+  readonly sourceName: string;
   readonly referenceNumber: string | null;
   readonly notes: string;
   readonly expectedVersion: number;

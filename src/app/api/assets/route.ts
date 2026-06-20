@@ -68,6 +68,7 @@ export async function GET(request: Request) {
       query: url.searchParams.get("query") ?? "",
       status: url.searchParams.get("status") ?? "active",
       limit: url.searchParams.get("limit") ?? "50",
+      categoryKey: url.searchParams.get("categoryKey") ?? "all",
     });
     const assets = await assetService.list(criteria, session.profile);
 

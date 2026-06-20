@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/language-provider";
 import type { UserStatus } from "@/domain/entities/user-profile";
 import { USER_ROLES, type UserRole } from "@/domain/value-objects/user-role";
+import { BRANCHES } from "@/domain/master-data/branches";
 import {
   createManagedUser,
   sendManagedUserPasswordReset,
@@ -185,13 +186,23 @@ export function UserForm({
         {role === "branch" ? (
           <div className="space-y-2">
             <Label htmlFor="branchId">{t("field.branchId")} *</Label>
-            <Input
+            <select
+              className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
               defaultValue={initialValues?.branchId ?? ""}
               id="branchId"
-              maxLength={120}
               name="branchId"
               required
-            />
+            >
+              <option value="">
+                {locale === "th" ? "เลือกสาขา" : "Select branch"}
+              </option>
+              {BRANCHES.map((branch) => (
+                <option key={branch.id} value={branch.id}>
+                  {locale === "th" ? branch.nameTh : branch.nameEn} ({branch.id}
+                  )
+                </option>
+              ))}
+            </select>
           </div>
         ) : null}
         {role === "customer" ? (

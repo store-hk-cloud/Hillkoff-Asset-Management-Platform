@@ -1,6 +1,7 @@
 import type {
   Asset,
   AssetCatalog,
+  AssetCategoryCounts,
   AssetSearchCriteria,
 } from "@/domain/entities/asset";
 import type { AssetEvent, AssetEventType } from "@/domain/entities/asset-event";
@@ -23,6 +24,9 @@ export interface AssetRepository {
   findByPublicId(publicId: PublicId): Promise<Asset | null>;
   findCatalogByCode(assetCode: string): Promise<AssetCatalog | null>;
   countInStockByCode(assetCode: string): Promise<number>;
+  countByCategory(
+    criteria: Pick<AssetSearchCriteria, "status" | "branchId" | "customerId">,
+  ): Promise<AssetCategoryCounts>;
   search(criteria: AssetSearchCriteria): Promise<readonly Asset[]>;
   listEvents(
     assetId: AssetId,

@@ -63,6 +63,12 @@ beforeEach(async () => {
         involvedBranchIds: ["branch-a", "branch-b"],
         occurredAt: Timestamp.now(),
       }),
+      setDoc(doc(firestore, "asset_transfers", "transfer-1"), {
+        id: "transfer-1",
+        involvedBranchIds: ["branch-a", "branch-b"],
+        status: "in_transit",
+        updatedAt: Timestamp.now(),
+      }),
     ]);
   });
 });
@@ -117,6 +123,41 @@ describe("Warehouse movement rules", () => {
       setDoc(doc(firestore, "movement_logs", "unauthorized"), {
         involvedBranchIds: [],
         occurredAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  it("allows only involved branches to read transfers", async () => {
+    const involved = testEnvironment
+      .authenticatedContext("branch-a-user", {
+        role: "branch",
+        email: "branch-a-user@example.com",
+      })
+      .firestore();
+    const unrelated = testEnvironment
+      .authenticatedContext("branch-c-user", {
+        role: "branch",
+        email: "branch-c-user@example.com",
+      })
+      .firestore();
+    await assertSucceeds(
+      getDoc(doc(involved, "asset_transfers", "transfer-1")),
+    );
+    await assertFails(getDoc(doc(unrelated, "asset_transfers", "transfer-1")));
+  });
+
+  it("denies direct client transfer writes", async () => {
+    const firestore = testEnvironment
+      .authenticatedContext("warehouse", {
+        role: "warehouse",
+        email: "warehouse@example.com",
+      })
+      .firestore();
+    await assertFails(
+      setDoc(doc(firestore, "asset_transfers", "unauthorized"), {
+        involvedBranchIds: [],
+        status: "pending_dispatch",
+        updatedAt: Timestamp.now(),
       }),
     );
   });

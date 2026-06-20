@@ -60,8 +60,10 @@ export function MovementList({
                 {locale === "th" ? "ต้นทาง" : "Source"}
               </p>
               <p>
-                {movement.source.locationName || "—"} · Branch{" "}
-                {movement.source.branchId ?? "—"}
+                {movement.source.name || movement.source.locationName || "—"} ·{" "}
+                {movement.source.type === "external"
+                  ? movement.source.externalType
+                  : `Branch ${movement.source.branchId ?? "—"}`}
               </p>
             </div>
             <div>
@@ -69,7 +71,10 @@ export function MovementList({
                 {locale === "th" ? "ปลายทาง" : "Destination"}
               </p>
               <p>
-                {movement.destination.locationName || "—"} ·{" "}
+                {movement.destination.name ||
+                  movement.destination.locationName ||
+                  "—"}{" "}
+                ·{" "}
                 {movement.destination.customerId
                   ? `Customer ${movement.destination.customerId}`
                   : `Branch ${movement.destination.branchId ?? "—"}`}

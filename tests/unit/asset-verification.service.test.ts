@@ -24,6 +24,18 @@ describe("AssetVerificationService", () => {
     ).toBe("in_stock");
   });
 
+  it("maps transfer custody to in-transit", () => {
+    expect(
+      service.getOperationalStatus(
+        asset({
+          status: "active",
+          custodyType: "in_transit",
+          installedAt: null,
+        }),
+      ),
+    ).toBe("in_transit");
+  });
+
   it("distinguishes sold from installed customer assets", () => {
     expect(
       service.getOperationalStatus(

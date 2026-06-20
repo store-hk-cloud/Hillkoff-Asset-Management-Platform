@@ -110,18 +110,20 @@ export default async function PublicAssetPage({
 }
 
 function operationalStatusLabel(
-  status: "in_stock" | "sold" | "in_use" | "archived",
+  status: "in_stock" | "sold" | "in_use" | "in_transit" | "archived",
   locale: "th" | "en",
 ): string {
   const labels = {
     th: {
       in_stock: "อยู่ในสต็อก",
+      in_transit: "อยู่ระหว่างขนส่ง",
       sold: "ขายแล้ว",
       in_use: "กำลังใช้งาน",
       archived: "เก็บถาวร",
     },
     en: {
       in_stock: "In stock",
+      in_transit: "In transit",
       sold: "Sold",
       in_use: "In use",
       archived: "Archived",

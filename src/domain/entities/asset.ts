@@ -2,6 +2,7 @@ import type { Entity } from "@/domain/entities/entity";
 import type { AssetId } from "@/domain/value-objects/asset-id";
 import type { PublicId } from "@/domain/value-objects/public-id";
 import type { UserId } from "@/domain/value-objects/user-id";
+import type { AssetCategoryKey } from "@/domain/master-data/asset-categories";
 
 export const ASSET_STATUSES = ["active", "archived"] as const;
 export const ASSET_CONDITIONS = [
@@ -9,7 +10,11 @@ export const ASSET_CONDITIONS = [
   "needs_repair",
   "out_of_service",
 ] as const;
-export const ASSET_CUSTODY_TYPES = ["branch", "customer"] as const;
+export const ASSET_CUSTODY_TYPES = [
+  "branch",
+  "customer",
+  "in_transit",
+] as const;
 
 export type AssetStatus = (typeof ASSET_STATUSES)[number];
 export type AssetCondition = (typeof ASSET_CONDITIONS)[number];
@@ -25,6 +30,7 @@ export type AssetOperationalStatus =
   | "in_stock"
   | "sold"
   | "in_use"
+  | "in_transit"
   | "archived";
 
 export interface AssetCatalog {
@@ -32,6 +38,7 @@ export interface AssetCatalog {
   readonly name: string;
   readonly description: string;
   readonly category: string;
+  readonly categoryKey: AssetCategoryKey;
   readonly defaultBranchId: string | null;
   readonly defaultLocationName: string;
   readonly updatedAt: Date;
@@ -62,6 +69,7 @@ export interface Asset extends Entity<AssetId> {
   readonly name: string;
   readonly description: string;
   readonly category: string;
+  readonly categoryKey: AssetCategoryKey;
   readonly serialNumber: string | null;
   readonly condition: AssetCondition;
   readonly status: AssetStatus;
@@ -73,6 +81,7 @@ export interface Asset extends Entity<AssetId> {
   readonly installationLatitude: number | null;
   readonly installationLongitude: number | null;
   readonly lastMovementAt: Date | null;
+  readonly activeTransferId: string | null;
   readonly warranty: AssetWarranty;
   readonly nfcStatus: AssetNfcStatus;
   readonly nfcTagType: "ntag213" | "ntag215" | null;
@@ -80,6 +89,7 @@ export interface Asset extends Entity<AssetId> {
   readonly nfcVerifiedAt: Date | null;
   readonly documents: readonly AssetDocument[];
   readonly searchKeywords: readonly string[];
+  readonly searchPrefixes: readonly string[];
   readonly createdAt: Date;
   readonly createdBy: UserId;
   readonly updatedAt: Date;
@@ -93,6 +103,7 @@ export interface AssetCreateInput {
   readonly name: string;
   readonly description: string;
   readonly category: string;
+  readonly categoryKey: AssetCategoryKey;
   readonly serialNumber: string;
   readonly condition: AssetCondition;
   readonly custodyType?: AssetCustodyType;
@@ -115,4 +126,7 @@ export interface AssetSearchCriteria {
   readonly limit: number;
   readonly branchId: string | null;
   readonly customerId: string | null;
+  readonly categoryKey: AssetCategoryKey | "all";
 }
+
+export type AssetCategoryCounts = Readonly<Record<AssetCategoryKey, number>>;

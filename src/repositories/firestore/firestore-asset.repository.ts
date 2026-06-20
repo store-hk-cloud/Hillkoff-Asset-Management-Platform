@@ -10,12 +10,18 @@ import {
 import type {
   Asset,
   AssetCatalog,
+  AssetCategoryCounts,
   AssetCondition,
   AssetCustodyType,
   AssetDocument,
   AssetSearchCriteria,
   AssetStatus,
 } from "@/domain/entities/asset";
+import {
+  ASSET_CATEGORY_KEYS,
+  inferAssetCategoryKey,
+  isAssetCategoryKey,
+} from "@/domain/master-data/asset-categories";
 import type {
   AssetEvent,
   AssetEventType,
@@ -112,7 +118,7 @@ function isAssetCondition(value: unknown): value is AssetCondition {
 }
 
 function isAssetCustodyType(value: unknown): value is AssetCustodyType {
-  return value === "branch" || value === "customer";
+  return value === "branch" || value === "customer" || value === "in_transit";
 }
 
 function mapDocumentMetadata(data: DocumentData): AssetDocument {
@@ -157,6 +163,9 @@ function mapAsset(data: DocumentData): Asset {
     name: requireString(data, "name"),
     description: requireString(data, "description"),
     category: requireString(data, "category"),
+    categoryKey: isAssetCategoryKey(data.categoryKey)
+      ? data.categoryKey
+      : inferAssetCategoryKey(requireString(data, "category")),
     serialNumber: nullableString(data, "serialNumber"),
     condition,
     status,
@@ -177,6 +186,8 @@ function mapAsset(data: DocumentData): Asset {
       data.lastMovementAt === undefined
         ? null
         : nullableTimestamp(data, "lastMovementAt"),
+    activeTransferId:
+      typeof data.activeTransferId === "string" ? data.activeTransferId : null,
     nfcStatus:
       data.nfcStatus === "registered" ||
       data.nfcStatus === "verified" ||
@@ -223,6 +234,15 @@ function mapAsset(data: DocumentData): Asset {
           (keyword): keyword is string => typeof keyword === "string",
         )
       : [],
+    searchPrefixes: Array.isArray(data.searchPrefixes)
+      ? data.searchPrefixes.filter(
+          (prefix): prefix is string => typeof prefix === "string",
+        )
+      : Array.isArray(data.searchKeywords)
+        ? data.searchKeywords.filter(
+            (keyword): keyword is string => typeof keyword === "string",
+          )
+        : [],
     version,
     createdAt: requireTimestamp(data, "createdAt"),
     createdBy: createUserId(requireString(data, "createdBy")),
@@ -420,6 +440,9 @@ export class FirestoreAssetRepository implements AssetRepository {
         name: requireString(data, "name"),
         description: requireString(data, "description"),
         category: requireString(data, "category"),
+        categoryKey: isAssetCategoryKey(data.categoryKey)
+          ? data.categoryKey
+          : inferAssetCategoryKey(requireString(data, "category")),
         defaultBranchId:
           typeof data.defaultBranchId === "string"
             ? data.defaultBranchId
@@ -449,6 +472,7 @@ export class FirestoreAssetRepository implements AssetRepository {
       name: asset.name,
       description: asset.description,
       category: asset.category,
+      categoryKey: asset.categoryKey,
       defaultBranchId: asset.branchId,
       defaultLocationName: asset.locationName,
       updatedAt: asset.updatedAt,
@@ -464,6 +488,34 @@ export class FirestoreAssetRepository implements AssetRepository {
     return snapshot.docs
       .map((document) => mapAsset(document.data()))
       .filter((asset) => asset.custodyType === "branch").length;
+  }
+
+  async countByCategory(
+    criteria: Pick<AssetSearchCriteria, "status" | "branchId" | "customerId">,
+  ): Promise<AssetCategoryCounts> {
+    const entries = await Promise.all(
+      ASSET_CATEGORY_KEYS.map(async (categoryKey) => {
+        let query: Query = this.firestore.collection("assets");
+
+        if (criteria.status !== "all") {
+          query = query.where("status", "==", criteria.status);
+        }
+        if (criteria.branchId) {
+          query = query.where("branchId", "==", criteria.branchId);
+        }
+        if (criteria.customerId) {
+          query = query.where("customerId", "==", criteria.customerId);
+        }
+
+        const snapshot = await query
+          .where("categoryKey", "==", categoryKey)
+          .count()
+          .get();
+        return [categoryKey, snapshot.data().count] as const;
+      }),
+    );
+
+    return Object.fromEntries(entries) as AssetCategoryCounts;
   }
 
   async search(criteria: AssetSearchCriteria): Promise<readonly Asset[]> {
@@ -485,8 +537,16 @@ export class FirestoreAssetRepository implements AssetRepository {
       query = query.where("customerId", "==", criteria.customerId);
     }
 
+    if (criteria.categoryKey !== "all") {
+      query = query.where("categoryKey", "==", criteria.categoryKey);
+    }
+
     if (firstKeyword) {
-      query = query.where("searchKeywords", "array-contains", firstKeyword);
+      query = query.where(
+        firstKeyword.length >= 2 ? "searchPrefixes" : "searchKeywords",
+        "array-contains",
+        firstKeyword,
+      );
     }
 
     const snapshot = await query
@@ -503,7 +563,7 @@ export class FirestoreAssetRepository implements AssetRepository {
       .map((document) => mapAsset(document.data()))
       .filter((asset) =>
         queryKeywords.every((keyword) =>
-          asset.searchKeywords.includes(keyword),
+          asset.searchPrefixes.includes(keyword),
         ),
       );
   }
@@ -676,6 +736,7 @@ export class FirestoreAssetRepository implements AssetRepository {
           name: commit.asset.name,
           description: commit.asset.description,
           category: commit.asset.category,
+          categoryKey: commit.asset.categoryKey,
           ...(commit.asset.custodyType === "branch"
             ? {
                 defaultBranchId: commit.asset.branchId,

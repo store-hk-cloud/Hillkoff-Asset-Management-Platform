@@ -7,7 +7,11 @@ export type WarehouseErrorCode =
   | "ASSET_VERSION_CONFLICT"
   | "INVALID_MOVEMENT"
   | "SAME_BRANCH_TRANSFER"
-  | "ASSET_ALREADY_SOLD";
+  | "ASSET_ALREADY_SOLD"
+  | "TRANSFER_NOT_FOUND"
+  | "TRANSFER_VERSION_CONFLICT"
+  | "TRANSFER_STATE_CONFLICT"
+  | "ASSET_TRANSFER_ACTIVE";
 
 export class WarehouseError extends DomainError {
   constructor(

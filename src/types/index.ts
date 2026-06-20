@@ -14,6 +14,10 @@ export type { AssetEvent, AssetEventType } from "@/domain/entities/asset-event";
 export type { AssetId } from "@/domain/value-objects/asset-id";
 export type { MovementLog, MovementType } from "@/domain/entities/movement-log";
 export type {
+  AssetTransfer,
+  AssetTransferStatus,
+} from "@/domain/entities/asset-transfer";
+export type {
   NfcRegistration,
   NfcRegistrationStatus,
   NfcTagType,

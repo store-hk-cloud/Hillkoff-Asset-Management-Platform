@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import { ASSET_CONDITIONS, ASSET_STATUSES } from "@/domain/entities/asset";
+import { ASSET_CATEGORY_KEYS } from "@/domain/master-data/asset-categories";
+import { BRANCH_IDS } from "@/domain/master-data/branches";
 
 const nullableTrimmedString = z
   .string()
@@ -36,9 +38,10 @@ export const assetCreateSchema = z.object({
   name: z.string().trim().min(1).max(160),
   description: z.string().trim().max(2000),
   category: z.string().trim().min(1).max(120),
+  categoryKey: z.enum(ASSET_CATEGORY_KEYS),
   serialNumber: z.string().trim().min(1).max(120),
   condition: z.enum(ASSET_CONDITIONS),
-  branchId: nullableTrimmedString,
+  branchId: z.enum(BRANCH_IDS).nullable(),
   customerId: nullableTrimmedString,
   locationName: z.string().trim().max(200),
   installedAt: installedAtSchema,
@@ -58,6 +61,7 @@ export const assetSearchSchema = z.object({
   query: z.string().trim().max(120).default(""),
   status: z.enum([...ASSET_STATUSES, "all"]).default("active"),
   limit: z.coerce.number().int().min(1).max(100).default(50),
+  categoryKey: z.enum([...ASSET_CATEGORY_KEYS, "all"]).default("all"),
 });
 
 export type AssetCreateValues = z.input<typeof assetCreateSchema>;

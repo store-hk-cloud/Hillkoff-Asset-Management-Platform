@@ -4,11 +4,18 @@ import type {
   MovementEndpoint,
   ReceiveAssetInput,
   SellAssetInput,
-  TransferAssetInput,
 } from "@/domain/entities/movement-log";
 import { WarehouseError } from "@/domain/errors/warehouse.error";
 import type { DomainService } from "@/domain/services/domain-service";
 import type { UserId } from "@/domain/value-objects/user-id";
+import {
+  buildAssetSearchKeywords,
+  buildAssetSearchPrefixes,
+} from "@/domain/services/asset-search.service";
+import {
+  getBranchLocationName,
+  isBranchId,
+} from "@/domain/master-data/branches";
 
 export interface WarehouseTransition {
   readonly asset: Asset;
@@ -19,6 +26,9 @@ export interface WarehouseTransition {
 
 function endpointFromAsset(asset: Asset): MovementEndpoint {
   return {
+    type: asset.custodyType === "customer" ? "customer" : "branch",
+    name: asset.locationName,
+    externalType: null,
     branchId: asset.branchId,
     customerId: asset.customerId,
     locationName: asset.locationName,
@@ -37,6 +47,12 @@ function requireMovable(asset: Asset, expectedVersion: number): void {
     throw new WarehouseError(
       "ASSET_VERSION_CONFLICT",
       "The asset has changed. Reload and try again.",
+    );
+  }
+  if (asset.activeTransferId) {
+    throw new WarehouseError(
+      "ASSET_TRANSFER_ACTIVE",
+      "This asset is locked by an active branch transfer.",
     );
   }
 }
@@ -78,6 +94,21 @@ function normalizeRequired(value: string, field: string): string {
   return normalized;
 }
 
+function withUpdatedSearch(asset: Asset): Asset {
+  const values = [
+    asset.assetCode,
+    asset.name,
+    asset.category,
+    asset.serialNumber ?? "",
+    asset.locationName,
+  ];
+  return {
+    ...asset,
+    searchKeywords: buildAssetSearchKeywords(values),
+    searchPrefixes: buildAssetSearchPrefixes(values),
+  };
+}
+
 export class WarehouseMovementService implements DomainService {
   readonly serviceName = "WarehouseMovementService";
 
@@ -92,11 +123,14 @@ export class WarehouseMovementService implements DomainService {
       input.destinationBranchId,
       "Destination branch",
     );
-    const destinationLocationName = normalizeRequired(
-      input.destinationLocationName,
-      "Destination location",
-    );
-    const updated: Asset = {
+    if (!isBranchId(destinationBranchId)) {
+      throw new WarehouseError(
+        "INVALID_MOVEMENT",
+        "Invalid destination branch.",
+      );
+    }
+    const destinationLocationName = getBranchLocationName(destinationBranchId);
+    const updated = withUpdatedSearch({
       ...current,
       custodyType: "branch",
       branchId: destinationBranchId,
@@ -106,44 +140,21 @@ export class WarehouseMovementService implements DomainService {
       updatedAt: now,
       updatedBy: actorId,
       version: current.version + 1,
-    };
+    });
 
     return {
       asset: updated,
-      source: endpointFromAsset(current),
+      source: {
+        type: "external",
+        name: normalizeRequired(input.sourceName, "Source"),
+        externalType: input.sourceType,
+        branchId: null,
+        customerId: null,
+        locationName: normalizeRequired(input.sourceName, "Source"),
+      },
       destination: endpointFromAsset(updated),
       changes: changes(current, updated),
     };
-  }
-
-  transfer(
-    current: Asset,
-    input: TransferAssetInput,
-    actorId: UserId,
-    now: Date,
-  ): WarehouseTransition {
-    requireMovable(current, input.expectedVersion);
-
-    if (current.custodyType !== "branch" || !current.branchId) {
-      throw new WarehouseError(
-        "INVALID_MOVEMENT",
-        "Only assets held by a branch can be transferred.",
-      );
-    }
-
-    const destinationBranchId = normalizeRequired(
-      input.destinationBranchId,
-      "Destination branch",
-    );
-
-    if (current.branchId === destinationBranchId) {
-      throw new WarehouseError(
-        "SAME_BRANCH_TRANSFER",
-        "Source and destination branch must be different.",
-      );
-    }
-
-    return this.receive(current, input, actorId, now);
   }
 
   sell(
@@ -173,7 +184,7 @@ export class WarehouseMovementService implements DomainService {
       input.destinationLocationName,
       "Customer location",
     );
-    const updated: Asset = {
+    const updated = withUpdatedSearch({
       ...current,
       custodyType: "customer",
       branchId: null,
@@ -183,7 +194,7 @@ export class WarehouseMovementService implements DomainService {
       updatedAt: now,
       updatedBy: actorId,
       version: current.version + 1,
-    };
+    });
 
     return {
       asset: updated,

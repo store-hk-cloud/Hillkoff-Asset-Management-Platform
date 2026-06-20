@@ -19,6 +19,7 @@ const asset: Asset = {
   name: "Machine",
   description: "",
   category: "Equipment",
+  categoryKey: "other",
   serialNumber: null,
   condition: "operational",
   status: "active",
@@ -30,6 +31,7 @@ const asset: Asset = {
   installationLatitude: null,
   installationLongitude: null,
   lastMovementAt: null,
+  activeTransferId: null,
   warranty: {
     status: "inactive",
     startedAt: null,
@@ -42,6 +44,7 @@ const asset: Asset = {
   nfcVerifiedAt: null,
   documents: [],
   searchKeywords: [],
+  searchPrefixes: [],
   version: 0,
   createdAt: now,
   createdBy: createUserId("admin"),

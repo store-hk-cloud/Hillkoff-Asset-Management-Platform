@@ -10,6 +10,7 @@ import { assetSearchSchema } from "@/features/assets/schemas/asset.schema";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { AssetManagementService } from "@/services/asset-management.service";
+import { ASSET_CATEGORIES } from "@/domain/master-data/asset-categories";
 
 const assetService = new AssetManagementService();
 const accessService = new AssetAccessService();
@@ -18,6 +19,7 @@ type AssetsPageProps = {
   searchParams: Promise<{
     query?: string;
     status?: string;
+    categoryKey?: string;
   }>;
 };
 
@@ -33,8 +35,12 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
     query: params.query ?? "",
     status: params.status ?? "active",
     limit: 50,
+    categoryKey: params.categoryKey ?? "all",
   });
-  const assets = await assetService.list(criteria, profile);
+  const [assets, categoryCounts] = await Promise.all([
+    assetService.list(criteria, profile),
+    assetService.getCategoryCounts({ status: criteria.status }, profile),
+  ]);
   const canWrite = accessService.canWrite(profile);
 
   return (
@@ -58,7 +64,42 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
         ) : null}
       </div>
 
-      <AssetSearchForm query={criteria.query} status={criteria.status} />
+      <AssetSearchForm
+        categoryKey={criteria.categoryKey}
+        query={criteria.query}
+        status={criteria.status}
+      />
+
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        {ASSET_CATEGORIES.map((category) => {
+          const active = criteria.categoryKey === category.key;
+          const href = new URLSearchParams({
+            status: criteria.status,
+            categoryKey: category.key,
+            ...(criteria.query ? { query: criteria.query } : {}),
+          });
+          return (
+            <Link href={`/assets?${href}`} key={category.key}>
+              <Card
+                className={
+                  active
+                    ? "border-primary bg-primary/5 py-0"
+                    : "hover:bg-accent/40 py-0"
+                }
+              >
+                <CardContent className="p-3">
+                  <p className="text-muted-foreground text-xs">
+                    {locale === "th" ? category.nameTh : category.nameEn}
+                  </p>
+                  <p className="text-xl font-semibold">
+                    {categoryCounts[category.key]}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
+      </div>
 
       {assets.length === 0 ? (
         <div className="text-muted-foreground rounded-xl border border-dashed p-10 text-center text-sm">

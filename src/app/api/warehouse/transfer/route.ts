@@ -31,7 +31,10 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: true,
-        data: { id: movement.id, movementNumber: movement.movementNumber },
+        data: {
+          id: movement.id,
+          movementNumber: movement.transferNumber,
+        },
       },
       { status: 201 },
     );

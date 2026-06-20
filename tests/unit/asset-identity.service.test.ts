@@ -23,6 +23,7 @@ function asset(): Asset {
     name: "Machine",
     description: "",
     category: "Equipment",
+    categoryKey: "other",
     serialNumber: null,
     condition: "operational",
     status: "active",
@@ -34,6 +35,7 @@ function asset(): Asset {
     installationLatitude: null,
     installationLongitude: null,
     lastMovementAt: null,
+    activeTransferId: null,
     warranty: {
       status: "inactive",
       startedAt: null,
@@ -46,6 +48,7 @@ function asset(): Asset {
     nfcVerifiedAt: null,
     documents: [],
     searchKeywords: [],
+    searchPrefixes: [],
     version: 1,
     createdAt: now,
     createdBy: actorId,

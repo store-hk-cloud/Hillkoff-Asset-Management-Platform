@@ -60,6 +60,7 @@ export default async function EditAssetPage({ params }: EditAssetPageProps) {
               name: asset.name,
               description: asset.description,
               category: asset.category,
+              categoryKey: asset.categoryKey,
               serialNumber: asset.serialNumber,
               condition: asset.condition,
               branchId: asset.branchId,

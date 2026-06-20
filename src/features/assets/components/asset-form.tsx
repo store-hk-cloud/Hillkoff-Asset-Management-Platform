@@ -12,6 +12,18 @@ import {
   findAssetCatalog,
   updateAsset,
 } from "@/features/assets/services/asset-api.service";
+import {
+  ASSET_CATEGORIES,
+  getAssetCategoryName,
+  inferAssetCategoryKey,
+  type AssetCategoryKey,
+} from "@/domain/master-data/asset-categories";
+import {
+  BRANCHES,
+  findBranch,
+  getBranchLocationName,
+  type BranchId,
+} from "@/domain/master-data/branches";
 
 export interface AssetFormInitialValues {
   readonly id: string;
@@ -19,6 +31,7 @@ export interface AssetFormInitialValues {
   readonly name: string;
   readonly description: string;
   readonly category: string;
+  readonly categoryKey: AssetCategoryKey;
   readonly serialNumber: string | null;
   readonly condition: "operational" | "needs_repair" | "out_of_service";
   readonly branchId: string | null;
@@ -43,6 +56,10 @@ export function AssetForm({ initialValues }: AssetFormProps) {
     initialValues?.description ?? "",
   );
   const [category, setCategory] = useState(initialValues?.category ?? "");
+  const [categoryKey, setCategoryKey] = useState<AssetCategoryKey>(
+    initialValues?.categoryKey ??
+      inferAssetCategoryKey(initialValues?.category ?? ""),
+  );
   const [branchId, setBranchId] = useState(initialValues?.branchId ?? "");
   const [locationName, setLocationName] = useState(
     initialValues?.locationName ?? "",
@@ -65,8 +82,12 @@ export function AssetForm({ initialValues }: AssetFormProps) {
       setName(catalog.name);
       setDescription(catalog.description);
       setCategory(catalog.category);
+      setCategoryKey(catalog.categoryKey);
       setBranchId(catalog.defaultBranchId ?? "");
-      setLocationName(catalog.defaultLocationName);
+      setLocationName(
+        findBranch(catalog.defaultBranchId)?.nameTh ??
+          catalog.defaultLocationName,
+      );
     } catch (catalogError) {
       setError(
         catalogError instanceof Error
@@ -89,6 +110,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
       name: formData.get("name"),
       description: formData.get("description"),
       category: formData.get("category"),
+      categoryKey: formData.get("categoryKey"),
       serialNumber: formData.get("serialNumber") || null,
       condition: formData.get("condition"),
       installedAt: formData.get("installedAt") || null,
@@ -163,17 +185,43 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="category">
+          <Label htmlFor="categoryKey">
             {locale === "th" ? "หมวดหมู่" : "Category"} *
           </Label>
-          <Input
-            id="category"
-            maxLength={120}
-            name="category"
-            onChange={(event) => setCategory(event.currentTarget.value)}
-            required
-            value={category}
-          />
+          <select
+            className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
+            id="categoryKey"
+            name="categoryKey"
+            onChange={(event) => {
+              const nextKey = event.currentTarget.value as AssetCategoryKey;
+              setCategoryKey(nextKey);
+              setCategory(
+                nextKey === "other" ? "" : getAssetCategoryName(nextKey, "th"),
+              );
+            }}
+            value={categoryKey}
+          >
+            {ASSET_CATEGORIES.map((item) => (
+              <option key={item.key} value={item.key}>
+                {locale === "th" ? item.nameTh : item.nameEn}
+              </option>
+            ))}
+          </select>
+          <input name="category" type="hidden" value={category} />
+          {categoryKey === "other" ? (
+            <Input
+              aria-label={
+                locale === "th" ? "ระบุหมวดหมู่อื่น" : "Custom category"
+              }
+              maxLength={120}
+              onChange={(event) => setCategory(event.currentTarget.value)}
+              placeholder={
+                locale === "th" ? "ระบุชื่อหมวดหมู่" : "Enter category name"
+              }
+              required
+              value={category}
+            />
+          ) : null}
         </div>
 
         <div className="space-y-2">
@@ -210,29 +258,36 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="locationName">
+          <Label htmlFor="branchId">
             {locale === "th" ? "สถานที่" : "Location"}
           </Label>
-          <Input
+          <select
+            className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm disabled:opacity-50"
             disabled={Boolean(initialValues)}
-            id="locationName"
-            maxLength={200}
-            name="locationName"
-            onChange={(event) => setLocationName(event.currentTarget.value)}
-            value={locationName}
-          />
+            id="branchId"
+            name="branchId"
+            onChange={(event) => {
+              const value = event.currentTarget.value as BranchId | "";
+              setBranchId(value);
+              setLocationName(value ? getBranchLocationName(value) : "");
+            }}
+            value={branchId}
+          >
+            <option value="">
+              {locale === "th" ? "เลือกสาขา" : "Select branch"}
+            </option>
+            {BRANCHES.map((branch) => (
+              <option key={branch.id} value={branch.id}>
+                {locale === "th" ? branch.nameTh : branch.nameEn} ({branch.id})
+              </option>
+            ))}
+          </select>
+          <input name="locationName" type="hidden" value={locationName} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="branchId">{t("field.branchId")}</Label>
-          <Input
-            disabled={Boolean(initialValues)}
-            id="branchId"
-            maxLength={120}
-            name="branchId"
-            onChange={(event) => setBranchId(event.currentTarget.value)}
-            value={branchId}
-          />
+          <Label htmlFor="branchCode">{t("field.branchId")}</Label>
+          <Input disabled id="branchCode" readOnly value={branchId} />
         </div>
 
         <div className="space-y-2">

@@ -14,6 +14,11 @@ import {
   findWarehouseAsset,
   submitMovement,
 } from "@/features/warehouse/services/warehouse-api.service";
+import {
+  BRANCHES,
+  getBranchLocationName,
+  type BranchId,
+} from "@/domain/master-data/branches";
 
 type MovementAction = "receive" | "transfer" | "sale";
 
@@ -83,6 +88,7 @@ export function MovementForm({ action }: MovementFormProps) {
   const [loadingAsset, setLoadingAsset] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [destinationBranchId, setDestinationBranchId] = useState("");
   const config = labels[locale][action];
 
   async function lookupAsset() {
@@ -121,6 +127,12 @@ export function MovementForm({ action }: MovementFormProps) {
       assetCode: asset.assetCode,
       [config.destinationName]: formData.get(config.destinationName),
       destinationLocationName: formData.get("destinationLocationName"),
+      ...(action === "receive"
+        ? {
+            sourceType: formData.get("sourceType"),
+            sourceName: formData.get("sourceName"),
+          }
+        : {}),
       referenceNumber: formData.get("referenceNumber") || null,
       notes: formData.get("notes") ?? "",
       expectedVersion: asset.version,
@@ -132,7 +144,7 @@ export function MovementForm({ action }: MovementFormProps) {
     try {
       const movement = await submitMovement(action, payload);
       router.replace(
-        `/warehouse/movements?success=${encodeURIComponent(
+        `${action === "transfer" ? "/warehouse/transfers" : "/warehouse/movements"}?success=${encodeURIComponent(
           movement.movementNumber,
         )}`,
       );
@@ -197,24 +209,115 @@ export function MovementForm({ action }: MovementFormProps) {
           <Label htmlFor={config.destinationName}>
             {config.destinationLabel} *
           </Label>
-          <Input
-            disabled={!asset}
-            id={config.destinationName}
-            name={config.destinationName}
-            required
-          />
+          {action === "sale" ? (
+            <Input
+              disabled={!asset}
+              id={config.destinationName}
+              name={config.destinationName}
+              required
+            />
+          ) : (
+            <select
+              className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm disabled:opacity-50"
+              disabled={!asset}
+              id="destinationBranchId"
+              name="destinationBranchId"
+              onChange={(event) =>
+                setDestinationBranchId(event.currentTarget.value)
+              }
+              required
+              value={destinationBranchId}
+            >
+              <option value="">
+                {locale === "th" ? "เลือกสาขาปลายทาง" : "Select destination"}
+              </option>
+              {BRANCHES.map((branch) => (
+                <option
+                  disabled={
+                    action === "transfer" && asset?.branchId === branch.id
+                  }
+                  key={branch.id}
+                  value={branch.id}
+                >
+                  {locale === "th" ? branch.nameTh : branch.nameEn} ({branch.id}
+                  )
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="destinationLocationName">
             {config.locationLabel} *
           </Label>
-          <Input
-            disabled={!asset}
-            id="destinationLocationName"
-            name="destinationLocationName"
-            required
-          />
+          {action === "sale" ? (
+            <Input
+              disabled={!asset}
+              id="destinationLocationName"
+              name="destinationLocationName"
+              required
+            />
+          ) : (
+            <>
+              <Input
+                disabled
+                id="destinationLocationName"
+                readOnly
+                value={
+                  destinationBranchId
+                    ? getBranchLocationName(destinationBranchId as BranchId)
+                    : ""
+                }
+              />
+              <input
+                name="destinationLocationName"
+                type="hidden"
+                value={
+                  destinationBranchId
+                    ? getBranchLocationName(destinationBranchId as BranchId)
+                    : ""
+                }
+              />
+            </>
+          )}
         </div>
+        {action === "receive" ? (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="sourceType">
+                {locale === "th" ? "ประเภทต้นทาง" : "Source type"} *
+              </Label>
+              <select
+                className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm disabled:opacity-50"
+                disabled={!asset}
+                id="sourceType"
+                name="sourceType"
+                required
+              >
+                <option value="supplier">
+                  {locale === "th" ? "ผู้จำหน่าย" : "Supplier"}
+                </option>
+                <option value="external">
+                  {locale === "th" ? "หน่วยงานภายนอก" : "External"}
+                </option>
+                <option value="other">
+                  {locale === "th" ? "อื่นๆ" : "Other"}
+                </option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="sourceName">
+                {locale === "th" ? "ชื่อต้นทาง/ผู้จำหน่าย" : "Source name"} *
+              </Label>
+              <Input
+                disabled={!asset}
+                id="sourceName"
+                name="sourceName"
+                required
+              />
+            </div>
+          </>
+        ) : null}
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="referenceNumber">
             {locale === "th" ? "เลขที่เอกสารอ้างอิง" : "Reference number"}

@@ -25,6 +25,7 @@ function asset(overrides: Partial<Asset> = {}): Asset {
     name: "Coffee Machine",
     description: "",
     category: "Equipment",
+    categoryKey: "other",
     serialNumber: null,
     condition: "needs_repair",
     status: "active",
@@ -36,6 +37,7 @@ function asset(overrides: Partial<Asset> = {}): Asset {
     installationLatitude: null,
     installationLongitude: null,
     lastMovementAt: null,
+    activeTransferId: null,
     warranty: {
       status: "active",
       startedAt: now,
@@ -48,6 +50,7 @@ function asset(overrides: Partial<Asset> = {}): Asset {
     nfcVerifiedAt: null,
     documents: [],
     searchKeywords: [],
+    searchPrefixes: [],
     version: 1,
     createdAt: now,
     createdBy: actorId,

@@ -20,17 +20,19 @@ function asset(overrides: Partial<Asset> = {}): Asset {
     name: "Coffee Machine",
     description: "",
     category: "Equipment",
+    categoryKey: "other",
     serialNumber: null,
     condition: "operational",
     status: "active",
     custodyType: "branch",
-    branchId: "branch-a",
+    branchId: "HK1",
     customerId: null,
     locationName: "Warehouse A",
     installedAt: null,
     installationLatitude: null,
     installationLongitude: null,
     lastMovementAt: null,
+    activeTransferId: null,
     warranty: {
       status: "inactive",
       startedAt: null,
@@ -43,6 +45,7 @@ function asset(overrides: Partial<Asset> = {}): Asset {
     nfcVerifiedAt: null,
     documents: [],
     searchKeywords: [],
+    searchPrefixes: [],
     version: 2,
     createdAt: now,
     createdBy: actorId,
@@ -63,8 +66,10 @@ describe("WarehouseMovementService", () => {
       }),
       {
         assetCode: "HK-001",
-        destinationBranchId: "branch-b",
+        destinationBranchId: "HQ",
         destinationLocationName: "Warehouse B",
+        sourceType: "supplier",
+        sourceName: "Hillkoff Supplier",
         referenceNumber: null,
         notes: "",
         expectedVersion: 2,
@@ -74,46 +79,9 @@ describe("WarehouseMovementService", () => {
     );
 
     expect(transition.asset.custodyType).toBe("branch");
-    expect(transition.asset.branchId).toBe("branch-b");
+    expect(transition.asset.branchId).toBe("HQ");
     expect(transition.asset.customerId).toBeNull();
     expect(transition.asset.version).toBe(3);
-  });
-
-  it("transfers between different branches", () => {
-    const transition = service.transfer(
-      asset(),
-      {
-        assetCode: "HK-001",
-        destinationBranchId: "branch-b",
-        destinationLocationName: "Branch B",
-        referenceNumber: "TR-001",
-        notes: "",
-        expectedVersion: 2,
-      },
-      actorId,
-      now,
-    );
-
-    expect(transition.source.branchId).toBe("branch-a");
-    expect(transition.destination.branchId).toBe("branch-b");
-  });
-
-  it("rejects transfer to the same branch", () => {
-    expect(() =>
-      service.transfer(
-        asset(),
-        {
-          assetCode: "HK-001",
-          destinationBranchId: "branch-a",
-          destinationLocationName: "Warehouse A",
-          referenceNumber: null,
-          notes: "",
-          expectedVersion: 2,
-        },
-        actorId,
-        now,
-      ),
-    ).toThrowError(WarehouseError);
   });
 
   it("sells a branch asset to a customer", () => {
@@ -134,26 +102,21 @@ describe("WarehouseMovementService", () => {
     expect(transition.asset.custodyType).toBe("customer");
     expect(transition.asset.branchId).toBeNull();
     expect(transition.asset.customerId).toBe("customer-a");
-    expect(transition.source.branchId).toBe("branch-a");
+    expect(transition.source.branchId).toBe("HK1");
   });
 
-  it("rejects stale and archived movements", () => {
-    const input = {
-      assetCode: "HK-001",
-      destinationBranchId: "branch-b",
-      destinationLocationName: "Branch B",
-      referenceNumber: null,
-      notes: "",
-      expectedVersion: 1,
-    };
-
-    expect(() => service.transfer(asset(), input, actorId, now)).toThrowError(
-      WarehouseError,
-    );
+  it("blocks other movement while a transfer is active", () => {
     expect(() =>
-      service.transfer(
-        asset({ status: "archived" }),
-        { ...input, expectedVersion: 2 },
+      service.sell(
+        asset({ activeTransferId: "transfer-1" }),
+        {
+          assetCode: "HK-001",
+          customerId: "customer-a",
+          destinationLocationName: "Customer Cafe",
+          referenceNumber: null,
+          notes: "",
+          expectedVersion: 2,
+        },
         actorId,
         now,
       ),

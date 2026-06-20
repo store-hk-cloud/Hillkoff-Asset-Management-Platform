@@ -2,6 +2,7 @@ import {
   ArrowRightLeft,
   History,
   PackageCheck,
+  PackageSearch,
   ShoppingCart,
 } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -72,6 +73,18 @@ export default async function WarehousePage() {
             href="/warehouse/sale"
             icon={<ShoppingCart aria-hidden="true" className="size-6" />}
             title={t("warehouse.sale")}
+          />
+        ) : null}
+        {warehouseService.canView(profile) ? (
+          <WarehouseActionCard
+            description={
+              locale === "th"
+                ? "ยืนยันส่ง ติดตามระหว่างขนส่ง และรับเข้าสต็อกสาขาปลายทาง"
+                : "Dispatch, track, and receive branch stock transfers"
+            }
+            href="/warehouse/transfers"
+            icon={<PackageSearch aria-hidden="true" className="size-6" />}
+            title={locale === "th" ? "รายการโอนสาขา" : "Branch transfer queue"}
           />
         ) : null}
         {warehouseService.canView(profile) ? (

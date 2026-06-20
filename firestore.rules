@@ -170,6 +170,18 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    match /asset_transfers/{transferId} {
+      allow get, list: if isActiveUser() && (
+        request.auth.token.role in ['admin', 'warehouse', 'executive']
+        || (
+          request.auth.token.role == 'branch'
+          && currentUser().branchId != null
+          && currentUser().branchId in resource.data.involvedBranchIds
+        )
+      );
+      allow create, update, delete: if false;
+    }
+
     match /nfc_registrations/{registrationId} {
       allow get, list: if isActiveUser()
         && request.auth.token.role in ['admin', 'warehouse', 'technician']
