@@ -27,8 +27,8 @@ const firestore = getFirestore();
 const applyChanges = process.env.APPLY_WAREHOUSE_MIGRATION === "true";
 const targetSerials = new Set(["0020569B", "0020571B"]);
 const warehouse = {
-  id: "Z03",
-  name: "คลังบ้านเช่า 2",
+  id: "HK1",
+  name: "Hillkoff 1",
 };
 
 const snapshot = await firestore.collection("assets").get();

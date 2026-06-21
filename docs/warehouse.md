@@ -49,7 +49,7 @@ because those values belong to the individual machine.
 ## Migration
 
 The two approved existing Assets with Serial Numbers `0020569B` and `0020571B`
-are migrated to `Z03 — คลังบ้านเช่า 2`. The migration creates an Asset Event
+are migrated to `HK1 — Hillkoff 1`. The migration creates an Asset Event
 and Audit Log for each change.
 
 Run a dry-run first:
