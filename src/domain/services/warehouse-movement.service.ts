@@ -4,6 +4,7 @@ import type {
   MovementEndpoint,
   ReceiveAssetInput,
   SellAssetInput,
+  TransferAssetInput,
 } from "@/domain/entities/movement-log";
 import { WarehouseError } from "@/domain/errors/warehouse.error";
 import type { DomainService } from "@/domain/services/domain-service";
@@ -16,6 +17,10 @@ import {
   getBranchLocationName,
   isBranchId,
 } from "@/domain/master-data/branches";
+import {
+  getWarehouseName,
+  isWarehouseId,
+} from "@/domain/master-data/warehouses";
 
 export interface WarehouseTransition {
   readonly asset: Asset;
@@ -30,6 +35,7 @@ function endpointFromAsset(asset: Asset): MovementEndpoint {
     name: asset.locationName,
     externalType: null,
     branchId: asset.branchId,
+    warehouseId: asset.warehouseId ?? null,
     customerId: asset.customerId,
     locationName: asset.locationName,
   };
@@ -64,6 +70,7 @@ function changes(
   const fields = [
     "custodyType",
     "branchId",
+    "warehouseId",
     "customerId",
     "locationName",
     "lastMovementAt",
@@ -149,9 +156,57 @@ export class WarehouseMovementService implements DomainService {
         name: normalizeRequired(input.sourceName, "Source"),
         externalType: input.sourceType,
         branchId: null,
+        warehouseId: null,
         customerId: null,
         locationName: normalizeRequired(input.sourceName, "Source"),
       },
+      destination: endpointFromAsset(updated),
+      changes: changes(current, updated),
+    };
+  }
+
+  transfer(
+    current: Asset,
+    input: TransferAssetInput,
+    actorId: UserId,
+    now: Date,
+  ): WarehouseTransition {
+    requireMovable(current, input.expectedVersion);
+    const destinationWarehouseId = normalizeRequired(
+      input.destinationWarehouseId,
+      "Destination warehouse",
+    );
+    if (!isWarehouseId(destinationWarehouseId)) {
+      throw new WarehouseError(
+        "INVALID_MOVEMENT",
+        "Invalid destination warehouse.",
+      );
+    }
+    if (current.warehouseId === destinationWarehouseId) {
+      throw new WarehouseError(
+        "SAME_BRANCH_TRANSFER",
+        "Source and destination warehouse must be different.",
+      );
+    }
+    if (current.custodyType !== "branch") {
+      throw new WarehouseError(
+        "INVALID_MOVEMENT",
+        "Only an asset held in a warehouse can be moved.",
+      );
+    }
+    const updated = withUpdatedSearch({
+      ...current,
+      branchId: destinationWarehouseId,
+      warehouseId: destinationWarehouseId,
+      locationName: getWarehouseName(destinationWarehouseId),
+      lastMovementAt: now,
+      updatedAt: now,
+      updatedBy: actorId,
+      version: current.version + 1,
+    });
+    return {
+      asset: updated,
+      source: endpointFromAsset(current),
       destination: endpointFromAsset(updated),
       changes: changes(current, updated),
     };
@@ -188,6 +243,7 @@ export class WarehouseMovementService implements DomainService {
       ...current,
       custodyType: "customer",
       branchId: null,
+      warehouseId: null,
       customerId,
       locationName: destinationLocationName,
       lastMovementAt: now,

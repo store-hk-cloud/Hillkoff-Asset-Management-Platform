@@ -7,9 +7,9 @@ import type { TransferAssetInput } from "@/domain/entities/movement-log";
 import type { AssetFieldChange } from "@/domain/entities/asset-event";
 import { WarehouseError } from "@/domain/errors/warehouse.error";
 import {
-  getBranchLocationName,
-  isBranchId,
-} from "@/domain/master-data/branches";
+  getWarehouseName,
+  isWarehouseId,
+} from "@/domain/master-data/warehouses";
 import type { DomainService } from "@/domain/services/domain-service";
 import type { UserId } from "@/domain/value-objects/user-id";
 import {
@@ -103,13 +103,13 @@ export class AssetTransferService implements DomainService {
         "The asset has changed. Reload and try again.",
       );
     }
-    if (!isBranchId(input.destinationBranchId)) {
+    if (!isWarehouseId(input.destinationWarehouseId)) {
       throw new WarehouseError(
         "INVALID_MOVEMENT",
         "Invalid destination branch.",
       );
     }
-    if (current.branchId === input.destinationBranchId) {
+    if (current.warehouseId === input.destinationWarehouseId) {
       throw new WarehouseError(
         "SAME_BRANCH_TRANSFER",
         "Source and destination branch must be different.",
@@ -128,8 +128,8 @@ export class AssetTransferService implements DomainService {
       serialNumber: current.serialNumber,
       sourceBranchId: current.branchId,
       sourceLocationName: current.locationName,
-      destinationBranchId: input.destinationBranchId,
-      destinationLocationName: getBranchLocationName(input.destinationBranchId),
+      destinationBranchId: input.destinationWarehouseId,
+      destinationLocationName: getWarehouseName(input.destinationWarehouseId),
       status: "pending_dispatch",
       referenceNumber: input.referenceNumber?.trim() || null,
       notes: input.notes.trim(),

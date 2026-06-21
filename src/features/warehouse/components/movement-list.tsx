@@ -21,12 +21,12 @@ export function MovementList({
     locale === "th"
       ? {
           received: "รับเข้า",
-          branch_transfer: "โอนสาขา",
+          branch_transfer: "ย้ายคลัง",
           customer_sale: "ขายลูกค้า",
         }
       : {
           received: "Received",
-          branch_transfer: "Branch transfer",
+          branch_transfer: "Warehouse transfer",
           customer_sale: "Customer sale",
         };
 
@@ -63,7 +63,7 @@ export function MovementList({
                 {movement.source.name || movement.source.locationName || "—"} ·{" "}
                 {movement.source.type === "external"
                   ? movement.source.externalType
-                  : `Branch ${movement.source.branchId ?? "—"}`}
+                  : `Warehouse ${movement.source.warehouseId ?? movement.source.branchId ?? "—"}`}
               </p>
             </div>
             <div>
@@ -77,7 +77,7 @@ export function MovementList({
                 ·{" "}
                 {movement.destination.customerId
                   ? `Customer ${movement.destination.customerId}`
-                  : `Branch ${movement.destination.branchId ?? "—"}`}
+                  : `Warehouse ${movement.destination.warehouseId ?? movement.destination.branchId ?? "—"}`}
               </p>
             </div>
           </div>

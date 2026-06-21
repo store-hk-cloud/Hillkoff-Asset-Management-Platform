@@ -16,6 +16,7 @@ export interface MovementEndpoint {
   readonly name: string;
   readonly externalType: "supplier" | "external" | "other" | null;
   readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly locationName: string;
 }
@@ -51,7 +52,7 @@ export interface ReceiveAssetInput {
 
 export interface TransferAssetInput {
   readonly assetCode: string;
-  readonly destinationBranchId: string;
+  readonly destinationWarehouseId: string;
   readonly destinationLocationName: string;
   readonly referenceNumber: string | null;
   readonly notes: string;

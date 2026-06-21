@@ -30,7 +30,7 @@ export function MovementSummary({ asset }: MovementSummaryProps) {
               (locale === "th" ? "ไม่ระบุ" : "Not specified")}
           </p>
           <p className="text-muted-foreground text-xs">
-            Branch: {asset.branchId ?? "—"} · Customer:{" "}
+            Warehouse: {asset.warehouseId ?? "—"} · Customer:{" "}
             {asset.customerId ?? "—"}
           </p>
         </div>

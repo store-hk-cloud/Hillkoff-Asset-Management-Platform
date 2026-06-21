@@ -63,7 +63,7 @@ function requested() {
     asset(),
     {
       assetCode: "HK-001",
-      destinationBranchId: "HQ",
+      destinationWarehouseId: "HQ",
       destinationLocationName: "สำนักงานใหญ่",
       referenceNumber: "TR-001",
       notes: "",
@@ -124,7 +124,7 @@ describe("AssetTransferService", () => {
         asset({ activeTransferId: "transfer-1" }),
         {
           assetCode: "HK-001",
-          destinationBranchId: "HQ",
+          destinationWarehouseId: "HQ",
           destinationLocationName: "สำนักงานใหญ่",
           referenceNumber: null,
           notes: "",

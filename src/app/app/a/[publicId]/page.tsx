@@ -82,8 +82,8 @@ export default async function PublicAssetPage({
                 value={asset.details.category}
               />
               <Detail
-                label={locale === "th" ? "คลัง/รหัสสาขา" : "Warehouse / Branch"}
-                value={asset.details.branchId ?? "—"}
+                label={locale === "th" ? "รหัสคลัง" : "Warehouse ID"}
+                value={asset.details.warehouseId ?? "—"}
               />
               <Detail
                 label={locale === "th" ? "สถานที่ปัจจุบัน" : "Current Location"}

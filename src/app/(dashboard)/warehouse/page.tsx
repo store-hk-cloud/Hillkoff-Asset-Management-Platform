@@ -1,10 +1,4 @@
-import {
-  ArrowRightLeft,
-  History,
-  PackageCheck,
-  PackageSearch,
-  ShoppingCart,
-} from "lucide-react";
+import { ArrowRightLeft, History, ShoppingCart } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { WarehouseActionCard } from "@/features/warehouse/components/warehouse-action-card";
@@ -39,24 +33,12 @@ export default async function WarehousePage() {
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        {warehouseService.canReceive(profile) ? (
-          <WarehouseActionCard
-            description={
-              locale === "th"
-                ? "รับทรัพย์สินเข้าคลังหรือสาขาปลายทาง"
-                : "Receive an asset into a warehouse or destination branch"
-            }
-            href="/warehouse/receive"
-            icon={<PackageCheck aria-hidden="true" className="size-6" />}
-            title={t("warehouse.receive")}
-          />
-        ) : null}
         {warehouseService.canTransfer(profile) ? (
           <WarehouseActionCard
             description={
               locale === "th"
-                ? "โอนทรัพย์สินระหว่างสาขา"
-                : "Transfer an asset between branches"
+                ? "ย้ายทรัพย์สินจากคลังปัจจุบันไปคลังปลายทางทันที"
+                : "Move an asset directly between warehouses"
             }
             href="/warehouse/transfer"
             icon={<ArrowRightLeft aria-hidden="true" className="size-6" />}
@@ -73,18 +55,6 @@ export default async function WarehousePage() {
             href="/warehouse/sale"
             icon={<ShoppingCart aria-hidden="true" className="size-6" />}
             title={t("warehouse.sale")}
-          />
-        ) : null}
-        {warehouseService.canView(profile) ? (
-          <WarehouseActionCard
-            description={
-              locale === "th"
-                ? "ยืนยันส่ง ติดตามระหว่างขนส่ง และรับเข้าสต็อกสาขาปลายทาง"
-                : "Dispatch, track, and receive branch stock transfers"
-            }
-            href="/warehouse/transfers"
-            icon={<PackageSearch aria-hidden="true" className="size-6" />}
-            title={locale === "th" ? "รายการโอนสาขา" : "Branch transfer queue"}
           />
         ) : null}
         {warehouseService.canView(profile) ? (

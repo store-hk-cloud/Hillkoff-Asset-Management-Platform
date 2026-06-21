@@ -73,6 +73,15 @@ function normalizeSerialNumber(value: string): string {
   return value.trim().toUpperCase();
 }
 
+function normalizeWarehouseId(value: unknown): string | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const aliases: Readonly<Record<string, string>> = {
+    Ratika: "RAT",
+    TD: "TDP",
+  };
+  return aliases[value] ?? (value === "Pa-Pang" ? null : value);
+}
+
 function assetCatalogId(assetCode: string): string {
   return encodeURIComponent(normalizeAssetCode(assetCode));
 }
@@ -167,10 +176,12 @@ function mapAsset(data: DocumentData): Asset {
       ? data.categoryKey
       : inferAssetCategoryKey(requireString(data, "category")),
     serialNumber: nullableString(data, "serialNumber"),
+    color: typeof data.color === "string" ? data.color : "",
     condition,
     status,
     custodyType,
     branchId: nullableString(data, "branchId"),
+    warehouseId: normalizeWarehouseId(data.warehouseId ?? data.branchId),
     customerId: nullableString(data, "customerId"),
     locationName: requireString(data, "locationName"),
     installedAt: nullableTimestamp(data, "installedAt"),
@@ -453,10 +464,9 @@ export class FirestoreAssetRepository implements AssetRepository {
         categoryKey: isAssetCategoryKey(data.categoryKey)
           ? data.categoryKey
           : inferAssetCategoryKey(requireString(data, "category")),
-        defaultBranchId:
-          typeof data.defaultBranchId === "string"
-            ? data.defaultBranchId
-            : null,
+        defaultWarehouseId: normalizeWarehouseId(
+          data.defaultWarehouseId ?? data.defaultBranchId,
+        ),
         defaultLocationName:
           typeof data.defaultLocationName === "string"
             ? data.defaultLocationName
@@ -483,7 +493,7 @@ export class FirestoreAssetRepository implements AssetRepository {
       description: asset.description,
       category: asset.category,
       categoryKey: asset.categoryKey,
-      defaultBranchId: asset.branchId,
+      defaultWarehouseId: asset.warehouseId ?? null,
       defaultLocationName: asset.locationName,
       updatedAt: asset.updatedAt,
     };
@@ -749,7 +759,7 @@ export class FirestoreAssetRepository implements AssetRepository {
           categoryKey: commit.asset.categoryKey,
           ...(commit.asset.custodyType === "branch"
             ? {
-                defaultBranchId: commit.asset.branchId,
+              defaultWarehouseId: commit.asset.warehouseId ?? null,
                 defaultLocationName: commit.asset.locationName,
               }
             : {}),

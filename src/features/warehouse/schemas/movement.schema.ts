@@ -6,6 +6,10 @@ import {
   BRANCH_IDS,
   getBranchLocationName,
 } from "@/domain/master-data/branches";
+import {
+  getWarehouseName,
+  WAREHOUSE_IDS,
+} from "@/domain/master-data/warehouses";
 
 const commonMovementSchema = z.object({
   assetCode: z.string().trim().min(1).max(60),
@@ -33,11 +37,11 @@ export const receiveAssetSchema = commonMovementSchema
 
 export const transferAssetSchema = commonMovementSchema
   .extend({
-    destinationBranchId: z.enum(BRANCH_IDS),
+    destinationWarehouseId: z.enum(WAREHOUSE_IDS),
   })
   .transform((value) => ({
     ...value,
-    destinationLocationName: getBranchLocationName(value.destinationBranchId),
+    destinationLocationName: getWarehouseName(value.destinationWarehouseId),
   }));
 
 export const sellAssetSchema = commonMovementSchema.extend({

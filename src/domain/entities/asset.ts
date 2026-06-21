@@ -39,7 +39,7 @@ export interface AssetCatalog {
   readonly description: string;
   readonly category: string;
   readonly categoryKey: AssetCategoryKey;
-  readonly defaultBranchId: string | null;
+  readonly defaultWarehouseId: string | null;
   readonly defaultLocationName: string;
   readonly updatedAt: Date;
 }
@@ -71,10 +71,12 @@ export interface Asset extends Entity<AssetId> {
   readonly category: string;
   readonly categoryKey: AssetCategoryKey;
   readonly serialNumber: string | null;
+  readonly color?: string;
   readonly condition: AssetCondition;
   readonly status: AssetStatus;
   readonly custodyType: AssetCustodyType;
   readonly branchId: string | null;
+  readonly warehouseId?: string | null;
   readonly customerId: string | null;
   readonly locationName: string;
   readonly installedAt: Date | null;
@@ -105,9 +107,10 @@ export interface AssetCreateInput {
   readonly category: string;
   readonly categoryKey: AssetCategoryKey;
   readonly serialNumber: string;
+  readonly color: string;
   readonly condition: AssetCondition;
   readonly custodyType?: AssetCustodyType;
-  readonly branchId: string | null;
+  readonly warehouseId: string;
   readonly customerId: string | null;
   readonly locationName: string;
   readonly installedAt: Date | null;
@@ -115,7 +118,7 @@ export interface AssetCreateInput {
 
 export interface AssetUpdateInput extends Omit<
   AssetCreateInput,
-  "custodyType" | "branchId" | "customerId" | "locationName"
+  "custodyType" | "warehouseId" | "customerId" | "locationName"
 > {
   readonly expectedVersion: number;
 }

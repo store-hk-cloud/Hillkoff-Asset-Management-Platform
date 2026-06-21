@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { USER_STATUSES } from "@/domain/entities/user-profile";
 import { USER_ROLES } from "@/domain/value-objects/user-role";
-import { BRANCH_IDS } from "@/domain/master-data/branches";
+import { WAREHOUSE_IDS } from "@/domain/master-data/warehouses";
 
 const nullableScope = z
   .string()
@@ -10,7 +10,7 @@ const nullableScope = z
   .max(120)
   .nullable()
   .transform((value) => value || null);
-const nullableBranchId = z.enum(BRANCH_IDS).nullable();
+const nullableBranchId = z.enum(WAREHOUSE_IDS).nullable();
 
 export const managedUserCreateSchema = z.object({
   email: z.email().transform((value) => value.trim().toLowerCase()),

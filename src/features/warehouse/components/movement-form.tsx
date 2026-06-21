@@ -15,12 +15,12 @@ import {
   submitMovement,
 } from "@/features/warehouse/services/warehouse-api.service";
 import {
-  BRANCHES,
-  getBranchLocationName,
-  type BranchId,
-} from "@/domain/master-data/branches";
+  getWarehouseName,
+  WAREHOUSES,
+  type WarehouseId,
+} from "@/domain/master-data/warehouses";
 
-type MovementAction = "receive" | "transfer" | "sale";
+type MovementAction = "transfer" | "sale";
 
 type MovementFormProps = Readonly<{
   action: MovementAction;
@@ -28,17 +28,11 @@ type MovementFormProps = Readonly<{
 
 const labels = {
   th: {
-    receive: {
-      title: "รับเข้าคลัง/สาขา",
-      destinationLabel: "รหัสสาขาปลายทาง",
-      destinationName: "destinationBranchId",
-      locationLabel: "สถานที่รับเข้า",
-    },
     transfer: {
-      title: "โอนสาขา",
-      destinationLabel: "รหัสสาขาปลายทาง",
-      destinationName: "destinationBranchId",
-      locationLabel: "สถานที่ปลายทาง",
+      title: "ย้ายคลัง",
+      destinationLabel: "คลังปลายทาง",
+      destinationName: "destinationWarehouseId",
+      locationLabel: "ชื่อคลังปลายทาง",
     },
     sale: {
       title: "ขายลูกค้า",
@@ -48,17 +42,11 @@ const labels = {
     },
   },
   en: {
-    receive: {
-      title: "Receive asset",
-      destinationLabel: "Destination branch ID",
-      destinationName: "destinationBranchId",
-      locationLabel: "Receiving location",
-    },
     transfer: {
-      title: "Transfer asset",
-      destinationLabel: "Destination branch ID",
-      destinationName: "destinationBranchId",
-      locationLabel: "Destination location",
+      title: "Move warehouse",
+      destinationLabel: "Destination warehouse",
+      destinationName: "destinationWarehouseId",
+      locationLabel: "Destination warehouse name",
     },
     sale: {
       title: "Sell asset",
@@ -74,7 +62,7 @@ const labels = {
     {
       title: string;
       destinationLabel: string;
-      destinationName: "destinationBranchId" | "customerId";
+      destinationName: "destinationWarehouseId" | "customerId";
       locationLabel: string;
     }
   >
@@ -88,7 +76,7 @@ export function MovementForm({ action }: MovementFormProps) {
   const [loadingAsset, setLoadingAsset] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [destinationBranchId, setDestinationBranchId] = useState("");
+  const [destinationWarehouseId, setDestinationWarehouseId] = useState("");
   const config = labels[locale][action];
 
   async function lookupAsset() {
@@ -127,12 +115,6 @@ export function MovementForm({ action }: MovementFormProps) {
       assetCode: asset.assetCode,
       [config.destinationName]: formData.get(config.destinationName),
       destinationLocationName: formData.get("destinationLocationName"),
-      ...(action === "receive"
-        ? {
-            sourceType: formData.get("sourceType"),
-            sourceName: formData.get("sourceName"),
-          }
-        : {}),
       referenceNumber: formData.get("referenceNumber") || null,
       notes: formData.get("notes") ?? "",
       expectedVersion: asset.version,
@@ -144,9 +126,7 @@ export function MovementForm({ action }: MovementFormProps) {
     try {
       const movement = await submitMovement(action, payload);
       router.replace(
-        `${action === "transfer" ? "/warehouse/transfers" : "/warehouse/movements"}?success=${encodeURIComponent(
-          movement.movementNumber,
-        )}`,
+        `/warehouse/movements?success=${encodeURIComponent(movement.movementNumber)}`,
       );
       router.refresh();
     } catch (submitError) {
@@ -220,27 +200,27 @@ export function MovementForm({ action }: MovementFormProps) {
             <select
               className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm disabled:opacity-50"
               disabled={!asset}
-              id="destinationBranchId"
-              name="destinationBranchId"
+              id="destinationWarehouseId"
+              name="destinationWarehouseId"
               onChange={(event) =>
-                setDestinationBranchId(event.currentTarget.value)
+                setDestinationWarehouseId(event.currentTarget.value)
               }
               required
-              value={destinationBranchId}
+              value={destinationWarehouseId}
             >
               <option value="">
-                {locale === "th" ? "เลือกสาขาปลายทาง" : "Select destination"}
+                {locale === "th" ? "เลือกคลังปลายทาง" : "Select destination"}
               </option>
-              {BRANCHES.map((branch) => (
+              {WAREHOUSES.map((warehouse) => (
                 <option
                   disabled={
-                    action === "transfer" && asset?.branchId === branch.id
+                    action === "transfer" && asset?.warehouseId === warehouse.id
                   }
-                  key={branch.id}
-                  value={branch.id}
+                  key={warehouse.id}
+                  value={warehouse.id}
                 >
-                  {locale === "th" ? branch.nameTh : branch.nameEn} ({branch.id}
-                  )
+                  {warehouse.id} —{" "}
+                  {locale === "th" ? warehouse.nameTh : warehouse.nameEn}
                 </option>
               ))}
             </select>
@@ -264,8 +244,8 @@ export function MovementForm({ action }: MovementFormProps) {
                 id="destinationLocationName"
                 readOnly
                 value={
-                  destinationBranchId
-                    ? getBranchLocationName(destinationBranchId as BranchId)
+                  destinationWarehouseId
+                    ? getWarehouseName(destinationWarehouseId as WarehouseId)
                     : ""
                 }
               />
@@ -273,51 +253,14 @@ export function MovementForm({ action }: MovementFormProps) {
                 name="destinationLocationName"
                 type="hidden"
                 value={
-                  destinationBranchId
-                    ? getBranchLocationName(destinationBranchId as BranchId)
+                  destinationWarehouseId
+                    ? getWarehouseName(destinationWarehouseId as WarehouseId)
                     : ""
                 }
               />
             </>
           )}
         </div>
-        {action === "receive" ? (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="sourceType">
-                {locale === "th" ? "ประเภทต้นทาง" : "Source type"} *
-              </Label>
-              <select
-                className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm disabled:opacity-50"
-                disabled={!asset}
-                id="sourceType"
-                name="sourceType"
-                required
-              >
-                <option value="supplier">
-                  {locale === "th" ? "ผู้จำหน่าย" : "Supplier"}
-                </option>
-                <option value="external">
-                  {locale === "th" ? "หน่วยงานภายนอก" : "External"}
-                </option>
-                <option value="other">
-                  {locale === "th" ? "อื่นๆ" : "Other"}
-                </option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sourceName">
-                {locale === "th" ? "ชื่อต้นทาง/ผู้จำหน่าย" : "Source name"} *
-              </Label>
-              <Input
-                disabled={!asset}
-                id="sourceName"
-                name="sourceName"
-                required
-              />
-            </div>
-          </>
-        ) : null}
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="referenceNumber">
             {locale === "th" ? "เลขที่เอกสารอ้างอิง" : "Reference number"}

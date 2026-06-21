@@ -19,11 +19,11 @@ import {
   type AssetCategoryKey,
 } from "@/domain/master-data/asset-categories";
 import {
-  BRANCHES,
-  findBranch,
-  getBranchLocationName,
-  type BranchId,
-} from "@/domain/master-data/branches";
+  findWarehouse,
+  getWarehouseName,
+  WAREHOUSES,
+  type WarehouseId,
+} from "@/domain/master-data/warehouses";
 
 export interface AssetFormInitialValues {
   readonly id: string;
@@ -33,8 +33,10 @@ export interface AssetFormInitialValues {
   readonly category: string;
   readonly categoryKey: AssetCategoryKey;
   readonly serialNumber: string | null;
+  readonly color: string;
   readonly condition: "operational" | "needs_repair" | "out_of_service";
   readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly locationName: string;
   readonly installedAt: string | null;
@@ -60,7 +62,9 @@ export function AssetForm({ initialValues }: AssetFormProps) {
     initialValues?.categoryKey ??
       inferAssetCategoryKey(initialValues?.category ?? ""),
   );
-  const [branchId, setBranchId] = useState(initialValues?.branchId ?? "");
+  const [warehouseId, setWarehouseId] = useState(
+    initialValues?.warehouseId ?? "",
+  );
   const [locationName, setLocationName] = useState(
     initialValues?.locationName ?? "",
   );
@@ -83,9 +87,9 @@ export function AssetForm({ initialValues }: AssetFormProps) {
       setDescription(catalog.description);
       setCategory(catalog.category);
       setCategoryKey(catalog.categoryKey);
-      setBranchId(catalog.defaultBranchId ?? "");
+      setWarehouseId(catalog.defaultWarehouseId ?? "");
       setLocationName(
-        findBranch(catalog.defaultBranchId)?.nameTh ??
+        findWarehouse(catalog.defaultWarehouseId)?.nameTh ??
           catalog.defaultLocationName,
       );
     } catch (catalogError) {
@@ -112,12 +116,13 @@ export function AssetForm({ initialValues }: AssetFormProps) {
       category: formData.get("category"),
       categoryKey: formData.get("categoryKey"),
       serialNumber: formData.get("serialNumber") || null,
+      color: formData.get("color") ?? "",
       condition: formData.get("condition"),
       installedAt: formData.get("installedAt") || null,
       ...(initialValues
         ? { expectedVersion: initialValues.version }
         : {
-            branchId: formData.get("branchId") || null,
+            warehouseId: formData.get("warehouseId"),
             customerId: formData.get("customerId") || null,
             locationName: formData.get("locationName"),
           }),
@@ -236,6 +241,19 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="color">{locale === "th" ? "สี" : "Color"}</Label>
+          <Input
+            defaultValue={initialValues?.color ?? ""}
+            id="color"
+            maxLength={120}
+            name="color"
+            placeholder={
+              locale === "th" ? "พิมพ์สีของเครื่อง" : "Enter asset color"
+            }
+          />
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="condition">
             {locale === "th" ? "สภาพ" : "Condition"}
           </Label>
@@ -258,36 +276,33 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="branchId">
-            {locale === "th" ? "สถานที่" : "Location"}
+          <Label htmlFor="warehouseId">
+            {locale === "th" ? "คลังเก็บ" : "Warehouse"} *
           </Label>
           <select
             className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm disabled:opacity-50"
             disabled={Boolean(initialValues)}
-            id="branchId"
-            name="branchId"
+            id="warehouseId"
+            name="warehouseId"
             onChange={(event) => {
-              const value = event.currentTarget.value as BranchId | "";
-              setBranchId(value);
-              setLocationName(value ? getBranchLocationName(value) : "");
+              const value = event.currentTarget.value as WarehouseId | "";
+              setWarehouseId(value);
+              setLocationName(value ? getWarehouseName(value) : "");
             }}
-            value={branchId}
+            required
+            value={warehouseId}
           >
             <option value="">
-              {locale === "th" ? "เลือกสาขา" : "Select branch"}
+              {locale === "th" ? "เลือกคลังเก็บ" : "Select warehouse"}
             </option>
-            {BRANCHES.map((branch) => (
-              <option key={branch.id} value={branch.id}>
-                {locale === "th" ? branch.nameTh : branch.nameEn} ({branch.id})
+            {WAREHOUSES.map((warehouse) => (
+              <option key={warehouse.id} value={warehouse.id}>
+                {warehouse.id} —{" "}
+                {locale === "th" ? warehouse.nameTh : warehouse.nameEn}
               </option>
             ))}
           </select>
           <input name="locationName" type="hidden" value={locationName} />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="branchCode">{t("field.branchId")}</Label>
-          <Input disabled id="branchCode" readOnly value={branchId} />
         </div>
 
         <div className="space-y-2">

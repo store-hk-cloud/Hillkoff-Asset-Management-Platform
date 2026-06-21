@@ -33,7 +33,7 @@ export async function POST(request: Request) {
         success: true,
         data: {
           id: movement.id,
-          movementNumber: movement.transferNumber,
+          movementNumber: movement.movementNumber,
         },
       },
       { status: 201 },

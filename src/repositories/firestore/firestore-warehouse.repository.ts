@@ -72,6 +72,8 @@ function mapEndpoint(data: DocumentData): MovementEndpoint {
         ? data.externalType
         : null,
     branchId,
+    warehouseId:
+      typeof data.warehouseId === "string" ? data.warehouseId : branchId,
     customerId,
     locationName,
   };
@@ -206,6 +208,7 @@ function serializeEndpoint(endpoint: MovementEndpoint) {
     name: endpoint.name,
     externalType: endpoint.externalType,
     branchId: endpoint.branchId,
+    warehouseId: endpoint.warehouseId,
     customerId: endpoint.customerId,
     locationName: endpoint.locationName,
   };
@@ -250,8 +253,11 @@ export class FirestoreWarehouseRepository implements WarehouseRepository {
       transaction.update(assetReference, {
         custodyType: asset.custodyType,
         branchId: asset.branchId,
+        warehouseId: asset.warehouseId,
         customerId: asset.customerId,
         locationName: asset.locationName,
+        searchKeywords: asset.searchKeywords,
+        searchPrefixes: asset.searchPrefixes,
         lastMovementAt: Timestamp.fromDate(
           asset.lastMovementAt ?? asset.updatedAt,
         ),
@@ -375,6 +381,7 @@ export class FirestoreWarehouseRepository implements WarehouseRepository {
       transaction.update(assetReference, {
         custodyType: commit.asset.custodyType,
         branchId: commit.asset.branchId,
+        warehouseId: commit.asset.warehouseId,
         customerId: commit.asset.customerId,
         locationName: commit.asset.locationName,
         activeTransferId: commit.asset.activeTransferId,

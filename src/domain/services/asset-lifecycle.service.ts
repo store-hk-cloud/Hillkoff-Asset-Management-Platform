@@ -15,10 +15,10 @@ import {
   buildAssetSearchPrefixes,
 } from "@/domain/services/asset-search.service";
 import {
-  getBranchLocationName,
-  isBranchId,
-  type BranchId,
-} from "@/domain/master-data/branches";
+  getWarehouseName,
+  isWarehouseId,
+  type WarehouseId,
+} from "@/domain/master-data/warehouses";
 
 export interface AssetTransition {
   readonly asset: Asset;
@@ -27,7 +27,7 @@ export interface AssetTransition {
 
 type SearchableAssetInput = Pick<
   AssetCreateInput,
-  "assetCode" | "name" | "category" | "serialNumber" | "locationName"
+  "assetCode" | "name" | "category" | "serialNumber" | "color" | "locationName"
 >;
 
 function searchableValues(input: SearchableAssetInput): readonly string[] {
@@ -36,6 +36,7 @@ function searchableValues(input: SearchableAssetInput): readonly string[] {
     input.name,
     input.category,
     input.serialNumber ?? "",
+    input.color,
     input.locationName,
   ];
 }
@@ -51,9 +52,11 @@ function createChanges(
     "category",
     "categoryKey",
     "serialNumber",
+    "color",
     "condition",
     "status",
     "branchId",
+    "warehouseId",
     "customerId",
     "locationName",
     "installedAt",
@@ -103,11 +106,11 @@ export class AssetLifecycleService implements DomainService {
       throw new AssetError("INVALID_ASSET", "Serial number is required.");
     }
 
-    const requestedBranchId = input.branchId?.trim() || null;
-    if (requestedBranchId && !isBranchId(requestedBranchId)) {
-      throw new AssetError("INVALID_ASSET", "Invalid branch.");
+    const requestedWarehouseId = input.warehouseId.trim();
+    if (!isWarehouseId(requestedWarehouseId)) {
+      throw new AssetError("INVALID_ASSET", "Invalid warehouse.");
     }
-    const branchId = requestedBranchId as BranchId | null;
+    const warehouseId = requestedWarehouseId as WarehouseId;
 
     const normalizedInput = {
       assetCode,
@@ -116,13 +119,13 @@ export class AssetLifecycleService implements DomainService {
       category,
       categoryKey,
       serialNumber,
+      color: input.color.trim(),
       condition: input.condition,
       custodyType:
         input.custodyType ?? (input.customerId?.trim() ? "customer" : "branch"),
-      locationName: branchId
-        ? getBranchLocationName(branchId)
-        : input.locationName.trim(),
-      branchId,
+      locationName: getWarehouseName(warehouseId),
+      branchId: warehouseId,
+      warehouseId,
       customerId: input.customerId?.trim() || null,
       installedAt: input.installedAt,
     };
@@ -198,6 +201,7 @@ export class AssetLifecycleService implements DomainService {
       category: input.category.trim(),
       categoryKey: input.categoryKey,
       serialNumber: input.serialNumber.trim().toUpperCase(),
+      color: input.color.trim(),
       condition: input.condition,
       installedAt: input.installedAt,
     };

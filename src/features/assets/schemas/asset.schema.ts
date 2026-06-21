@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { ASSET_CONDITIONS, ASSET_STATUSES } from "@/domain/entities/asset";
 import { ASSET_CATEGORY_KEYS } from "@/domain/master-data/asset-categories";
-import { BRANCH_IDS } from "@/domain/master-data/branches";
+import { WAREHOUSE_IDS } from "@/domain/master-data/warehouses";
 
 const nullableTrimmedString = z
   .string()
@@ -40,8 +40,9 @@ export const assetCreateSchema = z.object({
   category: z.string().trim().min(1).max(120),
   categoryKey: z.enum(ASSET_CATEGORY_KEYS),
   serialNumber: z.string().trim().min(1).max(120),
+  color: z.string().trim().max(120),
   condition: z.enum(ASSET_CONDITIONS),
-  branchId: z.enum(BRANCH_IDS).nullable(),
+  warehouseId: z.enum(WAREHOUSE_IDS),
   customerId: nullableTrimmedString,
   locationName: z.string().trim().max(200),
   installedAt: installedAtSchema,
@@ -49,7 +50,7 @@ export const assetCreateSchema = z.object({
 
 export const assetUpdateSchema = assetCreateSchema
   .omit({
-    branchId: true,
+    warehouseId: true,
     customerId: true,
     locationName: true,
   })

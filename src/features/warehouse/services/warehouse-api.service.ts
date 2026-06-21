@@ -1,7 +1,6 @@
 "use client";
 
 import type { Asset } from "@/domain/entities/asset";
-import type { AssetTransfer } from "@/domain/entities/asset-transfer";
 
 async function getCsrfToken(): Promise<string> {
   const response = await fetch("/api/auth/csrf", {
@@ -34,7 +33,7 @@ export async function findWarehouseAsset(assetCode: string): Promise<Asset> {
 }
 
 export async function submitMovement(
-  action: "receive" | "transfer" | "sale",
+  action: "transfer" | "sale",
   input: unknown,
 ): Promise<{ id: string; movementNumber: string }> {
   const csrfToken = await getCsrfToken();
@@ -56,33 +55,5 @@ export async function submitMovement(
     throw new Error(payload.error?.message ?? "ไม่สามารถทำรายการได้");
   }
 
-  return payload.data;
-}
-
-export async function submitTransferAction(
-  transferId: string,
-  action: "dispatch" | "receive" | "cancel" | "reject" | "return",
-  input: unknown,
-): Promise<AssetTransfer> {
-  const csrfToken = await getCsrfToken();
-  const response = await fetch(
-    `/api/warehouse/transfers/${encodeURIComponent(transferId)}/${action}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-Token": csrfToken,
-      },
-      credentials: "same-origin",
-      body: JSON.stringify(input),
-    },
-  );
-  const payload = (await response.json()) as {
-    data?: AssetTransfer;
-    error?: { message?: string };
-  };
-  if (!response.ok || !payload.data) {
-    throw new Error(payload.error?.message ?? "Unable to update transfer.");
-  }
   return payload.data;
 }

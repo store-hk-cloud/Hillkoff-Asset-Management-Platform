@@ -26,6 +26,7 @@ function asset(overrides: Partial<Asset> = {}): Asset {
     status: "active",
     custodyType: "branch",
     branchId: "HK1",
+    warehouseId: "HK1",
     customerId: null,
     locationName: "Warehouse A",
     installedAt: null,
@@ -103,6 +104,29 @@ describe("WarehouseMovementService", () => {
     expect(transition.asset.branchId).toBeNull();
     expect(transition.asset.customerId).toBe("customer-a");
     expect(transition.source.branchId).toBe("HK1");
+  });
+
+  it("moves an asset directly between warehouses", () => {
+    const transition = service.transfer(
+      asset(),
+      {
+        assetCode: "HK-001",
+        destinationWarehouseId: "Z03",
+        destinationLocationName: "คลังบ้านเช่า 2",
+        referenceNumber: "MOVE-001",
+        notes: "",
+        expectedVersion: 2,
+      },
+      actorId,
+      now,
+    );
+
+    expect(transition.asset.warehouseId).toBe("Z03");
+    expect(transition.asset.branchId).toBe("Z03");
+    expect(transition.asset.locationName).toBe("คลังบ้านเช่า 2");
+    expect(transition.asset.version).toBe(3);
+    expect(transition.source.warehouseId).toBe("HK1");
+    expect(transition.destination.warehouseId).toBe("Z03");
   });
 
   it("blocks other movement while a transfer is active", () => {

@@ -51,7 +51,6 @@ data-access layer and route handlers.
 | `/assets/{id}`                     | Authenticated and scope-filtered                       |
 | `/assets/{id}/edit`                | Admin or warehouse; active assets only                 |
 | `/warehouse`                       | Warehouse operation menu                               |
-| `/warehouse/receive`               | Admin or warehouse                                     |
 | `/warehouse/transfer`              | Admin or warehouse                                     |
 | `/warehouse/sale`                  | Admin, warehouse, or sales                             |
 | `/warehouse/movements`             | Admin, warehouse, executive, or scoped branch          |

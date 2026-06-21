@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/language-provider";
 import type { UserStatus } from "@/domain/entities/user-profile";
 import { USER_ROLES, type UserRole } from "@/domain/value-objects/user-role";
-import { BRANCHES } from "@/domain/master-data/branches";
+import { WAREHOUSES } from "@/domain/master-data/warehouses";
 import {
   createManagedUser,
   sendManagedUserPasswordReset,
@@ -185,7 +185,9 @@ export function UserForm({
         ) : null}
         {role === "branch" ? (
           <div className="space-y-2">
-            <Label htmlFor="branchId">{t("field.branchId")} *</Label>
+            <Label htmlFor="branchId">
+              {locale === "th" ? "คลังที่รับผิดชอบ" : "Assigned warehouse"} *
+            </Label>
             <select
               className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
               defaultValue={initialValues?.branchId ?? ""}
@@ -194,12 +196,12 @@ export function UserForm({
               required
             >
               <option value="">
-                {locale === "th" ? "เลือกสาขา" : "Select branch"}
+                {locale === "th" ? "เลือกคลัง" : "Select warehouse"}
               </option>
-              {BRANCHES.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {locale === "th" ? branch.nameTh : branch.nameEn} ({branch.id}
-                  )
+              {WAREHOUSES.map((warehouse) => (
+                <option key={warehouse.id} value={warehouse.id}>
+                  {warehouse.id} —{" "}
+                  {locale === "th" ? warehouse.nameTh : warehouse.nameEn}
                 </option>
               ))}
             </select>

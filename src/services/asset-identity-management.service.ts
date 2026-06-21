@@ -38,7 +38,7 @@ export interface PublicAssetProjection {
     readonly condition: Asset["condition"];
     readonly lifecycleStatus: Asset["status"];
     readonly nfcStatus: Asset["nfcStatus"];
-    readonly branchId: string | null;
+    readonly warehouseId: string | null;
     readonly locationName: string;
     readonly inStockQuantity: number;
   } | null;
@@ -116,7 +116,7 @@ export class AssetIdentityManagementService {
             condition: asset.condition,
             lifecycleStatus: asset.status,
             nfcStatus: asset.nfcStatus,
-            branchId: asset.branchId,
+            warehouseId: asset.warehouseId ?? null,
             locationName: asset.locationName,
             inStockQuantity: await this.assetRepository.countInStockByCode(
               asset.assetCode,

@@ -129,37 +129,27 @@ export class WarehouseManagementService {
   async transfer(
     input: TransferAssetInput,
     context: WarehouseRequestContext,
-  ): Promise<AssetTransfer> {
+  ): Promise<MovementLog> {
     this.requirePermission(this.canTransfer(context.actor));
     const current = await this.findAssetByCode(input.assetCode, context.actor);
-    if (
-      context.actor.role === "branch" &&
-      current.branchId !== context.actor.branchId
-    ) {
-      throw new WarehouseError(
-        "WAREHOUSE_ACCESS_DENIED",
-        "A branch can transfer only its own stock.",
-      );
-    }
     const now = new Date();
-    const transition = this.transferService.request(
-      crypto.randomUUID(),
+    const transition = this.movementService.transfer(
       current,
       input,
       context.actor.uid,
       now,
     );
-    await this.commitTransfer(
+    return this.commit(
+      "branch_transfer",
+      "branch_transferred",
+      "Asset moved between warehouses",
       current,
       transition,
-      "transfer_requested",
-      "Asset transfer requested",
+      input.referenceNumber,
+      input.notes,
       context,
       now,
-      null,
-      null,
     );
-    return transition.transfer;
   }
 
   async listTransfers(
@@ -441,6 +431,7 @@ export class WarehouseManagementService {
         name: transition.transfer.sourceLocationName,
         externalType: null,
         branchId: transition.transfer.sourceBranchId,
+        warehouseId: transition.transfer.sourceBranchId,
         customerId: null,
         locationName: transition.transfer.sourceLocationName,
       },
@@ -449,6 +440,7 @@ export class WarehouseManagementService {
         name: transition.transfer.destinationLocationName,
         externalType: null,
         branchId: transition.transfer.destinationBranchId,
+        warehouseId: transition.transfer.destinationBranchId,
         customerId: null,
         locationName: transition.transfer.destinationLocationName,
       },
