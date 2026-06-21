@@ -25,7 +25,10 @@ export interface AssetRepository {
   findCatalogByCode(assetCode: string): Promise<AssetCatalog | null>;
   countInStockByCode(assetCode: string): Promise<number>;
   countByCategory(
-    criteria: Pick<AssetSearchCriteria, "status" | "branchId" | "customerId">,
+    criteria: Pick<
+      AssetSearchCriteria,
+      "status" | "warehouseId" | "customerId"
+    >,
   ): Promise<AssetCategoryCounts>;
   search(criteria: AssetSearchCriteria): Promise<readonly Asset[]>;
   listEvents(

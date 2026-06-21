@@ -30,7 +30,7 @@ export function UserList({ users }: { users: readonly UserProfile[] }) {
               <div>
                 <p className="text-sm font-medium">{user.role}</p>
                 <p className="text-muted-foreground text-xs">
-                  {user.branchId ??
+                  {user.warehouseId ??
                     user.customerId ??
                     (locale === "th" ? "ทุกขอบเขต" : "All scope")}
                 </p>

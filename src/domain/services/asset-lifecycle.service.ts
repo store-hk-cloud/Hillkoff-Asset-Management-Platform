@@ -55,7 +55,6 @@ function createChanges(
     "color",
     "condition",
     "status",
-    "branchId",
     "warehouseId",
     "customerId",
     "locationName",
@@ -122,9 +121,9 @@ export class AssetLifecycleService implements DomainService {
       color: input.color.trim(),
       condition: input.condition,
       custodyType:
-        input.custodyType ?? (input.customerId?.trim() ? "customer" : "branch"),
+        input.custodyType ??
+        (input.customerId?.trim() ? "customer" : "warehouse"),
       locationName: getWarehouseName(warehouseId),
-      branchId: warehouseId,
       warehouseId,
       customerId: input.customerId?.trim() || null,
       installedAt: input.installedAt,
@@ -137,7 +136,6 @@ export class AssetLifecycleService implements DomainService {
       qrUrl: identity?.urls.qrUrl ?? null,
       status: "active",
       lastMovementAt: null,
-      activeTransferId: null,
       installationLatitude: null,
       installationLongitude: null,
       warranty: {

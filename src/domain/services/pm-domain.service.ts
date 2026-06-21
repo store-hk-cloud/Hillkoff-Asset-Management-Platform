@@ -51,7 +51,7 @@ export class PmDomainService {
       assetId: asset.id,
       assetCode: asset.assetCode,
       assetName: asset.name,
-      branchId: asset.branchId,
+      warehouseId: asset.warehouseId,
       customerId: asset.customerId,
       title: input.title.trim(),
       scheduledAt: input.scheduledAt,

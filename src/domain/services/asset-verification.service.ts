@@ -9,11 +9,8 @@ export class AssetVerificationService implements DomainService {
       return "archived";
     }
 
-    if (asset.custodyType === "branch") {
+    if (asset.custodyType === "warehouse") {
       return "in_stock";
-    }
-    if (asset.custodyType === "in_transit") {
-      return "in_transit";
     }
 
     return asset.installedAt ? "in_use" : "sold";

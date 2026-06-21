@@ -16,7 +16,7 @@ export const managedUserCreateSchema = z.object({
   email: z.email().transform((value) => value.trim().toLowerCase()),
   displayName: z.string().trim().min(1).max(120),
   role: z.enum(USER_ROLES),
-  branchId: nullableBranchId,
+  warehouseId: nullableBranchId,
   customerId: nullableScope,
 });
 
@@ -24,7 +24,7 @@ export const managedUserUpdateSchema = z.object({
   displayName: z.string().trim().min(1).max(120),
   role: z.enum(USER_ROLES),
   status: z.enum(USER_STATUSES),
-  branchId: nullableBranchId,
+  warehouseId: nullableBranchId,
   customerId: nullableScope,
   expectedVersion: z.number().int().nonnegative(),
 });

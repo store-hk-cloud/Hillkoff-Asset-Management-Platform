@@ -22,7 +22,7 @@ export interface ManagedUserFormValues {
   readonly displayName: string;
   readonly role: UserRole;
   readonly status: UserStatus;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly version: number;
 }
@@ -53,7 +53,7 @@ export function UserForm({
     const common = {
       displayName: form.get("displayName"),
       role: form.get("role"),
-      branchId: form.get("branchId") || null,
+      warehouseId: form.get("warehouseId") || null,
       customerId: form.get("customerId") || null,
     };
 
@@ -185,14 +185,14 @@ export function UserForm({
         ) : null}
         {role === "branch" ? (
           <div className="space-y-2">
-            <Label htmlFor="branchId">
+            <Label htmlFor="warehouseId">
               {locale === "th" ? "คลังที่รับผิดชอบ" : "Assigned warehouse"} *
             </Label>
             <select
               className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
-              defaultValue={initialValues?.branchId ?? ""}
-              id="branchId"
-              name="branchId"
+              defaultValue={initialValues?.warehouseId ?? ""}
+              id="warehouseId"
+              name="warehouseId"
               required
             >
               <option value="">

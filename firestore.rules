@@ -54,8 +54,8 @@ service cloud.firestore {
         ]
         || (
           request.auth.token.role == 'branch'
-          && currentUser().branchId != null
-          && data.branchId == currentUser().branchId
+          && currentUser().warehouseId != null
+          && data.warehouseId == currentUser().warehouseId
         )
         || (
           request.auth.token.role == 'customer'
@@ -74,7 +74,7 @@ service cloud.firestore {
           'photoURL',
           'role',
           'status',
-          'branchId',
+          'warehouseId',
           'customerId',
           'lastLoginAt',
           'createdAt',
@@ -90,7 +90,7 @@ service cloud.firestore {
         && (data.photoURL == null || data.photoURL is string)
         && hasValidRole(data.role)
         && data.status in ['invited', 'active', 'disabled']
-        && (data.branchId == null || data.branchId is string)
+        && (data.warehouseId == null || data.warehouseId is string)
         && (data.customerId == null || data.customerId is string)
         && (data.lastLoginAt == null || data.lastLoginAt is timestamp)
         && data.createdAt is timestamp
@@ -163,20 +163,8 @@ service cloud.firestore {
         request.auth.token.role in ['admin', 'warehouse', 'executive']
         || (
           request.auth.token.role == 'branch'
-          && currentUser().branchId != null
-          && currentUser().branchId in resource.data.involvedBranchIds
-        )
-      );
-      allow create, update, delete: if false;
-    }
-
-    match /asset_transfers/{transferId} {
-      allow get, list: if isActiveUser() && (
-        request.auth.token.role in ['admin', 'warehouse', 'executive']
-        || (
-          request.auth.token.role == 'branch'
-          && currentUser().branchId != null
-          && currentUser().branchId in resource.data.involvedBranchIds
+          && currentUser().warehouseId != null
+          && currentUser().warehouseId in resource.data.involvedWarehouseIds
         )
       );
       allow create, update, delete: if false;
@@ -221,8 +209,8 @@ service cloud.firestore {
         )
         || (
           request.auth.token.role == 'branch'
-          && currentUser().branchId != null
-          && resource.data.branchId == currentUser().branchId
+          && currentUser().warehouseId != null
+          && resource.data.warehouseId == currentUser().warehouseId
         )
         || (
           request.auth.token.role == 'customer'
@@ -242,8 +230,8 @@ service cloud.firestore {
         )
         || (
           request.auth.token.role == 'branch'
-          && currentUser().branchId != null
-          && resource.data.branchId == currentUser().branchId
+          && currentUser().warehouseId != null
+          && resource.data.warehouseId == currentUser().warehouseId
         )
         || (
           request.auth.token.role == 'customer'

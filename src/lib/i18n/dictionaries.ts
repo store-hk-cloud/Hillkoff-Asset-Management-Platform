@@ -49,7 +49,6 @@ const translations = {
   "field.role": { th: "บทบาท", en: "Role" },
   "field.phone": { th: "เบอร์โทรศัพท์", en: "Phone number" },
   "field.status": { th: "สถานะ", en: "Status" },
-  "field.branchId": { th: "รหัสสาขา", en: "Branch ID" },
   "field.customerId": { th: "รหัสลูกค้า", en: "Customer ID" },
   "profile.title": { th: "โปรไฟล์ผู้ใช้", en: "User profile" },
   "profile.description": {

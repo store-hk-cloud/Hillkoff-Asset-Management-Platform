@@ -36,17 +36,17 @@ export class AssetManagementService {
   ) {}
 
   async list(
-    criteria: Omit<AssetSearchCriteria, "branchId" | "customerId">,
+    criteria: Omit<AssetSearchCriteria, "warehouseId" | "customerId">,
     profile: UserProfile,
   ): Promise<readonly Asset[]> {
     const scopedCriteria: AssetSearchCriteria = {
       ...criteria,
-      branchId: profile.role === "branch" ? profile.branchId : null,
+      warehouseId: profile.role === "branch" ? profile.warehouseId : null,
       customerId: profile.role === "customer" ? profile.customerId : null,
     };
 
     if (
-      (profile.role === "branch" && !profile.branchId) ||
+      (profile.role === "branch" && !profile.warehouseId) ||
       (profile.role === "customer" && !profile.customerId)
     ) {
       return [];
@@ -60,7 +60,7 @@ export class AssetManagementService {
     profile: UserProfile,
   ): Promise<AssetCategoryCounts> {
     if (
-      (profile.role === "branch" && !profile.branchId) ||
+      (profile.role === "branch" && !profile.warehouseId) ||
       (profile.role === "customer" && !profile.customerId)
     ) {
       return {
@@ -75,7 +75,7 @@ export class AssetManagementService {
 
     return this.repository.countByCategory({
       status: criteria.status,
-      branchId: profile.role === "branch" ? profile.branchId : null,
+      warehouseId: profile.role === "branch" ? profile.warehouseId : null,
       customerId: profile.role === "customer" ? profile.customerId : null,
     });
   }

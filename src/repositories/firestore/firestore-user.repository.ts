@@ -30,7 +30,7 @@ interface UserDocument {
   readonly photoURL: string | null;
   readonly role: string;
   readonly status: UserStatus;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly lastLoginAt: Timestamp | null;
   readonly createdAt: Timestamp;
@@ -110,7 +110,7 @@ function mapUserDocument(data: DocumentData): UserProfile {
     photoURL: requireNullableString(data, "photoURL"),
     role,
     status,
-    branchId: requireNullableString(data, "branchId"),
+    warehouseId: requireNullableString(data, "warehouseId"),
     customerId: requireNullableString(data, "customerId"),
     lastLoginAt: lastLoginAt?.toDate() ?? null,
     createdAt: requireTimestamp(data, "createdAt").toDate(),
@@ -189,7 +189,7 @@ export class FirestoreUserRepository implements UserRepository {
         displayName: update.displayName,
         role: update.role,
         status: update.status,
-        branchId: update.branchId,
+        warehouseId: update.warehouseId,
         customerId: update.customerId,
         updatedAt: FieldValue.serverTimestamp(),
         version: current.version + 1,
@@ -282,7 +282,7 @@ function mapManagedProfile(profile: UserProfile): UserDocument {
     photoURL: profile.photoURL,
     role: profile.role,
     status: profile.status,
-    branchId: profile.branchId,
+    warehouseId: profile.warehouseId,
     customerId: profile.customerId,
     lastLoginAt: profile.lastLoginAt
       ? Timestamp.fromDate(profile.lastLoginAt)

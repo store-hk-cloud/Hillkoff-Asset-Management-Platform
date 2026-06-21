@@ -244,7 +244,7 @@ async function provisionAdmin({ email, displayName, password }) {
       photoURL: typeof current?.photoURL === "string" ? current.photoURL : null,
       role: "admin",
       status: "active",
-      branchId: null,
+      warehouseId: null,
       customerId: null,
       lastLoginAt:
         current?.lastLoginAt instanceof Timestamp ? current.lastLoginAt : null,

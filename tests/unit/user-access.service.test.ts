@@ -23,7 +23,7 @@ function profile(role: UserRole): UserProfile {
     photoURL: null,
     role,
     status: "active",
-    branchId: null,
+    warehouseId: null,
     customerId: null,
     lastLoginAt: null,
     createdAt: now,
@@ -44,7 +44,7 @@ describe("UserAccessService", () => {
         email: "branch@example.com",
         displayName: "Branch",
         role: "branch",
-        branchId: null,
+        warehouseId: null,
         customerId: null,
       }),
     ).toThrow(UserManagementError);
@@ -54,10 +54,10 @@ describe("UserAccessService", () => {
         email: "customer@example.com",
         displayName: "Customer",
         role: "customer",
-        branchId: "ignored",
+        warehouseId: "HK1",
         customerId: "customer-1",
       }),
-    ).toMatchObject({ branchId: null, customerId: "customer-1" });
+    ).toMatchObject({ warehouseId: null, customerId: "customer-1" });
   });
 
   it("prevents administrators from locking themselves out", () => {
@@ -66,7 +66,7 @@ describe("UserAccessService", () => {
       displayName: admin.displayName,
       role: "warehouse",
       status: "active",
-      branchId: null,
+      warehouseId: null,
       customerId: null,
       expectedVersion: 0,
     };

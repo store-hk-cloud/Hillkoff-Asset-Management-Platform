@@ -43,7 +43,7 @@ function userDocument(
     photoURL: null,
     role,
     status,
-    branchId: null,
+    warehouseId: null,
     customerId: null,
     lastLoginAt: null,
     createdAt: now,

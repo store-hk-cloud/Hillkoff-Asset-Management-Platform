@@ -61,7 +61,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
               displayName: user.displayName,
               role: user.role,
               status: user.status,
-              branchId: user.branchId,
+              warehouseId: user.warehouseId,
               customerId: user.customerId,
               version: user.version,
             }}

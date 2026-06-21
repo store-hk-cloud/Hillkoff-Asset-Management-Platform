@@ -65,7 +65,7 @@ function mapJob(data: DocumentData): PmJob {
     assetId: createAssetId(string(data, "assetId")),
     assetCode: string(data, "assetCode"),
     assetName: string(data, "assetName"),
-    branchId: nullableString(data, "branchId"),
+    warehouseId: nullableString(data, "warehouseId"),
     customerId: nullableString(data, "customerId"),
     title: string(data, "title"),
     scheduledAt,
@@ -138,8 +138,8 @@ export class FirestorePmRepository implements PmRepository {
     if (criteria.technicianId) {
       query = query.where("assignedTechnicianId", "==", criteria.technicianId);
     }
-    if (criteria.branchId) {
-      query = query.where("branchId", "==", criteria.branchId);
+    if (criteria.warehouseId) {
+      query = query.where("warehouseId", "==", criteria.warehouseId);
     }
     if (criteria.customerId) {
       query = query.where("customerId", "==", criteria.customerId);

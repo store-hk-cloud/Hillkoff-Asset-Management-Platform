@@ -37,7 +37,7 @@ export interface RepairTicket {
   readonly assetId: AssetId;
   readonly assetCode: string;
   readonly assetName: string;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly title: string;
   readonly description: string;

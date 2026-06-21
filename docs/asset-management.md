@@ -38,7 +38,7 @@ or any write fails, the whole transaction is rolled back.
 ## Asset catalog and create form
 
 `asset_catalog/{assetCode}` stores reusable name, category, description,
-default branch, and default location values. Entering an existing Asset Code in
+default warehouse, and default location values. Entering an existing Asset Code in
 the create form fills those fields automatically. Serial Number is deliberately
 never copied and must be entered for each machine.
 
@@ -52,15 +52,15 @@ than counting only the currently displayed page.
 
 ## Permissions
 
-| Role       | Read scope            | Create/Edit/Archive |
-| ---------- | --------------------- | ------------------- |
-| admin      | All assets            | Yes                 |
-| warehouse  | All assets            | Yes                 |
-| technician | All assets            | No                  |
-| sales      | All assets            | No                  |
-| executive  | All assets            | No                  |
-| branch     | Matching `branchId`   | No                  |
-| customer   | Matching `customerId` | No                  |
+| Role       | Read scope             | Create/Edit/Archive |
+| ---------- | ---------------------- | ------------------- |
+| admin      | All assets             | Yes                 |
+| warehouse  | All assets             | Yes                 |
+| technician | All assets             | No                  |
+| sales      | All assets             | No                  |
+| executive  | All assets             | No                  |
+| branch     | Matching `warehouseId` | No                  |
+| customer   | Matching `customerId`  | No                  |
 
 Direct browser writes to all three collections are denied. Mutations use
 verified Next.js sessions, CSRF protection, application services, and the Admin
@@ -88,8 +88,8 @@ replace the repository implementation later without changing domain contracts.
 Repair, PM, installation, and document event types are prepared for future
 modules. Phase 3 does not create repair or maintenance workflows.
 
-Warehouse events (`warehouse_received`, `branch_transferred`, and
-`customer_sold`) are appended by the Warehouse module and appear in the same
+Warehouse events (`warehouse_moved` and `customer_sold`) are appended by the
+Warehouse module and appear in the same
 Asset Timeline.
 
 New assets also receive an immutable Public ID with canonical QR and NFC URLs.

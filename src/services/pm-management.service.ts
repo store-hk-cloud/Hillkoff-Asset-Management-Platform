@@ -67,14 +67,14 @@ export class PmManagementService {
       throw new PmError("PM_ACCESS_DENIED", "You cannot view PM jobs.");
     }
     if (
-      (profile.role === "branch" && !profile.branchId) ||
+      (profile.role === "branch" && !profile.warehouseId) ||
       (profile.role === "customer" && !profile.customerId)
     ) {
       return [];
     }
     const jobs = await this.repository.list({
       technicianId: profile.role === "technician" ? profile.uid : null,
-      branchId: profile.role === "branch" ? profile.branchId : null,
+      warehouseId: profile.role === "branch" ? profile.warehouseId : null,
       customerId: profile.role === "customer" ? profile.customerId : null,
       status: options.status,
       from: options.from ?? null,
@@ -99,8 +99,8 @@ export class PmManagementService {
       (profile.role === "technician" &&
         job.assignedTechnicianId === profile.uid) ||
       (profile.role === "branch" &&
-        profile.branchId !== null &&
-        job.branchId === profile.branchId) ||
+        profile.warehouseId !== null &&
+        job.warehouseId === profile.warehouseId) ||
       (profile.role === "customer" &&
         profile.customerId !== null &&
         job.customerId === profile.customerId);

@@ -12,28 +12,16 @@ function asset(
 }
 
 describe("AssetVerificationService", () => {
-  it("maps branch custody to in-stock", () => {
+  it("maps warehouse custody to in-stock", () => {
     expect(
       service.getOperationalStatus(
         asset({
           status: "active",
-          custodyType: "branch",
+          custodyType: "warehouse",
           installedAt: null,
         }),
       ),
     ).toBe("in_stock");
-  });
-
-  it("maps transfer custody to in-transit", () => {
-    expect(
-      service.getOperationalStatus(
-        asset({
-          status: "active",
-          custodyType: "in_transit",
-          installedAt: null,
-        }),
-      ),
-    ).toBe("in_transit");
   });
 
   it("distinguishes sold from installed customer assets", () => {

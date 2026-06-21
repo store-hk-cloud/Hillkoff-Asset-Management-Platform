@@ -8,9 +8,8 @@ The Warehouse module exposes three operational workflows:
 - Sell and assign an asset to a customer.
 - Review immutable movement history.
 
-The former external Receive workflow and two-sided branch-transfer queue are no
-longer exposed. Existing `asset_transfers` documents remain read-only historical
-data and are not deleted.
+The former external Receive workflow and two-sided branch-transfer queue have
+been removed. Historical movements remain available through `movement_logs`.
 
 ## Warehouse master data
 
@@ -19,10 +18,7 @@ New records must select one of the 13 approved warehouses:
 `ENG-SPT`, `ENG`, `FAC-EXP`, `FAC-STORE`, `HK1`, `HK1-SW`, `HQ`, `MHD`,
 `MKT`, `RAT`, `SME`, `Z03`, and `TDP`.
 
-The Asset stores `warehouseId` and the derived Thai `locationName`. The legacy
-`branchId` field mirrors `warehouseId` temporarily so existing access rules,
-Repair/PM snapshots, and historical queries remain compatible. It is not shown
-or entered in the Asset UI.
+The Asset stores `warehouseId` and the derived Thai `locationName`.
 
 ## Direct warehouse movement
 
@@ -32,7 +28,7 @@ Every move uses one Firestore transaction:
    unambiguous Asset Code.
 2. Validate optimistic version, lifecycle state, current custody, and that the
    destination differs from the current warehouse.
-3. Update `warehouseId`, compatibility `branchId`, and `locationName`.
+3. Update `warehouseId` and `locationName`.
 4. Create `movement_logs/{movementId}`.
 5. Create `asset_events/{eventId}`.
 6. Create `audit_logs/{auditId}`.
@@ -46,20 +42,9 @@ Asset creation includes a free-text `color` field and a required warehouse
 dropdown. Asset Code catalog autofill does not overwrite color or Serial Number,
 because those values belong to the individual machine.
 
-## Migration
+## Production migration
 
-The two approved existing Assets with Serial Numbers `0020569B` and `0020571B`
-are migrated to `HK1 — Hillkoff 1`. The migration creates an Asset Event
-and Audit Log for each change.
-
-Run a dry-run first:
-
-```text
-npm run assets:migrate-warehouses
-```
-
-Apply only after reviewing the exact two matches:
-
-```text
-APPLY_WAREHOUSE_MIGRATION=true npm run assets:migrate-warehouses
-```
+The warehouse-only migration was applied to Production after a reviewed dry
+run. Assets, users, catalog data, movements, and historical events no longer
+contain the obsolete branch-transfer fields. The migration record is retained
+in `audit_logs/warehouse-model-v2`.

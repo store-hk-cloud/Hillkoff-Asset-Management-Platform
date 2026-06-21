@@ -86,7 +86,7 @@ export class UserManagementService {
       photoURL: null,
       role: normalized.role,
       status: "invited",
-      branchId: normalized.branchId,
+      warehouseId: normalized.warehouseId,
       customerId: normalized.customerId,
       lastLoginAt: null,
       createdAt: now,
@@ -101,7 +101,7 @@ export class UserManagementService {
         this.audit("user.created", profile, context, now, {
           role: normalized.role,
           status: "active",
-          branchId: normalized.branchId,
+          warehouseId: normalized.warehouseId,
           customerId: normalized.customerId,
         }),
       );
@@ -165,7 +165,10 @@ export class UserManagementService {
           },
           role: { before: current.role, after: normalized.role },
           status: { before: current.status, after: normalized.status },
-          branchId: { before: current.branchId, after: normalized.branchId },
+          warehouseId: {
+            before: current.warehouseId,
+            after: normalized.warehouseId,
+          },
           customerId: {
             before: current.customerId,
             after: normalized.customerId,

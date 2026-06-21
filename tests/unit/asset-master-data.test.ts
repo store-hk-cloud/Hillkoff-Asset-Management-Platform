@@ -5,21 +5,22 @@ import {
   getAssetCategoryName,
 } from "@/domain/master-data/asset-categories";
 import {
-  findBranch,
-  getBranchLocationName,
-  isBranchId,
-} from "@/domain/master-data/branches";
+  findWarehouse,
+  getWarehouseName,
+  isWarehouseId,
+} from "@/domain/master-data/warehouses";
 import {
   buildAssetSearchKeywords,
   buildAssetSearchPrefixes,
 } from "@/domain/services/asset-search.service";
 
 describe("Asset master data", () => {
-  it("uses the approved stable branch IDs", () => {
-    expect(isBranchId("HK1")).toBe(true);
-    expect(isBranchId("Pa-Pang")).toBe(true);
-    expect(getBranchLocationName("HQ")).toBe("สำนักงานใหญ่");
-    expect(findBranch("Ratika")?.nameTh).toBe("ราติก้า");
+  it("uses the approved stable warehouse IDs", () => {
+    expect(isWarehouseId("HK1")).toBe(true);
+    expect(isWarehouseId("ENG-SPT")).toBe(true);
+    expect(isWarehouseId("Pa-Pang")).toBe(false);
+    expect(getWarehouseName("HQ")).toBe("ที่เก็บสินค้าหลัก HQ");
+    expect(findWarehouse("RAT")?.nameTh).toBe("โกดัง Ratika");
   });
 
   it("maps fixed and custom categories", () => {

@@ -84,14 +84,14 @@ export class RepairManagementService {
       );
     }
     if (
-      (profile.role === "branch" && !profile.branchId) ||
+      (profile.role === "branch" && !profile.warehouseId) ||
       (profile.role === "customer" && !profile.customerId)
     ) {
       return [];
     }
     return this.repository.list({
       technicianId: profile.role === "technician" ? profile.uid : null,
-      branchId: profile.role === "branch" ? profile.branchId : null,
+      warehouseId: profile.role === "branch" ? profile.warehouseId : null,
       customerId: profile.role === "customer" ? profile.customerId : null,
       limit: 100,
     });
@@ -111,8 +111,8 @@ export class RepairManagementService {
       (profile.role === "technician" &&
         ticket.assignedTechnicianId === profile.uid) ||
       (profile.role === "branch" &&
-        profile.branchId !== null &&
-        ticket.branchId === profile.branchId) ||
+        profile.warehouseId !== null &&
+        ticket.warehouseId === profile.warehouseId) ||
       (profile.role === "customer" &&
         profile.customerId !== null &&
         ticket.customerId === profile.customerId);

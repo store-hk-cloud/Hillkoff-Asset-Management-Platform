@@ -22,7 +22,7 @@ function user(uid: string, role: string) {
     photoURL: null,
     role,
     status: "active",
-    branchId: null,
+    warehouseId: null,
     customerId: null,
     lastLoginAt: null,
     createdAt: now,

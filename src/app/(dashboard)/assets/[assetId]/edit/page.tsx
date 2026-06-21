@@ -64,7 +64,6 @@ export default async function EditAssetPage({ params }: EditAssetPageProps) {
               serialNumber: asset.serialNumber,
               color: asset.color ?? "",
               condition: asset.condition,
-              branchId: asset.branchId,
               warehouseId: asset.warehouseId ?? null,
               customerId: asset.customerId,
               locationName: asset.locationName,

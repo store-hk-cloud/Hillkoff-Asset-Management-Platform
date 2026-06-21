@@ -18,6 +18,8 @@ import { createPublicId } from "@/domain/value-objects/public-id";
 import { createAssetId } from "@/domain/value-objects/asset-id";
 import { FirestoreAssetIdentityRepository } from "@/repositories/firestore/firestore-asset-identity.repository";
 import { FirestoreAssetRepository } from "@/repositories/firestore/firestore-asset.repository";
+import { FirestoreRepairRepository } from "@/repositories/firestore/firestore-repair.repository";
+import type { RepairStatus } from "@/domain/entities/repair-ticket";
 
 export interface IdentityRequestContext {
   readonly actor: UserProfile;
@@ -30,7 +32,10 @@ export interface PublicAssetProjection {
   readonly publicId: string;
   readonly name: string;
   readonly serialNumber: string;
+  readonly color: string;
   readonly operationalStatus: AssetOperationalStatus;
+  readonly repairStatus: RepairStatus | null;
+  readonly inStockQuantity: number;
   readonly details: {
     readonly assetCode: string;
     readonly name: string;
@@ -40,13 +45,13 @@ export interface PublicAssetProjection {
     readonly nfcStatus: Asset["nfcStatus"];
     readonly warehouseId: string | null;
     readonly locationName: string;
-    readonly inStockQuantity: number;
   } | null;
 }
 
 export class AssetIdentityManagementService {
   constructor(
     private readonly assetRepository = new FirestoreAssetRepository(),
+    private readonly repairRepository = new FirestoreRepairRepository(),
     private readonly identityRepository = new FirestoreAssetIdentityRepository(),
     private readonly identityService = new AssetIdentityService(),
     private readonly accessService = new AssetAccessService(),
@@ -100,6 +105,10 @@ export class AssetIdentityManagementService {
       );
     }
 
+    const [inStockQuantity, openRepair] = await Promise.all([
+      this.assetRepository.countInStockByCode(asset.assetCode),
+      this.repairRepository.findLatestOpenByAsset(asset.id),
+    ]);
     const operationalStatus =
       this.verificationService.getOperationalStatus(asset);
 
@@ -107,7 +116,10 @@ export class AssetIdentityManagementService {
       publicId: publicIdValue,
       name: asset.name,
       serialNumber: asset.serialNumber ?? "",
+      color: asset.color,
       operationalStatus,
+      repairStatus: openRepair?.status ?? null,
+      inStockQuantity,
       details: includeInternalDetails
         ? {
             assetCode: asset.assetCode,
@@ -118,9 +130,6 @@ export class AssetIdentityManagementService {
             nfcStatus: asset.nfcStatus,
             warehouseId: asset.warehouseId ?? null,
             locationName: asset.locationName,
-            inStockQuantity: await this.assetRepository.countInStockByCode(
-              asset.assetCode,
-            ),
           }
         : null,
     };

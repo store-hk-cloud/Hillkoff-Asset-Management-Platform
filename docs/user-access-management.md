@@ -25,8 +25,8 @@ removed.
 
 ## Role and scope rules
 
-- `branch` requires `branchId` and cannot carry `customerId`.
-- `customer` requires `customerId` and cannot carry `branchId`.
+- `branch` requires `warehouseId` and cannot carry `customerId`.
+- `customer` requires `customerId` and cannot carry `warehouseId`.
 - Other roles are organization-wide and carry neither scope field.
 - Administrators cannot disable themselves or remove their own administrator
   role.

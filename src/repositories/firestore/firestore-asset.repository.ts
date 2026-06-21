@@ -127,7 +127,7 @@ function isAssetCondition(value: unknown): value is AssetCondition {
 }
 
 function isAssetCustodyType(value: unknown): value is AssetCustodyType {
-  return value === "branch" || value === "customer" || value === "in_transit";
+  return value === "warehouse" || value === "customer";
 }
 
 function mapDocumentMetadata(data: DocumentData): AssetDocument {
@@ -148,7 +148,7 @@ function mapAsset(data: DocumentData): Asset {
   const inferredCustodyType =
     data.customerId !== null && data.customerId !== undefined
       ? "customer"
-      : "branch";
+      : "warehouse";
   const custodyType = isAssetCustodyType(data.custodyType)
     ? data.custodyType
     : inferredCustodyType;
@@ -180,8 +180,7 @@ function mapAsset(data: DocumentData): Asset {
     condition,
     status,
     custodyType,
-    branchId: nullableString(data, "branchId"),
-    warehouseId: normalizeWarehouseId(data.warehouseId ?? data.branchId),
+    warehouseId: normalizeWarehouseId(data.warehouseId),
     customerId: nullableString(data, "customerId"),
     locationName: requireString(data, "locationName"),
     installedAt: nullableTimestamp(data, "installedAt"),
@@ -197,8 +196,6 @@ function mapAsset(data: DocumentData): Asset {
       data.lastMovementAt === undefined
         ? null
         : nullableTimestamp(data, "lastMovementAt"),
-    activeTransferId:
-      typeof data.activeTransferId === "string" ? data.activeTransferId : null,
     nfcStatus:
       data.nfcStatus === "registered" ||
       data.nfcStatus === "verified" ||
@@ -464,9 +461,7 @@ export class FirestoreAssetRepository implements AssetRepository {
         categoryKey: isAssetCategoryKey(data.categoryKey)
           ? data.categoryKey
           : inferAssetCategoryKey(requireString(data, "category")),
-        defaultWarehouseId: normalizeWarehouseId(
-          data.defaultWarehouseId ?? data.defaultBranchId,
-        ),
+        defaultWarehouseId: normalizeWarehouseId(data.defaultWarehouseId),
         defaultLocationName:
           typeof data.defaultLocationName === "string"
             ? data.defaultLocationName
@@ -504,14 +499,17 @@ export class FirestoreAssetRepository implements AssetRepository {
       .collection("assets")
       .where("assetCode", "==", normalizeAssetCode(assetCode))
       .where("status", "==", "active")
+      .where("custodyType", "==", "warehouse")
+      .count()
       .get();
-    return snapshot.docs
-      .map((document) => mapAsset(document.data()))
-      .filter((asset) => asset.custodyType === "branch").length;
+    return snapshot.data().count;
   }
 
   async countByCategory(
-    criteria: Pick<AssetSearchCriteria, "status" | "branchId" | "customerId">,
+    criteria: Pick<
+      AssetSearchCriteria,
+      "status" | "warehouseId" | "customerId"
+    >,
   ): Promise<AssetCategoryCounts> {
     const entries = await Promise.all(
       ASSET_CATEGORY_KEYS.map(async (categoryKey) => {
@@ -520,8 +518,8 @@ export class FirestoreAssetRepository implements AssetRepository {
         if (criteria.status !== "all") {
           query = query.where("status", "==", criteria.status);
         }
-        if (criteria.branchId) {
-          query = query.where("branchId", "==", criteria.branchId);
+        if (criteria.warehouseId) {
+          query = query.where("warehouseId", "==", criteria.warehouseId);
         }
         if (criteria.customerId) {
           query = query.where("customerId", "==", criteria.customerId);
@@ -549,8 +547,8 @@ export class FirestoreAssetRepository implements AssetRepository {
       query = query.where("status", "==", criteria.status);
     }
 
-    if (criteria.branchId) {
-      query = query.where("branchId", "==", criteria.branchId);
+    if (criteria.warehouseId) {
+      query = query.where("warehouseId", "==", criteria.warehouseId);
     }
 
     if (criteria.customerId) {
@@ -757,9 +755,9 @@ export class FirestoreAssetRepository implements AssetRepository {
           description: commit.asset.description,
           category: commit.asset.category,
           categoryKey: commit.asset.categoryKey,
-          ...(commit.asset.custodyType === "branch"
+          ...(commit.asset.custodyType === "warehouse"
             ? {
-              defaultWarehouseId: commit.asset.warehouseId ?? null,
+                defaultWarehouseId: commit.asset.warehouseId ?? null,
                 defaultLocationName: commit.asset.locationName,
               }
             : {}),

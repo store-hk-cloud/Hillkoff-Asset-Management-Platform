@@ -14,7 +14,7 @@ export interface UserProfile extends Entity<UserId> {
   readonly photoURL: string | null;
   readonly role: UserRole;
   readonly status: UserStatus;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly lastLoginAt: Date | null;
   readonly createdAt: Date;
@@ -32,7 +32,7 @@ export interface ManagedUserCreateInput {
   readonly email: string;
   readonly displayName: string;
   readonly role: UserRole;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
 }
 
@@ -40,7 +40,7 @@ export interface ManagedUserUpdateInput {
   readonly displayName: string;
   readonly role: UserRole;
   readonly status: UserStatus;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly expectedVersion: number;
 }

@@ -16,7 +16,10 @@ export class AssetAccessService implements DomainService {
     }
 
     if (profile.role === "branch") {
-      return profile.branchId !== null && asset.branchId === profile.branchId;
+      return (
+        profile.warehouseId !== null &&
+        asset.warehouseId === profile.warehouseId
+      );
     }
 
     return true;

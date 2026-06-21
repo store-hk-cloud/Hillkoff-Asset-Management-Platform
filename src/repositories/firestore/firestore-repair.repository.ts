@@ -95,7 +95,7 @@ function mapTicket(data: DocumentData): RepairTicket {
     assetId: createAssetId(requireString(data, "assetId")),
     assetCode: requireString(data, "assetCode"),
     assetName: requireString(data, "assetName"),
-    branchId: nullableString(data, "branchId"),
+    warehouseId: nullableString(data, "warehouseId"),
     customerId: nullableString(data, "customerId"),
     title: requireString(data, "title"),
     description: requireString(data, "description"),
@@ -184,8 +184,8 @@ export class FirestoreRepairRepository implements RepairRepository {
     if (criteria.technicianId) {
       query = query.where("assignedTechnicianId", "==", criteria.technicianId);
     }
-    if (criteria.branchId) {
-      query = query.where("branchId", "==", criteria.branchId);
+    if (criteria.warehouseId) {
+      query = query.where("warehouseId", "==", criteria.warehouseId);
     }
     if (criteria.customerId) {
       query = query.where("customerId", "==", criteria.customerId);
@@ -196,6 +196,23 @@ export class FirestoreRepairRepository implements RepairRepository {
       .limit(criteria.limit)
       .get();
     return snapshot.docs.map((document) => mapTicket(document.data()));
+  }
+
+  async findLatestOpenByAsset(assetId: string): Promise<RepairTicket | null> {
+    const snapshot = await this.firestore
+      .collection("repair_tickets")
+      .where("assetId", "==", assetId)
+      .where("status", "in", [
+        "new",
+        "assigned",
+        "in_progress",
+        "waiting_parts",
+      ])
+      .orderBy("updatedAt", "desc")
+      .limit(1)
+      .get();
+    const document = snapshot.docs[0];
+    return document ? mapTicket(document.data()) : null;
   }
 
   async commit(commit: RepairCommit): Promise<void> {

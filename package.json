@@ -22,7 +22,6 @@
     "auth:provision-admin": "node scripts/provision-admin.mjs",
     "identity:backfill": "node scripts/backfill-asset-public-identities.mjs",
     "assets:backfill-catalog": "node scripts/backfill-asset-catalog-and-serials.mjs",
-    "assets:migrate-warehouses": "node scripts/migrate-assets-to-warehouses.mjs",
     "functions:build": "npm run build --workspace functions",
     "functions:typecheck": "npm run typecheck --workspace functions",
     "check": "npm run typecheck && npm run lint && npm run functions:typecheck"

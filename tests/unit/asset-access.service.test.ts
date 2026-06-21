@@ -21,17 +21,17 @@ const asset: Asset = {
   category: "Equipment",
   categoryKey: "other",
   serialNumber: null,
+  color: "",
   condition: "operational",
   status: "active",
   custodyType: "customer",
-  branchId: "branch-a",
+  warehouseId: "HK1",
   customerId: "customer-a",
   locationName: "",
   installedAt: null,
   installationLatitude: null,
   installationLongitude: null,
   lastMovementAt: null,
-  activeTransferId: null,
   warranty: {
     status: "inactive",
     startedAt: null,
@@ -56,7 +56,7 @@ const asset: Asset = {
 
 function profile(
   role: UserRole,
-  branchId: string | null = null,
+  warehouseId: string | null = null,
   customerId: string | null = null,
 ): UserProfile {
   const uid = createUserId(`${role}-user`);
@@ -70,7 +70,7 @@ function profile(
     photoURL: null,
     role,
     status: "active",
-    branchId,
+    warehouseId,
     customerId,
     lastLoginAt: null,
     createdAt: now,
@@ -88,8 +88,8 @@ describe("AssetAccessService", () => {
   });
 
   it("scopes branch users", () => {
-    expect(service.canRead(profile("branch", "branch-a"), asset)).toBe(true);
-    expect(service.canRead(profile("branch", "branch-b"), asset)).toBe(false);
+    expect(service.canRead(profile("branch", "HK1"), asset)).toBe(true);
+    expect(service.canRead(profile("branch", "HQ"), asset)).toBe(false);
   });
 
   it("scopes customer users", () => {

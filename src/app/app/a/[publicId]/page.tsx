@@ -68,8 +68,24 @@ export default async function PublicAssetPage({
           />
           <Detail label="Serial Number" value={asset.serialNumber || "—"} />
           <Detail
+            label={locale === "th" ? "สี" : "Color"}
+            value={asset.color || "—"}
+          />
+          <Detail
             label={locale === "th" ? "สถานะทรัพย์สิน" : "Asset Status"}
             value={operationalStatusLabel(asset.operationalStatus, locale)}
+          />
+          <Detail
+            label={locale === "th" ? "สถานะงานซ่อม" : "Repair status"}
+            value={repairStatusLabel(asset.repairStatus, locale)}
+          />
+          <Detail
+            label={
+              locale === "th"
+                ? "จำนวนคงเหลือในสต็อกของรหัสนี้"
+                : "In-stock quantity for this code"
+            }
+            value={String(asset.inStockQuantity)}
           />
           {asset.details ? (
             <>
@@ -88,14 +104,6 @@ export default async function PublicAssetPage({
               <Detail
                 label={locale === "th" ? "สถานที่ปัจจุบัน" : "Current Location"}
                 value={asset.details.locationName || "—"}
-              />
-              <Detail
-                label={
-                  locale === "th"
-                    ? "จำนวนรหัสนี้ที่อยู่ในสต็อก"
-                    : "In-stock quantity for this code"
-                }
-                value={String(asset.details.inStockQuantity)}
               />
               <div>
                 <p className="text-muted-foreground text-xs">
@@ -150,26 +158,57 @@ export default async function PublicAssetPage({
 }
 
 function operationalStatusLabel(
-  status: "in_stock" | "sold" | "in_use" | "in_transit" | "archived",
+  status: "in_stock" | "sold" | "in_use" | "archived",
   locale: "th" | "en",
 ): string {
   const labels = {
     th: {
       in_stock: "อยู่ในสต็อก",
-      in_transit: "อยู่ระหว่างขนส่ง",
       sold: "ขายแล้ว",
       in_use: "กำลังใช้งาน",
       archived: "เก็บถาวร",
     },
     en: {
       in_stock: "In stock",
-      in_transit: "In transit",
       sold: "Sold",
       in_use: "In use",
       archived: "Archived",
     },
   } as const;
 
+  return labels[locale][status];
+}
+
+function repairStatusLabel(
+  status:
+    | "new"
+    | "assigned"
+    | "in_progress"
+    | "waiting_parts"
+    | "completed"
+    | "closed"
+    | null,
+  locale: "th" | "en",
+): string {
+  if (!status || status === "completed" || status === "closed") {
+    return locale === "th"
+      ? "ปกติ / ไม่มีงานซ่อมค้าง"
+      : "Normal / no open repair";
+  }
+  const labels = {
+    th: {
+      new: "รอรับงานซ่อม",
+      assigned: "มอบหมายช่างแล้ว",
+      in_progress: "กำลังซ่อม",
+      waiting_parts: "รออะไหล่",
+    },
+    en: {
+      new: "Awaiting assignment",
+      assigned: "Technician assigned",
+      in_progress: "Under repair",
+      waiting_parts: "Waiting for parts",
+    },
+  } as const;
   return labels[locale][status];
 }
 

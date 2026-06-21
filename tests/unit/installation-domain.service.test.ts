@@ -20,6 +20,7 @@ function asset(overrides: Partial<Asset> = {}): Asset {
     nfcUrl: null,
     qrUrl: null,
     name: "Coffee Machine",
+    color: "Black",
     description: "",
     category: "Equipment",
     categoryKey: "other",
@@ -27,14 +28,13 @@ function asset(overrides: Partial<Asset> = {}): Asset {
     condition: "operational",
     status: "active",
     custodyType: "customer",
-    branchId: null,
+    warehouseId: null,
     customerId: "customer-1",
     locationName: "Customer warehouse",
     installedAt: null,
     installationLatitude: null,
     installationLongitude: null,
     lastMovementAt: null,
-    activeTransferId: null,
     warranty: {
       status: "inactive",
       startedAt: null,
@@ -132,7 +132,7 @@ describe("InstallationDomainService", () => {
     expect(() =>
       service.schedule(
         "installation-1",
-        asset({ custodyType: "branch", customerId: null }),
+        asset({ custodyType: "warehouse", customerId: null }),
         {
           assetCode: "HK-001",
           customerId: "customer-1",

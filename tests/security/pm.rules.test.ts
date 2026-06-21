@@ -16,7 +16,7 @@ let testEnvironment: RulesTestEnvironment;
 function user(
   uid: string,
   role: string,
-  branchId: string | null = null,
+  warehouseId: string | null = null,
   customerId: string | null = null,
 ) {
   const now = Timestamp.now();
@@ -28,7 +28,7 @@ function user(
     photoURL: null,
     role,
     status: "active",
-    branchId,
+    warehouseId,
     customerId,
     lastLoginAt: null,
     createdAt: now,
@@ -70,7 +70,7 @@ beforeEach(async () => {
       setDoc(doc(firestore, "pm_jobs", "pm-1"), {
         id: "pm-1",
         assignedTechnicianId: "technician-1",
-        branchId: "branch-1",
+        warehouseId: "branch-1",
         customerId: "customer-1",
         status: "scheduled",
         scheduledAt: Timestamp.now(),
@@ -102,7 +102,7 @@ describe("PM rules", () => {
     );
   });
 
-  it("allows scoped branch and customer reads", async () => {
+  it("allows scoped warehouse and customer reads", async () => {
     await assertSucceeds(
       getDoc(doc(firestore("branch-user", "branch"), "pm_jobs", "pm-1")),
     );

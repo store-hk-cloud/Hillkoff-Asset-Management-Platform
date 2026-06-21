@@ -35,7 +35,6 @@ export interface AssetFormInitialValues {
   readonly serialNumber: string | null;
   readonly color: string;
   readonly condition: "operational" | "needs_repair" | "out_of_service";
-  readonly branchId: string | null;
   readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly locationName: string;

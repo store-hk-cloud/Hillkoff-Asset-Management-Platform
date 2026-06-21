@@ -25,7 +25,7 @@ For each user:
   "photoURL": null,
   "role": "technician",
   "status": "invited",
-  "branchId": null,
+  "warehouseId": null,
   "customerId": null,
   "lastLoginAt": null,
   "createdAt": "server timestamp",
@@ -39,7 +39,7 @@ For each user:
 Role changes are privileged server operations. Update the custom claim first,
 then the Firestore profile, revoke existing refresh tokens, and require the
 user to sign in again. Never allow a browser client to write `role`, `status`,
-`email`, `branchId`, or `customerId`.
+`email`, `warehouseId`, or `customerId`.
 
 ## Disabling a user
 
