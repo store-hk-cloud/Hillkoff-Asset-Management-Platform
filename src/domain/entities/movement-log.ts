@@ -34,6 +34,7 @@ export interface MovementLog {
 }
 
 export interface TransferAssetInput {
+  readonly assetId?: string | undefined;
   readonly assetCode: string;
   readonly destinationWarehouseId: string;
   readonly destinationLocationName: string;
@@ -43,6 +44,7 @@ export interface TransferAssetInput {
 }
 
 export interface SellAssetInput {
+  readonly assetId?: string | undefined;
   readonly assetCode: string;
   readonly customerId: string;
   readonly destinationLocationName: string;

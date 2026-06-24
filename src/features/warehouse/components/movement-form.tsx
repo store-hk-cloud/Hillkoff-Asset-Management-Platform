@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
-import { ScanLine, Search } from "lucide-react";
+import { QrCode, Radio, ScanLine, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,12 @@ import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/language-provider";
 import type { Asset } from "@/domain/entities/asset";
 import { MovementSummary } from "@/features/warehouse/components/movement-summary";
+import { scanNfcUrl } from "@/features/asset-identity/services/nfc.service";
 import {
   findWarehouseAsset,
   submitMovement,
 } from "@/features/warehouse/services/warehouse-api.service";
+import { scanQrCode } from "@/features/warehouse/services/qr-scanner.service";
 import {
   getWarehouseName,
   WAREHOUSES,
@@ -75,14 +77,17 @@ export function MovementForm({ action }: MovementFormProps) {
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loadingAsset, setLoadingAsset] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [scanningQr, setScanningQr] = useState(false);
+  const [scanningNfc, setScanningNfc] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [destinationWarehouseId, setDestinationWarehouseId] = useState("");
   const config = labels[locale][action];
 
-  async function lookupAsset() {
-    const assetCode = assetCodeInputRef.current?.value.trim();
+  async function lookupAsset(referenceOverride?: string) {
+    const assetReference =
+      referenceOverride?.trim() ?? assetCodeInputRef.current?.value.trim();
 
-    if (!assetCode) {
+    if (!assetReference) {
       setError("กรุณาระบุรหัสทรัพย์สิน");
       return;
     }
@@ -91,7 +96,7 @@ export function MovementForm({ action }: MovementFormProps) {
     setError(null);
 
     try {
-      setAsset(await findWarehouseAsset(assetCode));
+      setAsset(await findWarehouseAsset(assetReference));
     } catch (lookupError) {
       setAsset(null);
       setError(
@@ -99,6 +104,46 @@ export function MovementForm({ action }: MovementFormProps) {
       );
     } finally {
       setLoadingAsset(false);
+    }
+  }
+
+  async function scanQr() {
+    setScanningQr(true);
+    setError(null);
+
+    try {
+      const reference = await scanQrCode();
+      if (assetCodeInputRef.current) {
+        assetCodeInputRef.current.value = reference;
+      }
+      await lookupAsset(reference);
+    } catch (scanError) {
+      setAsset(null);
+      setError(
+        scanError instanceof Error ? scanError.message : "QR scan failed.",
+      );
+    } finally {
+      setScanningQr(false);
+    }
+  }
+
+  async function scanNfc() {
+    setScanningNfc(true);
+    setError(null);
+
+    try {
+      const tag = await scanNfcUrl();
+      if (assetCodeInputRef.current) {
+        assetCodeInputRef.current.value = tag.url;
+      }
+      await lookupAsset(tag.url);
+    } catch (scanError) {
+      setAsset(null);
+      setError(
+        scanError instanceof Error ? scanError.message : "NFC scan failed.",
+      );
+    } finally {
+      setScanningNfc(false);
     }
   }
 
@@ -112,6 +157,7 @@ export function MovementForm({ action }: MovementFormProps) {
 
     const formData = new FormData(event.currentTarget);
     const payload = {
+      assetId: asset.id,
       assetCode: asset.assetCode,
       [config.destinationName]: formData.get(config.destinationName),
       destinationLocationName: formData.get("destinationLocationName"),
@@ -149,7 +195,7 @@ export function MovementForm({ action }: MovementFormProps) {
             : "Serial number / Asset ID / Asset code"}{" "}
           *
         </Label>
-        <div className="flex gap-2">
+        <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
           <div className="relative flex-1">
             <ScanLine
               aria-hidden="true"
@@ -171,13 +217,35 @@ export function MovementForm({ action }: MovementFormProps) {
             />
           </div>
           <Button
-            disabled={loadingAsset}
-            onClick={lookupAsset}
+            disabled={loadingAsset || scanningQr || scanningNfc}
+            onClick={() => void lookupAsset()}
             type="button"
             variant="outline"
           >
             <Search aria-hidden="true" className="size-4" />
             <span className="hidden sm:inline">{t("action.search")}</span>
+          </Button>
+          <Button
+            disabled={loadingAsset || scanningQr || scanningNfc}
+            onClick={() => void scanQr()}
+            type="button"
+            variant="outline"
+          >
+            <QrCode aria-hidden="true" className="size-4" />
+            <span className="hidden sm:inline">
+              {scanningQr ? t("status.loading") : "QR"}
+            </span>
+          </Button>
+          <Button
+            disabled={loadingAsset || scanningQr || scanningNfc}
+            onClick={() => void scanNfc()}
+            type="button"
+            variant="outline"
+          >
+            <Radio aria-hidden="true" className="size-4" />
+            <span className="hidden sm:inline">
+              {scanningNfc ? t("status.loading") : "NFC"}
+            </span>
           </Button>
         </div>
       </div>

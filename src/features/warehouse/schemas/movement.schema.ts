@@ -7,6 +7,7 @@ import {
 } from "@/domain/master-data/warehouses";
 
 const commonMovementSchema = z.object({
+  assetId: z.string().trim().min(1).max(120).optional(),
   assetCode: z.string().trim().min(1).max(60),
   destinationLocationName: z.string().trim().min(1).max(200),
   referenceNumber: z

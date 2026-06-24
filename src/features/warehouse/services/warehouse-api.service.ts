@@ -15,9 +15,9 @@ async function getCsrfToken(): Promise<string> {
   return ((await response.json()) as { csrfToken: string }).csrfToken;
 }
 
-export async function findWarehouseAsset(assetCode: string): Promise<Asset> {
+export async function findWarehouseAsset(reference: string): Promise<Asset> {
   const response = await fetch(
-    `/api/warehouse/assets/by-code/${encodeURIComponent(assetCode)}`,
+    `/api/warehouse/assets/by-code/${encodeURIComponent(reference)}`,
     { cache: "no-store", credentials: "same-origin" },
   );
   const payload = (await response.json()) as {

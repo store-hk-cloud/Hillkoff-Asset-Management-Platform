@@ -13,6 +13,7 @@ import type { UserProfile } from "@/domain/entities/user-profile";
 import { WarehouseError } from "@/domain/errors/warehouse.error";
 import type { WarehouseCommit } from "@/domain/repositories/warehouse.repository";
 import { WarehouseMovementService } from "@/domain/services/warehouse-movement.service";
+import { createAssetId } from "@/domain/value-objects/asset-id";
 import { FirestoreAssetRepository } from "@/repositories/firestore/firestore-asset.repository";
 import { FirestoreWarehouseRepository } from "@/repositories/firestore/firestore-warehouse.repository";
 
@@ -58,13 +59,27 @@ export class WarehouseManagementService {
     assetCode: string,
     profile: UserProfile,
   ): Promise<Asset> {
+    return this.findAssetByReference(assetCode, profile);
+  }
+
+  async findAssetByReference(
+    reference: string,
+    profile: UserProfile,
+  ): Promise<Asset> {
     if (!this.canView(profile) && profile.role !== "sales") {
       throw new WarehouseError(
         "WAREHOUSE_ACCESS_DENIED",
         "You do not have access to warehouse operations.",
       );
     }
-    const asset = await this.assetRepository.findByReference(assetCode);
+    const asset = await this.assetRepository.findByReference(reference);
+    return this.authorizeAssetScope(asset, profile);
+  }
+
+  private authorizeAssetScope(
+    asset: Asset | null,
+    profile: UserProfile,
+  ): Asset {
     if (!asset) {
       throw new WarehouseError("ASSET_NOT_FOUND", "Asset was not found.");
     }
@@ -80,12 +95,26 @@ export class WarehouseManagementService {
     return asset;
   }
 
+  private async findAssetForMovement(
+    input: TransferAssetInput | SellAssetInput,
+    profile: UserProfile,
+  ): Promise<Asset> {
+    if (input.assetId) {
+      const asset = await this.assetRepository.findById(
+        createAssetId(input.assetId),
+      );
+      return this.authorizeAssetScope(asset, profile);
+    }
+
+    return this.findAssetByReference(input.assetCode, profile);
+  }
+
   async transfer(
     input: TransferAssetInput,
     context: WarehouseRequestContext,
   ): Promise<MovementLog> {
     this.requirePermission(this.canTransfer(context.actor));
-    const current = await this.findAssetByCode(input.assetCode, context.actor);
+    const current = await this.findAssetForMovement(input, context.actor);
     const now = new Date();
     const transition = this.movementService.transfer(
       current,
@@ -111,7 +140,7 @@ export class WarehouseManagementService {
     context: WarehouseRequestContext,
   ): Promise<MovementLog> {
     this.requirePermission(this.canSell(context.actor));
-    const current = await this.findAssetByCode(input.assetCode, context.actor);
+    const current = await this.findAssetForMovement(input, context.actor);
     const now = new Date();
     const transition = this.movementService.sell(
       current,
