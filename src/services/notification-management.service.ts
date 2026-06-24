@@ -9,13 +9,19 @@ export class NotificationManagementService {
   ) {}
 
   canView(profile: UserProfile): boolean {
-    return profile.role === "admin" || profile.role === "executive";
+    return (
+      profile.role === "admin" ||
+      profile.role === "executive" ||
+      profile.role === "technician"
+    );
   }
 
   async list(profile: UserProfile) {
     if (!this.canView(profile)) {
       throw new Error("Notification access denied.");
     }
-    return this.repository.list();
+    return this.repository.list(
+      profile.role === "technician" ? profile.uid : null,
+    );
   }
 }

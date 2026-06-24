@@ -65,12 +65,22 @@ function mapJob(data: DocumentData): PmJob {
     assetId: createAssetId(string(data, "assetId")),
     assetCode: string(data, "assetCode"),
     assetName: string(data, "assetName"),
-    branchId: nullableString(data, "branchId"),
+    warehouseId: nullableString(data, "warehouseId"),
     customerId: nullableString(data, "customerId"),
     title: string(data, "title"),
     scheduledAt,
     assignedTechnicianId: createUserId(string(data, "assignedTechnicianId")),
     assignedTechnicianName: string(data, "assignedTechnicianName"),
+    assignmentStatus:
+      data.assignmentStatus === "pending" ||
+      data.assignmentStatus === "rejected"
+        ? data.assignmentStatus
+        : "accepted",
+    assignmentRespondedAt: date(data.assignmentRespondedAt),
+    assignmentRejectionReason: nullableString(
+      data,
+      "assignmentRejectionReason",
+    ),
     status: status(data.status),
     checklist: Array.isArray(data.checklist)
       ? data.checklist.map(checklistItem)
@@ -95,6 +105,9 @@ function serialize(job: PmJob): DocumentData {
     scheduledAt: Timestamp.fromDate(job.scheduledAt),
     nextDueAt: job.nextDueAt ? Timestamp.fromDate(job.nextDueAt) : null,
     completedAt: job.completedAt ? Timestamp.fromDate(job.completedAt) : null,
+    assignmentRespondedAt: job.assignmentRespondedAt
+      ? Timestamp.fromDate(job.assignmentRespondedAt)
+      : null,
     createdAt: Timestamp.fromDate(job.createdAt),
     updatedAt: Timestamp.fromDate(job.updatedAt),
   };
@@ -125,8 +138,8 @@ export class FirestorePmRepository implements PmRepository {
     if (criteria.technicianId) {
       query = query.where("assignedTechnicianId", "==", criteria.technicianId);
     }
-    if (criteria.branchId) {
-      query = query.where("branchId", "==", criteria.branchId);
+    if (criteria.warehouseId) {
+      query = query.where("warehouseId", "==", criteria.warehouseId);
     }
     if (criteria.customerId) {
       query = query.where("customerId", "==", criteria.customerId);

@@ -20,6 +20,14 @@ export function MovementSummary({ asset }: MovementSummaryProps) {
           </p>
           <p className="font-semibold">{asset.name}</p>
           <p className="font-mono text-xs">{asset.assetCode}</p>
+          <p className="text-muted-foreground mt-1 font-mono text-xs">
+            Serial: {asset.serialNumber ?? "—"}
+          </p>
+          {asset.color ? (
+            <p className="text-muted-foreground text-xs">
+              {locale === "th" ? "สี" : "Color"}: {asset.color}
+            </p>
+          ) : null}
         </div>
         <div>
           <p className="text-muted-foreground text-xs">
@@ -30,7 +38,7 @@ export function MovementSummary({ asset }: MovementSummaryProps) {
               (locale === "th" ? "ไม่ระบุ" : "Not specified")}
           </p>
           <p className="text-muted-foreground text-xs">
-            Branch: {asset.branchId ?? "—"} · Customer:{" "}
+            Warehouse: {asset.warehouseId ?? "—"} · Customer:{" "}
             {asset.customerId ?? "—"}
           </p>
         </div>

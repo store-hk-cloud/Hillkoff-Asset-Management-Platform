@@ -1,5 +1,6 @@
 import type { AssetId } from "@/domain/value-objects/asset-id";
 import type { UserId } from "@/domain/value-objects/user-id";
+import type { TechnicianAssignmentStatus } from "@/domain/entities/technician-work";
 
 export const INSTALLATION_STATUSES = [
   "scheduled",
@@ -60,6 +61,9 @@ export interface Installation {
   readonly scheduledAt: Date;
   readonly assignedTechnicianId: UserId;
   readonly assignedTechnicianName: string;
+  readonly assignmentStatus: TechnicianAssignmentStatus;
+  readonly assignmentRespondedAt: Date | null;
+  readonly assignmentRejectionReason: string | null;
   readonly status: InstallationStatus;
   readonly checklist: readonly InstallationChecklistItem[];
   readonly gpsLocation: InstallationLocation | null;

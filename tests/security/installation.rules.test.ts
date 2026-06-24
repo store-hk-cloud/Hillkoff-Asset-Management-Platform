@@ -23,7 +23,7 @@ function user(uid: string, role: string, customerId: string | null = null) {
     photoURL: null,
     role,
     status: "active",
-    branchId: null,
+    warehouseId: null,
     customerId,
     lastLoginAt: null,
     createdAt: now,

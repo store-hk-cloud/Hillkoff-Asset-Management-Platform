@@ -6,7 +6,6 @@ import type { AuditLog } from "@/domain/entities/audit-log";
 import type {
   MovementLog,
   MovementType,
-  ReceiveAssetInput,
   SellAssetInput,
   TransferAssetInput,
 } from "@/domain/entities/movement-log";
@@ -14,6 +13,7 @@ import type { UserProfile } from "@/domain/entities/user-profile";
 import { WarehouseError } from "@/domain/errors/warehouse.error";
 import type { WarehouseCommit } from "@/domain/repositories/warehouse.repository";
 import { WarehouseMovementService } from "@/domain/services/warehouse-movement.service";
+import { createAssetId } from "@/domain/value-objects/asset-id";
 import { FirestoreAssetRepository } from "@/repositories/firestore/firestore-asset.repository";
 import { FirestoreWarehouseRepository } from "@/repositories/firestore/firestore-warehouse.repository";
 
@@ -44,12 +44,11 @@ export class WarehouseManagementService {
     return WAREHOUSE_READ_ROLES.some((role) => role === profile.role);
   }
 
-  canReceive(profile: UserProfile): boolean {
-    return STOCK_ROLES.some((role) => role === profile.role);
-  }
-
   canTransfer(profile: UserProfile): boolean {
-    return STOCK_ROLES.some((role) => role === profile.role);
+    return (
+      STOCK_ROLES.some((role) => role === profile.role) ||
+      (profile.role === "branch" && Boolean(profile.warehouseId))
+    );
   }
 
   canSell(profile: UserProfile): boolean {
@@ -60,56 +59,54 @@ export class WarehouseManagementService {
     assetCode: string,
     profile: UserProfile,
   ): Promise<Asset> {
+    return this.findAssetByReference(assetCode, profile);
+  }
+
+  async findAssetByReference(
+    reference: string,
+    profile: UserProfile,
+  ): Promise<Asset> {
     if (!this.canView(profile) && profile.role !== "sales") {
       throw new WarehouseError(
         "WAREHOUSE_ACCESS_DENIED",
         "You do not have access to warehouse operations.",
       );
     }
+    const asset = await this.assetRepository.findByReference(reference);
+    return this.authorizeAssetScope(asset, profile);
+  }
 
-    const asset = await this.assetRepository.findByCode(assetCode);
-
+  private authorizeAssetScope(
+    asset: Asset | null,
+    profile: UserProfile,
+  ): Asset {
     if (!asset) {
       throw new WarehouseError("ASSET_NOT_FOUND", "Asset was not found.");
     }
-
     if (
       profile.role === "branch" &&
-      (!profile.branchId || asset.branchId !== profile.branchId)
+      (!profile.warehouseId || asset.warehouseId !== profile.warehouseId)
     ) {
       throw new WarehouseError(
         "WAREHOUSE_ACCESS_DENIED",
-        "The asset is outside your branch.",
+        "The asset is outside your warehouse.",
       );
     }
-
     return asset;
   }
 
-  async receive(
-    input: ReceiveAssetInput,
-    context: WarehouseRequestContext,
-  ): Promise<MovementLog> {
-    this.requirePermission(this.canReceive(context.actor));
-    const current = await this.findAssetByCode(input.assetCode, context.actor);
-    const now = new Date();
-    const transition = this.movementService.receive(
-      current,
-      input,
-      context.actor.uid,
-      now,
-    );
-    return this.commit(
-      "received",
-      "warehouse_received",
-      "Asset received",
-      current,
-      transition,
-      input.referenceNumber,
-      input.notes,
-      context,
-      now,
-    );
+  private async findAssetForMovement(
+    input: TransferAssetInput | SellAssetInput,
+    profile: UserProfile,
+  ): Promise<Asset> {
+    if (input.assetId) {
+      const asset = await this.assetRepository.findById(
+        createAssetId(input.assetId),
+      );
+      return this.authorizeAssetScope(asset, profile);
+    }
+
+    return this.findAssetByReference(input.assetCode, profile);
   }
 
   async transfer(
@@ -117,7 +114,7 @@ export class WarehouseManagementService {
     context: WarehouseRequestContext,
   ): Promise<MovementLog> {
     this.requirePermission(this.canTransfer(context.actor));
-    const current = await this.findAssetByCode(input.assetCode, context.actor);
+    const current = await this.findAssetForMovement(input, context.actor);
     const now = new Date();
     const transition = this.movementService.transfer(
       current,
@@ -126,9 +123,9 @@ export class WarehouseManagementService {
       now,
     );
     return this.commit(
-      "branch_transfer",
-      "branch_transferred",
-      "Asset transferred between branches",
+      "warehouse_movement",
+      "warehouse_moved",
+      "Asset moved between warehouses",
       current,
       transition,
       input.referenceNumber,
@@ -143,7 +140,7 @@ export class WarehouseManagementService {
     context: WarehouseRequestContext,
   ): Promise<MovementLog> {
     this.requirePermission(this.canSell(context.actor));
-    const current = await this.findAssetByCode(input.assetCode, context.actor);
+    const current = await this.findAssetForMovement(input, context.actor);
     const now = new Date();
     const transition = this.movementService.sell(
       current,
@@ -174,10 +171,9 @@ export class WarehouseManagementService {
         "You do not have access to movement history.",
       );
     }
-
     return this.warehouseRepository.listMovements({
       type,
-      branchId: profile.role === "branch" ? profile.branchId : null,
+      warehouseId: profile.role === "branch" ? profile.warehouseId : null,
       limit: 100,
     });
   }
@@ -196,7 +192,7 @@ export class WarehouseManagementService {
     eventType: AssetEventType,
     title: string,
     current: Asset,
-    transition: ReturnType<WarehouseMovementService["receive"]>,
+    transition: ReturnType<WarehouseMovementService["transfer"]>,
     referenceNumber: string | null,
     notes: string,
     context: WarehouseRequestContext,
@@ -261,7 +257,6 @@ export class WarehouseManagementService {
       auditLog,
       expectedVersion: current.version,
     };
-
     await this.warehouseRepository.commitMovement(commit);
     return movement;
   }

@@ -101,6 +101,16 @@ function mapInstallation(data: DocumentData): Installation {
     scheduledAt,
     assignedTechnicianId: createUserId(string(data, "assignedTechnicianId")),
     assignedTechnicianName: string(data, "assignedTechnicianName"),
+    assignmentStatus:
+      data.assignmentStatus === "pending" ||
+      data.assignmentStatus === "rejected"
+        ? data.assignmentStatus
+        : "accepted",
+    assignmentRespondedAt: date(data.assignmentRespondedAt),
+    assignmentRejectionReason:
+      typeof data.assignmentRejectionReason === "string"
+        ? data.assignmentRejectionReason
+        : null,
     status: mapStatus(data.status),
     checklist: Array.isArray(data.checklist)
       ? data.checklist.map(mapChecklist)
@@ -165,6 +175,9 @@ function serialize(installation: Installation): DocumentData {
       : null,
     completedAt: installation.completedAt
       ? Timestamp.fromDate(installation.completedAt)
+      : null,
+    assignmentRespondedAt: installation.assignmentRespondedAt
+      ? Timestamp.fromDate(installation.assignmentRespondedAt)
       : null,
     createdAt: Timestamp.fromDate(installation.createdAt),
     updatedAt: Timestamp.fromDate(installation.updatedAt),

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
-import { ScanLine, Search } from "lucide-react";
+import { QrCode, Radio, ScanLine, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,19 @@ import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/language-provider";
 import type { Asset } from "@/domain/entities/asset";
 import { MovementSummary } from "@/features/warehouse/components/movement-summary";
+import { scanNfcUrl } from "@/features/asset-identity/services/nfc.service";
 import {
   findWarehouseAsset,
   submitMovement,
 } from "@/features/warehouse/services/warehouse-api.service";
+import { scanQrCode } from "@/features/warehouse/services/qr-scanner.service";
+import {
+  getWarehouseName,
+  WAREHOUSES,
+  type WarehouseId,
+} from "@/domain/master-data/warehouses";
 
-type MovementAction = "receive" | "transfer" | "sale";
+type MovementAction = "transfer" | "sale";
 
 type MovementFormProps = Readonly<{
   action: MovementAction;
@@ -23,17 +30,11 @@ type MovementFormProps = Readonly<{
 
 const labels = {
   th: {
-    receive: {
-      title: "รับเข้าคลัง/สาขา",
-      destinationLabel: "รหัสสาขาปลายทาง",
-      destinationName: "destinationBranchId",
-      locationLabel: "สถานที่รับเข้า",
-    },
     transfer: {
-      title: "โอนสาขา",
-      destinationLabel: "รหัสสาขาปลายทาง",
-      destinationName: "destinationBranchId",
-      locationLabel: "สถานที่ปลายทาง",
+      title: "ย้ายคลัง",
+      destinationLabel: "คลังปลายทาง",
+      destinationName: "destinationWarehouseId",
+      locationLabel: "ชื่อคลังปลายทาง",
     },
     sale: {
       title: "ขายลูกค้า",
@@ -43,17 +44,11 @@ const labels = {
     },
   },
   en: {
-    receive: {
-      title: "Receive asset",
-      destinationLabel: "Destination branch ID",
-      destinationName: "destinationBranchId",
-      locationLabel: "Receiving location",
-    },
     transfer: {
-      title: "Transfer asset",
-      destinationLabel: "Destination branch ID",
-      destinationName: "destinationBranchId",
-      locationLabel: "Destination location",
+      title: "Move warehouse",
+      destinationLabel: "Destination warehouse",
+      destinationName: "destinationWarehouseId",
+      locationLabel: "Destination warehouse name",
     },
     sale: {
       title: "Sell asset",
@@ -69,7 +64,7 @@ const labels = {
     {
       title: string;
       destinationLabel: string;
-      destinationName: "destinationBranchId" | "customerId";
+      destinationName: "destinationWarehouseId" | "customerId";
       locationLabel: string;
     }
   >
@@ -82,13 +77,17 @@ export function MovementForm({ action }: MovementFormProps) {
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loadingAsset, setLoadingAsset] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [scanningQr, setScanningQr] = useState(false);
+  const [scanningNfc, setScanningNfc] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [destinationWarehouseId, setDestinationWarehouseId] = useState("");
   const config = labels[locale][action];
 
-  async function lookupAsset() {
-    const assetCode = assetCodeInputRef.current?.value.trim();
+  async function lookupAsset(referenceOverride?: string) {
+    const assetReference =
+      referenceOverride?.trim() ?? assetCodeInputRef.current?.value.trim();
 
-    if (!assetCode) {
+    if (!assetReference) {
       setError("กรุณาระบุรหัสทรัพย์สิน");
       return;
     }
@@ -97,7 +96,7 @@ export function MovementForm({ action }: MovementFormProps) {
     setError(null);
 
     try {
-      setAsset(await findWarehouseAsset(assetCode));
+      setAsset(await findWarehouseAsset(assetReference));
     } catch (lookupError) {
       setAsset(null);
       setError(
@@ -105,6 +104,46 @@ export function MovementForm({ action }: MovementFormProps) {
       );
     } finally {
       setLoadingAsset(false);
+    }
+  }
+
+  async function scanQr() {
+    setScanningQr(true);
+    setError(null);
+
+    try {
+      const reference = await scanQrCode();
+      if (assetCodeInputRef.current) {
+        assetCodeInputRef.current.value = reference;
+      }
+      await lookupAsset(reference);
+    } catch (scanError) {
+      setAsset(null);
+      setError(
+        scanError instanceof Error ? scanError.message : "QR scan failed.",
+      );
+    } finally {
+      setScanningQr(false);
+    }
+  }
+
+  async function scanNfc() {
+    setScanningNfc(true);
+    setError(null);
+
+    try {
+      const tag = await scanNfcUrl();
+      if (assetCodeInputRef.current) {
+        assetCodeInputRef.current.value = tag.url;
+      }
+      await lookupAsset(tag.url);
+    } catch (scanError) {
+      setAsset(null);
+      setError(
+        scanError instanceof Error ? scanError.message : "NFC scan failed.",
+      );
+    } finally {
+      setScanningNfc(false);
     }
   }
 
@@ -118,6 +157,7 @@ export function MovementForm({ action }: MovementFormProps) {
 
     const formData = new FormData(event.currentTarget);
     const payload = {
+      assetId: asset.id,
       assetCode: asset.assetCode,
       [config.destinationName]: formData.get(config.destinationName),
       destinationLocationName: formData.get("destinationLocationName"),
@@ -132,9 +172,7 @@ export function MovementForm({ action }: MovementFormProps) {
     try {
       const movement = await submitMovement(action, payload);
       router.replace(
-        `/warehouse/movements?success=${encodeURIComponent(
-          movement.movementNumber,
-        )}`,
+        `/warehouse/movements?success=${encodeURIComponent(movement.movementNumber)}`,
       );
       router.refresh();
     } catch (submitError) {
@@ -152,10 +190,12 @@ export function MovementForm({ action }: MovementFormProps) {
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-2">
         <Label htmlFor="assetCode">
-          {locale === "th" ? "รหัสทรัพย์สิน / สแกน QR" : "Asset code / Scan QR"}{" "}
+          {locale === "th"
+            ? "Serial Number / Asset ID / รหัสทรัพย์สิน"
+            : "Serial number / Asset ID / Asset code"}{" "}
           *
         </Label>
-        <div className="flex gap-2">
+        <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
           <div className="relative flex-1">
             <ScanLine
               aria-hidden="true"
@@ -166,18 +206,46 @@ export function MovementForm({ action }: MovementFormProps) {
               autoFocus
               className="pl-9"
               id="assetCode"
+              name="assetCode"
               onChange={() => setAsset(null)}
+              placeholder={
+                locale === "th"
+                  ? "แนะนำให้ใช้ Serial Number หรือสแกน QR"
+                  : "Serial number or QR scan is recommended"
+              }
               ref={assetCodeInputRef}
             />
           </div>
           <Button
-            disabled={loadingAsset}
-            onClick={lookupAsset}
+            disabled={loadingAsset || scanningQr || scanningNfc}
+            onClick={() => void lookupAsset()}
             type="button"
             variant="outline"
           >
             <Search aria-hidden="true" className="size-4" />
             <span className="hidden sm:inline">{t("action.search")}</span>
+          </Button>
+          <Button
+            disabled={loadingAsset || scanningQr || scanningNfc}
+            onClick={() => void scanQr()}
+            type="button"
+            variant="outline"
+          >
+            <QrCode aria-hidden="true" className="size-4" />
+            <span className="hidden sm:inline">
+              {scanningQr ? t("status.loading") : "QR"}
+            </span>
+          </Button>
+          <Button
+            disabled={loadingAsset || scanningQr || scanningNfc}
+            onClick={() => void scanNfc()}
+            type="button"
+            variant="outline"
+          >
+            <Radio aria-hidden="true" className="size-4" />
+            <span className="hidden sm:inline">
+              {scanningNfc ? t("status.loading") : "NFC"}
+            </span>
           </Button>
         </div>
       </div>
@@ -189,23 +257,77 @@ export function MovementForm({ action }: MovementFormProps) {
           <Label htmlFor={config.destinationName}>
             {config.destinationLabel} *
           </Label>
-          <Input
-            disabled={!asset}
-            id={config.destinationName}
-            name={config.destinationName}
-            required
-          />
+          {action === "sale" ? (
+            <Input
+              disabled={!asset}
+              id={config.destinationName}
+              name={config.destinationName}
+              required
+            />
+          ) : (
+            <select
+              className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm disabled:opacity-50"
+              disabled={!asset}
+              id="destinationWarehouseId"
+              name="destinationWarehouseId"
+              onChange={(event) =>
+                setDestinationWarehouseId(event.currentTarget.value)
+              }
+              required
+              value={destinationWarehouseId}
+            >
+              <option value="">
+                {locale === "th" ? "เลือกคลังปลายทาง" : "Select destination"}
+              </option>
+              {WAREHOUSES.map((warehouse) => (
+                <option
+                  disabled={
+                    action === "transfer" && asset?.warehouseId === warehouse.id
+                  }
+                  key={warehouse.id}
+                  value={warehouse.id}
+                >
+                  {warehouse.id} —{" "}
+                  {locale === "th" ? warehouse.nameTh : warehouse.nameEn}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="destinationLocationName">
             {config.locationLabel} *
           </Label>
-          <Input
-            disabled={!asset}
-            id="destinationLocationName"
-            name="destinationLocationName"
-            required
-          />
+          {action === "sale" ? (
+            <Input
+              disabled={!asset}
+              id="destinationLocationName"
+              name="destinationLocationName"
+              required
+            />
+          ) : (
+            <>
+              <Input
+                disabled
+                id="destinationLocationName"
+                readOnly
+                value={
+                  destinationWarehouseId
+                    ? getWarehouseName(destinationWarehouseId as WarehouseId)
+                    : ""
+                }
+              />
+              <input
+                name="destinationLocationName"
+                type="hidden"
+                value={
+                  destinationWarehouseId
+                    ? getWarehouseName(destinationWarehouseId as WarehouseId)
+                    : ""
+                }
+              />
+            </>
+          )}
         </div>
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="referenceNumber">

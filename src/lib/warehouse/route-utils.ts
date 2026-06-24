@@ -3,6 +3,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import type { UserProfile } from "@/domain/entities/user-profile";
+import { AssetError } from "@/domain/errors/asset.error";
 import { WarehouseError } from "@/domain/errors/warehouse.error";
 import type { WarehouseRequestContext } from "@/services/warehouse-management.service";
 
@@ -20,13 +21,23 @@ export function createWarehouseContext(
 }
 
 export function warehouseErrorResponse(error: unknown) {
+  if (error instanceof AssetError) {
+    return NextResponse.json(
+      { success: false, error: { code: error.code, message: error.message } },
+      { status: error.code === "ASSET_NOT_FOUND" ? 404 : 409 },
+    );
+  }
+
   if (error instanceof WarehouseError) {
     const status =
       error.code === "WAREHOUSE_ACCESS_DENIED"
         ? 403
         : error.code === "ASSET_NOT_FOUND"
           ? 404
-          : error.code === "ASSET_VERSION_CONFLICT"
+          : error.code === "ASSET_VERSION_CONFLICT" ||
+              error.code === "TRANSFER_VERSION_CONFLICT" ||
+              error.code === "TRANSFER_STATE_CONFLICT" ||
+              error.code === "ASSET_TRANSFER_ACTIVE"
             ? 409
             : 400;
 

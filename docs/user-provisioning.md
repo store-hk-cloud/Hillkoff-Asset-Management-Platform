@@ -10,7 +10,8 @@ For each user:
 1. Create the Firebase Authentication account.
 2. Set one custom claim: `{ "role": "<supported-role>" }`.
 3. Create `users/{uid}` with the same email and role.
-4. Set `status` to `active` only after the record has been reviewed.
+4. Set `status` to `invited` until the one-time password invitation is
+   redeemed.
 5. Force the user to obtain a fresh ID token after a role change.
 
 ## Firestore document
@@ -23,8 +24,8 @@ For each user:
   "phoneNumber": null,
   "photoURL": null,
   "role": "technician",
-  "status": "active",
-  "branchId": null,
+  "status": "invited",
+  "warehouseId": null,
   "customerId": null,
   "lastLoginAt": null,
   "createdAt": "server timestamp",
@@ -38,7 +39,7 @@ For each user:
 Role changes are privileged server operations. Update the custom claim first,
 then the Firestore profile, revoke existing refresh tokens, and require the
 user to sign in again. Never allow a browser client to write `role`, `status`,
-`email`, `branchId`, or `customerId`.
+`email`, `warehouseId`, or `customerId`.
 
 ## Disabling a user
 

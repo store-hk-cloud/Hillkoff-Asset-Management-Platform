@@ -20,13 +20,11 @@ export function MovementList({
   const labels =
     locale === "th"
       ? {
-          received: "รับเข้า",
-          branch_transfer: "โอนสาขา",
+          warehouse_movement: "ย้ายคลัง",
           customer_sale: "ขายลูกค้า",
         }
       : {
-          received: "Received",
-          branch_transfer: "Branch transfer",
+          warehouse_movement: "Warehouse movement",
           customer_sale: "Customer sale",
         };
 
@@ -60,8 +58,10 @@ export function MovementList({
                 {locale === "th" ? "ต้นทาง" : "Source"}
               </p>
               <p>
-                {movement.source.locationName || "—"} · Branch{" "}
-                {movement.source.branchId ?? "—"}
+                {movement.source.name || movement.source.locationName || "—"} ·{" "}
+                {movement.source.customerId
+                  ? `Customer ${movement.source.customerId}`
+                  : `Warehouse ${movement.source.warehouseId ?? "—"}`}
               </p>
             </div>
             <div>
@@ -69,10 +69,13 @@ export function MovementList({
                 {locale === "th" ? "ปลายทาง" : "Destination"}
               </p>
               <p>
-                {movement.destination.locationName || "—"} ·{" "}
+                {movement.destination.name ||
+                  movement.destination.locationName ||
+                  "—"}{" "}
+                ·{" "}
                 {movement.destination.customerId
                   ? `Customer ${movement.destination.customerId}`
-                  : `Branch ${movement.destination.branchId ?? "—"}`}
+                  : `Warehouse ${movement.destination.warehouseId ?? "—"}`}
               </p>
             </div>
           </div>

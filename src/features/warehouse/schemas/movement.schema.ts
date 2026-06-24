@@ -1,8 +1,13 @@
 import { z } from "zod";
 
 import { MOVEMENT_TYPES } from "@/domain/entities/movement-log";
+import {
+  getWarehouseName,
+  WAREHOUSE_IDS,
+} from "@/domain/master-data/warehouses";
 
 const commonMovementSchema = z.object({
+  assetId: z.string().trim().min(1).max(120).optional(),
   assetCode: z.string().trim().min(1).max(60),
   destinationLocationName: z.string().trim().min(1).max(200),
   referenceNumber: z
@@ -15,13 +20,14 @@ const commonMovementSchema = z.object({
   expectedVersion: z.number().int().nonnegative(),
 });
 
-export const receiveAssetSchema = commonMovementSchema.extend({
-  destinationBranchId: z.string().trim().min(1).max(120),
-});
-
-export const transferAssetSchema = commonMovementSchema.extend({
-  destinationBranchId: z.string().trim().min(1).max(120),
-});
+export const transferAssetSchema = commonMovementSchema
+  .extend({
+    destinationWarehouseId: z.enum(WAREHOUSE_IDS),
+  })
+  .transform((value) => ({
+    ...value,
+    destinationLocationName: getWarehouseName(value.destinationWarehouseId),
+  }));
 
 export const sellAssetSchema = commonMovementSchema.extend({
   customerId: z.string().trim().min(1).max(120),

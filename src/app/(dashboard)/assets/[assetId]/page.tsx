@@ -194,12 +194,16 @@ export default async function AssetDetailPage({
               />
               <Detail label="Serial Number" value={asset.serialNumber ?? "—"} />
               <Detail
-                label={locale === "th" ? "สถานที่" : "Location"}
+                label={locale === "th" ? "สี" : "Color"}
+                value={asset.color || "—"}
+              />
+              <Detail
+                label={locale === "th" ? "คลังเก็บ" : "Warehouse"}
                 value={asset.locationName || "—"}
               />
               <Detail
-                label={t("field.branchId")}
-                value={asset.branchId ?? "—"}
+                label={locale === "th" ? "รหัสคลัง" : "Warehouse ID"}
+                value={asset.warehouseId ?? "—"}
               />
               <Detail
                 label={t("field.customerId")}

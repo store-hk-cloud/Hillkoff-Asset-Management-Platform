@@ -9,37 +9,36 @@ import type { DomainService } from "@/domain/services/domain-service";
 import type { AssetId } from "@/domain/value-objects/asset-id";
 import type { AssetIdentityProvision } from "@/domain/services/asset-identity.service";
 import type { UserId } from "@/domain/value-objects/user-id";
+import { isAssetCategoryKey } from "@/domain/master-data/asset-categories";
+import {
+  buildAssetSearchKeywords,
+  buildAssetSearchPrefixes,
+} from "@/domain/services/asset-search.service";
+import {
+  getWarehouseName,
+  isWarehouseId,
+  type WarehouseId,
+} from "@/domain/master-data/warehouses";
 
 export interface AssetTransition {
   readonly asset: Asset;
   readonly changes: Readonly<Record<string, AssetFieldChange>>;
 }
 
-function normalizeKeyword(value: string): string {
-  return value.trim().toLocaleLowerCase("th-TH");
-}
-
 type SearchableAssetInput = Pick<
   AssetCreateInput,
-  "assetCode" | "name" | "category" | "serialNumber" | "locationName"
+  "assetCode" | "name" | "category" | "serialNumber" | "color" | "locationName"
 >;
 
-function buildSearchKeywords(input: SearchableAssetInput): readonly string[] {
-  const values = [
+function searchableValues(input: SearchableAssetInput): readonly string[] {
+  return [
     input.assetCode,
     input.name,
     input.category,
     input.serialNumber ?? "",
+    input.color,
     input.locationName,
   ];
-
-  return [
-    ...new Set(
-      values
-        .flatMap((value) => normalizeKeyword(value).split(/\s+/))
-        .filter(Boolean),
-    ),
-  ].slice(0, 50);
 }
 
 function createChanges(
@@ -51,10 +50,12 @@ function createChanges(
     "name",
     "description",
     "category",
+    "categoryKey",
     "serialNumber",
+    "color",
     "condition",
     "status",
-    "branchId",
+    "warehouseId",
     "customerId",
     "locationName",
     "installedAt",
@@ -89,25 +90,41 @@ export class AssetLifecycleService implements DomainService {
     const assetCode = input.assetCode.trim().toUpperCase();
     const name = input.name.trim();
     const category = input.category.trim();
+    const categoryKey = input.categoryKey;
 
-    if (!assetCode || !name || !category) {
+    if (!assetCode || !name || !category || !isAssetCategoryKey(categoryKey)) {
       throw new AssetError(
         "INVALID_ASSET",
         "Asset code, name, and category are required.",
       );
     }
 
+    const serialNumber = input.serialNumber.trim().toUpperCase();
+
+    if (!serialNumber) {
+      throw new AssetError("INVALID_ASSET", "Serial number is required.");
+    }
+
+    const requestedWarehouseId = input.warehouseId.trim();
+    if (!isWarehouseId(requestedWarehouseId)) {
+      throw new AssetError("INVALID_ASSET", "Invalid warehouse.");
+    }
+    const warehouseId = requestedWarehouseId as WarehouseId;
+
     const normalizedInput = {
       assetCode,
       name,
       description: input.description.trim(),
       category,
-      serialNumber: input.serialNumber?.trim() || null,
+      categoryKey,
+      serialNumber,
+      color: input.color.trim(),
       condition: input.condition,
       custodyType:
-        input.custodyType ?? (input.customerId?.trim() ? "customer" : "branch"),
-      locationName: input.locationName.trim(),
-      branchId: input.branchId?.trim() || null,
+        input.custodyType ??
+        (input.customerId?.trim() ? "customer" : "warehouse"),
+      locationName: getWarehouseName(warehouseId),
+      warehouseId,
       customerId: input.customerId?.trim() || null,
       installedAt: input.installedAt,
     };
@@ -132,7 +149,12 @@ export class AssetLifecycleService implements DomainService {
       nfcRegisteredAt: null,
       nfcVerifiedAt: null,
       documents: [],
-      searchKeywords: buildSearchKeywords(normalizedInput),
+      searchKeywords: buildAssetSearchKeywords(
+        searchableValues(normalizedInput),
+      ),
+      searchPrefixes: buildAssetSearchPrefixes(
+        searchableValues(normalizedInput),
+      ),
       version: 0,
       createdAt: now,
       createdBy: actorId,
@@ -175,17 +197,27 @@ export class AssetLifecycleService implements DomainService {
       name: input.name.trim(),
       description: input.description.trim(),
       category: input.category.trim(),
-      serialNumber: input.serialNumber?.trim() || null,
+      categoryKey: input.categoryKey,
+      serialNumber: input.serialNumber.trim().toUpperCase(),
+      color: input.color.trim(),
       condition: input.condition,
       installedAt: input.installedAt,
     };
     const updated: Asset = {
       ...current,
       ...normalizedInput,
-      searchKeywords: buildSearchKeywords({
-        ...normalizedInput,
-        locationName: current.locationName,
-      }),
+      searchKeywords: buildAssetSearchKeywords(
+        searchableValues({
+          ...normalizedInput,
+          locationName: current.locationName,
+        }),
+      ),
+      searchPrefixes: buildAssetSearchPrefixes(
+        searchableValues({
+          ...normalizedInput,
+          locationName: current.locationName,
+        }),
+      ),
       version: current.version + 1,
       updatedAt: now,
       updatedBy: actorId,

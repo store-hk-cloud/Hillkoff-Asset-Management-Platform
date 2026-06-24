@@ -26,9 +26,18 @@ export default async function DashboardPage() {
           </h1>
         </div>
         <Card>
-          <CardContent className="py-6 text-sm">
+          <CardContent className="space-y-4 py-6 text-sm">
             <p>{profile.email}</p>
             <p className="text-muted-foreground">{profile.role}</p>
+            {profile.role === "technician" ? (
+              <Button asChild>
+                <Link href="/technician">
+                  {locale === "th"
+                    ? "เปิดพื้นที่งานช่าง"
+                    : "Open technician workspace"}
+                </Link>
+              </Button>
+            ) : null}
           </CardContent>
         </Card>
       </section>

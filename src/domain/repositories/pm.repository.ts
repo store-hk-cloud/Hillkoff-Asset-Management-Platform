@@ -15,7 +15,7 @@ export interface PmRepository {
   findById(id: string): Promise<PmJob | null>;
   list(criteria: {
     technicianId: UserId | null;
-    branchId: string | null;
+    warehouseId: string | null;
     customerId: string | null;
     status: "scheduled" | "completed" | "all";
     from: Date | null;

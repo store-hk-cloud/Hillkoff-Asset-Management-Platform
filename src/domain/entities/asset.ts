@@ -2,6 +2,7 @@ import type { Entity } from "@/domain/entities/entity";
 import type { AssetId } from "@/domain/value-objects/asset-id";
 import type { PublicId } from "@/domain/value-objects/public-id";
 import type { UserId } from "@/domain/value-objects/user-id";
+import type { AssetCategoryKey } from "@/domain/master-data/asset-categories";
 
 export const ASSET_STATUSES = ["active", "archived"] as const;
 export const ASSET_CONDITIONS = [
@@ -9,7 +10,7 @@ export const ASSET_CONDITIONS = [
   "needs_repair",
   "out_of_service",
 ] as const;
-export const ASSET_CUSTODY_TYPES = ["branch", "customer"] as const;
+export const ASSET_CUSTODY_TYPES = ["warehouse", "customer"] as const;
 
 export type AssetStatus = (typeof ASSET_STATUSES)[number];
 export type AssetCondition = (typeof ASSET_CONDITIONS)[number];
@@ -20,6 +21,23 @@ export type AssetNfcStatus =
   | "verified"
   | "mismatch"
   | "revoked";
+
+export type AssetOperationalStatus =
+  | "in_stock"
+  | "sold"
+  | "in_use"
+  | "archived";
+
+export interface AssetCatalog {
+  readonly assetCode: string;
+  readonly name: string;
+  readonly description: string;
+  readonly category: string;
+  readonly categoryKey: AssetCategoryKey;
+  readonly defaultWarehouseId: string | null;
+  readonly defaultLocationName: string;
+  readonly updatedAt: Date;
+}
 
 export interface AssetWarranty {
   readonly status: "inactive" | "active" | "expired";
@@ -46,11 +64,13 @@ export interface Asset extends Entity<AssetId> {
   readonly name: string;
   readonly description: string;
   readonly category: string;
+  readonly categoryKey: AssetCategoryKey;
   readonly serialNumber: string | null;
+  readonly color: string;
   readonly condition: AssetCondition;
   readonly status: AssetStatus;
   readonly custodyType: AssetCustodyType;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly locationName: string;
   readonly installedAt: Date | null;
@@ -64,6 +84,7 @@ export interface Asset extends Entity<AssetId> {
   readonly nfcVerifiedAt: Date | null;
   readonly documents: readonly AssetDocument[];
   readonly searchKeywords: readonly string[];
+  readonly searchPrefixes: readonly string[];
   readonly createdAt: Date;
   readonly createdBy: UserId;
   readonly updatedAt: Date;
@@ -77,10 +98,12 @@ export interface AssetCreateInput {
   readonly name: string;
   readonly description: string;
   readonly category: string;
-  readonly serialNumber: string | null;
+  readonly categoryKey: AssetCategoryKey;
+  readonly serialNumber: string;
+  readonly color: string;
   readonly condition: AssetCondition;
   readonly custodyType?: AssetCustodyType;
-  readonly branchId: string | null;
+  readonly warehouseId: string;
   readonly customerId: string | null;
   readonly locationName: string;
   readonly installedAt: Date | null;
@@ -88,7 +111,7 @@ export interface AssetCreateInput {
 
 export interface AssetUpdateInput extends Omit<
   AssetCreateInput,
-  "custodyType" | "branchId" | "customerId" | "locationName"
+  "custodyType" | "warehouseId" | "customerId" | "locationName"
 > {
   readonly expectedVersion: number;
 }
@@ -97,6 +120,9 @@ export interface AssetSearchCriteria {
   readonly query: string;
   readonly status: AssetStatus | "all";
   readonly limit: number;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
+  readonly categoryKey: AssetCategoryKey | "all";
 }
+
+export type AssetCategoryCounts = Readonly<Record<AssetCategoryKey, number>>;

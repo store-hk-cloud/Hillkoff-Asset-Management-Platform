@@ -3,6 +3,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import type { UserProfile } from "@/domain/entities/user-profile";
+import { AssetError } from "@/domain/errors/asset.error";
 import { RepairError } from "@/domain/errors/repair.error";
 import type { RepairRequestContext } from "@/services/repair-management.service";
 
@@ -20,6 +21,13 @@ export function createRepairContext(
 }
 
 export function repairErrorResponse(error: unknown) {
+  if (error instanceof AssetError) {
+    return NextResponse.json(
+      { success: false, error: { code: error.code, message: error.message } },
+      { status: error.code === "ASSET_NOT_FOUND" ? 404 : 409 },
+    );
+  }
+
   if (error instanceof RepairError) {
     const status =
       error.code === "REPAIR_ACCESS_DENIED"

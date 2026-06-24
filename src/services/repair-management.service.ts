@@ -17,6 +17,7 @@ import { RepairDomainService } from "@/domain/services/repair-domain.service";
 import { FirestoreAssetRepository } from "@/repositories/firestore/firestore-asset.repository";
 import { FirestoreInventoryRepository } from "@/repositories/firestore/firestore-inventory.repository";
 import { FirestoreRepairRepository } from "@/repositories/firestore/firestore-repair.repository";
+import { FirestoreUserRepository } from "@/repositories/firestore/firestore-user.repository";
 
 export interface RepairRequestContext {
   readonly actor: UserProfile;
@@ -51,6 +52,7 @@ export class RepairManagementService {
     private readonly assetAccessService = new AssetAccessService(),
     private readonly inventoryRepository = new FirestoreInventoryRepository(),
     private readonly inventoryDomainService = new InventoryDomainService(),
+    private readonly userRepository = new FirestoreUserRepository(),
   ) {}
 
   canView(profile: UserProfile): boolean {
@@ -69,7 +71,8 @@ export class RepairManagementService {
     return (
       profile.role === "admin" ||
       (profile.role === "technician" &&
-        ticket.assignedTechnicianId === profile.uid)
+        ticket.assignedTechnicianId === profile.uid &&
+        ticket.assignmentStatus === "accepted")
     );
   }
 
@@ -81,14 +84,14 @@ export class RepairManagementService {
       );
     }
     if (
-      (profile.role === "branch" && !profile.branchId) ||
+      (profile.role === "branch" && !profile.warehouseId) ||
       (profile.role === "customer" && !profile.customerId)
     ) {
       return [];
     }
     return this.repository.list({
       technicianId: profile.role === "technician" ? profile.uid : null,
-      branchId: profile.role === "branch" ? profile.branchId : null,
+      warehouseId: profile.role === "branch" ? profile.warehouseId : null,
       customerId: profile.role === "customer" ? profile.customerId : null,
       limit: 100,
     });
@@ -108,8 +111,8 @@ export class RepairManagementService {
       (profile.role === "technician" &&
         ticket.assignedTechnicianId === profile.uid) ||
       (profile.role === "branch" &&
-        profile.branchId !== null &&
-        ticket.branchId === profile.branchId) ||
+        profile.warehouseId !== null &&
+        ticket.warehouseId === profile.warehouseId) ||
       (profile.role === "customer" &&
         profile.customerId !== null &&
         ticket.customerId === profile.customerId);
@@ -133,7 +136,7 @@ export class RepairManagementService {
         "You cannot create repair tickets.",
       );
     }
-    const asset = await this.assetRepository.findByCode(input.assetCode);
+    const asset = await this.assetRepository.findByReference(input.assetCode);
     if (!asset) {
       throw new RepairError("ASSET_NOT_FOUND", "Asset was not found.");
     }
@@ -170,10 +173,24 @@ export class RepairManagementService {
       );
     }
     const current = await this.get(id, context.actor);
+    const technician = await this.userRepository.findById(input.technicianId);
+    if (
+      !technician ||
+      technician.role !== "technician" ||
+      technician.status === "disabled"
+    ) {
+      throw new RepairError(
+        "TECHNICIAN_REQUIRED",
+        "Select an active technician account.",
+      );
+    }
     const now = new Date();
     const ticket = this.domainService.assign(
       current,
-      input,
+      {
+        ...input,
+        technicianName: technician.displayName,
+      },
       context.actor.uid,
       now,
     );

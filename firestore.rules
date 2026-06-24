@@ -54,8 +54,8 @@ service cloud.firestore {
         ]
         || (
           request.auth.token.role == 'branch'
-          && currentUser().branchId != null
-          && data.branchId == currentUser().branchId
+          && currentUser().warehouseId != null
+          && data.warehouseId == currentUser().warehouseId
         )
         || (
           request.auth.token.role == 'customer'
@@ -74,7 +74,7 @@ service cloud.firestore {
           'photoURL',
           'role',
           'status',
-          'branchId',
+          'warehouseId',
           'customerId',
           'lastLoginAt',
           'createdAt',
@@ -89,8 +89,8 @@ service cloud.firestore {
         && (data.phoneNumber == null || data.phoneNumber is string)
         && (data.photoURL == null || data.photoURL is string)
         && hasValidRole(data.role)
-        && data.status in ['active', 'disabled']
-        && (data.branchId == null || data.branchId is string)
+        && data.status in ['invited', 'active', 'disabled']
+        && (data.warehouseId == null || data.warehouseId is string)
         && (data.customerId == null || data.customerId is string)
         && (data.lastLoginAt == null || data.lastLoginAt is timestamp)
         && data.createdAt is timestamp
@@ -126,9 +126,21 @@ service cloud.firestore {
       allow create, delete: if false;
     }
 
+    match /user_invitations/{invitationId} {
+      allow read, write: if false;
+    }
+
     match /assets/{assetId} {
       allow get, list: if canReadAsset(resource.data);
       allow create, update, delete: if false;
+    }
+
+    match /asset_catalog/{assetCode} {
+      allow read, write: if false;
+    }
+
+    match /asset_serials/{serialKey} {
+      allow read, write: if false;
     }
 
     match /asset_events/{eventId} {
@@ -151,8 +163,8 @@ service cloud.firestore {
         request.auth.token.role in ['admin', 'warehouse', 'executive']
         || (
           request.auth.token.role == 'branch'
-          && currentUser().branchId != null
-          && currentUser().branchId in resource.data.involvedBranchIds
+          && currentUser().warehouseId != null
+          && currentUser().warehouseId in resource.data.involvedWarehouseIds
         )
       );
       allow create, update, delete: if false;
@@ -197,8 +209,8 @@ service cloud.firestore {
         )
         || (
           request.auth.token.role == 'branch'
-          && currentUser().branchId != null
-          && resource.data.branchId == currentUser().branchId
+          && currentUser().warehouseId != null
+          && resource.data.warehouseId == currentUser().warehouseId
         )
         || (
           request.auth.token.role == 'customer'
@@ -218,8 +230,8 @@ service cloud.firestore {
         )
         || (
           request.auth.token.role == 'branch'
-          && currentUser().branchId != null
-          && resource.data.branchId == currentUser().branchId
+          && currentUser().warehouseId != null
+          && resource.data.warehouseId == currentUser().warehouseId
         )
         || (
           request.auth.token.role == 'customer'
@@ -243,8 +255,13 @@ service cloud.firestore {
     }
 
     match /notification_queue/{notificationId} {
-      allow get, list: if isActiveUser()
-        && request.auth.token.role in ['admin', 'executive'];
+      allow get, list: if isActiveUser() && (
+        request.auth.token.role in ['admin', 'executive']
+        || (
+          request.auth.token.role == 'technician'
+          && request.auth.uid in resource.data.recipientUserIds
+        )
+      );
       allow create, update, delete: if false;
     }
 

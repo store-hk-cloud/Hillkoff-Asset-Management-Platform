@@ -2,6 +2,8 @@ import "server-only";
 
 import type {
   Asset,
+  AssetCatalog,
+  AssetCategoryCounts,
   AssetCreateInput,
   AssetSearchCriteria,
   AssetUpdateInput,
@@ -34,23 +36,48 @@ export class AssetManagementService {
   ) {}
 
   async list(
-    criteria: Omit<AssetSearchCriteria, "branchId" | "customerId">,
+    criteria: Omit<AssetSearchCriteria, "warehouseId" | "customerId">,
     profile: UserProfile,
   ): Promise<readonly Asset[]> {
     const scopedCriteria: AssetSearchCriteria = {
       ...criteria,
-      branchId: profile.role === "branch" ? profile.branchId : null,
+      warehouseId: profile.role === "branch" ? profile.warehouseId : null,
       customerId: profile.role === "customer" ? profile.customerId : null,
     };
 
     if (
-      (profile.role === "branch" && !profile.branchId) ||
+      (profile.role === "branch" && !profile.warehouseId) ||
       (profile.role === "customer" && !profile.customerId)
     ) {
       return [];
     }
 
     return this.repository.search(scopedCriteria);
+  }
+
+  async getCategoryCounts(
+    criteria: Pick<AssetSearchCriteria, "status">,
+    profile: UserProfile,
+  ): Promise<AssetCategoryCounts> {
+    if (
+      (profile.role === "branch" && !profile.warehouseId) ||
+      (profile.role === "customer" && !profile.customerId)
+    ) {
+      return {
+        coffee_machine: 0,
+        grinder: 0,
+        blender: 0,
+        milling_machine: 0,
+        roaster: 0,
+        other: 0,
+      };
+    }
+
+    return this.repository.countByCategory({
+      status: criteria.status,
+      warehouseId: profile.role === "branch" ? profile.warehouseId : null,
+      customerId: profile.role === "customer" ? profile.customerId : null,
+    });
   }
 
   async get(id: string, profile: UserProfile): Promise<Asset> {
@@ -62,6 +89,14 @@ export class AssetManagementService {
 
     this.accessService.requireRead(profile, asset);
     return asset;
+  }
+
+  async getCatalog(
+    assetCode: string,
+    profile: UserProfile,
+  ): Promise<AssetCatalog | null> {
+    this.accessService.requireWrite(profile);
+    return this.repository.findCatalogByCode(assetCode);
   }
 
   async listEvents(

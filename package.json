@@ -21,6 +21,7 @@
     "test:rules": "firebase emulators:exec --project demo-hillkoff-auth --only firestore,storage \"vitest run tests/security\"",
     "auth:provision-admin": "node scripts/provision-admin.mjs",
     "identity:backfill": "node scripts/backfill-asset-public-identities.mjs",
+    "assets:backfill-catalog": "node scripts/backfill-asset-catalog-and-serials.mjs",
     "functions:build": "npm run build --workspace functions",
     "functions:typecheck": "npm run typecheck --workspace functions",
     "check": "npm run typecheck && npm run lint && npm run functions:typecheck"
@@ -35,6 +36,7 @@
     "firebase-admin": "^13.10.0",
     "lucide-react": "^0.468.0",
     "next": "^16.2.9",
+    "nodemailer": "^9.0.1",
     "qrcode": "^1.5.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -42,12 +44,13 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
     "@firebase/rules-unit-testing": "^5.0.1",
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^24.10.1",
+    "@types/nodemailer": "^8.0.1",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@types/qrcode": "^1.5.5",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.2.9",
     "firebase-tools": "^15.22.0",

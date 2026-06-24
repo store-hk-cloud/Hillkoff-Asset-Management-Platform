@@ -2,12 +2,19 @@ import type { Asset } from "@/domain/entities/asset";
 import type { AssetFieldChange } from "@/domain/entities/asset-event";
 import type {
   MovementEndpoint,
-  ReceiveAssetInput,
   SellAssetInput,
   TransferAssetInput,
 } from "@/domain/entities/movement-log";
 import { WarehouseError } from "@/domain/errors/warehouse.error";
+import {
+  getWarehouseName,
+  isWarehouseId,
+} from "@/domain/master-data/warehouses";
 import type { DomainService } from "@/domain/services/domain-service";
+import {
+  buildAssetSearchKeywords,
+  buildAssetSearchPrefixes,
+} from "@/domain/services/asset-search.service";
 import type { UserId } from "@/domain/value-objects/user-id";
 
 export interface WarehouseTransition {
@@ -19,7 +26,9 @@ export interface WarehouseTransition {
 
 function endpointFromAsset(asset: Asset): MovementEndpoint {
   return {
-    branchId: asset.branchId,
+    type: asset.custodyType,
+    name: asset.locationName,
+    warehouseId: asset.warehouseId,
     customerId: asset.customerId,
     locationName: asset.locationName,
   };
@@ -32,7 +41,6 @@ function requireMovable(asset: Asset, expectedVersion: number): void {
       "Archived assets cannot be moved.",
     );
   }
-
   if (asset.version !== expectedVersion) {
     throw new WarehouseError(
       "ASSET_VERSION_CONFLICT",
@@ -47,74 +55,56 @@ function changes(
 ): Readonly<Record<string, AssetFieldChange>> {
   const fields = [
     "custodyType",
-    "branchId",
+    "warehouseId",
     "customerId",
     "locationName",
     "lastMovementAt",
   ] as const;
-  const result: Record<string, AssetFieldChange> = {};
-
-  for (const field of fields) {
-    const before = previous[field];
-    const after = current[field];
-    const beforeValue = before instanceof Date ? before.toISOString() : before;
-    const afterValue = after instanceof Date ? after.toISOString() : after;
-
-    if (beforeValue !== afterValue) {
-      result[field] = { before: beforeValue, after: afterValue };
-    }
-  }
-
-  return result;
+  return Object.fromEntries(
+    fields
+      .filter((field) => previous[field] !== current[field])
+      .map((field) => [
+        field,
+        {
+          before:
+            previous[field] instanceof Date
+              ? previous[field].toISOString()
+              : previous[field],
+          after:
+            current[field] instanceof Date
+              ? current[field].toISOString()
+              : current[field],
+        },
+      ]),
+  );
 }
 
 function normalizeRequired(value: string, field: string): string {
   const normalized = value.trim();
-
   if (!normalized) {
     throw new WarehouseError("INVALID_MOVEMENT", `${field} is required.`);
   }
-
   return normalized;
+}
+
+function withUpdatedSearch(asset: Asset): Asset {
+  const values = [
+    asset.assetCode,
+    asset.name,
+    asset.category,
+    asset.serialNumber ?? "",
+    asset.color,
+    asset.locationName,
+  ];
+  return {
+    ...asset,
+    searchKeywords: buildAssetSearchKeywords(values),
+    searchPrefixes: buildAssetSearchPrefixes(values),
+  };
 }
 
 export class WarehouseMovementService implements DomainService {
   readonly serviceName = "WarehouseMovementService";
-
-  receive(
-    current: Asset,
-    input: ReceiveAssetInput,
-    actorId: UserId,
-    now: Date,
-  ): WarehouseTransition {
-    requireMovable(current, input.expectedVersion);
-    const destinationBranchId = normalizeRequired(
-      input.destinationBranchId,
-      "Destination branch",
-    );
-    const destinationLocationName = normalizeRequired(
-      input.destinationLocationName,
-      "Destination location",
-    );
-    const updated: Asset = {
-      ...current,
-      custodyType: "branch",
-      branchId: destinationBranchId,
-      customerId: null,
-      locationName: destinationLocationName,
-      lastMovementAt: now,
-      updatedAt: now,
-      updatedBy: actorId,
-      version: current.version + 1,
-    };
-
-    return {
-      asset: updated,
-      source: endpointFromAsset(current),
-      destination: endpointFromAsset(updated),
-      changes: changes(current, updated),
-    };
-  }
 
   transfer(
     current: Asset,
@@ -123,27 +113,43 @@ export class WarehouseMovementService implements DomainService {
     now: Date,
   ): WarehouseTransition {
     requireMovable(current, input.expectedVersion);
-
-    if (current.custodyType !== "branch" || !current.branchId) {
+    const destinationWarehouseId = normalizeRequired(
+      input.destinationWarehouseId,
+      "Destination warehouse",
+    );
+    if (!isWarehouseId(destinationWarehouseId)) {
       throw new WarehouseError(
         "INVALID_MOVEMENT",
-        "Only assets held by a branch can be transferred.",
+        "Invalid destination warehouse.",
       );
     }
-
-    const destinationBranchId = normalizeRequired(
-      input.destinationBranchId,
-      "Destination branch",
-    );
-
-    if (current.branchId === destinationBranchId) {
+    if (current.warehouseId === destinationWarehouseId) {
       throw new WarehouseError(
         "SAME_BRANCH_TRANSFER",
-        "Source and destination branch must be different.",
+        "Source and destination warehouse must be different.",
       );
     }
-
-    return this.receive(current, input, actorId, now);
+    if (current.custodyType !== "warehouse" || !current.warehouseId) {
+      throw new WarehouseError(
+        "INVALID_MOVEMENT",
+        "Only an asset held in a warehouse can be moved.",
+      );
+    }
+    const updated = withUpdatedSearch({
+      ...current,
+      warehouseId: destinationWarehouseId,
+      locationName: getWarehouseName(destinationWarehouseId),
+      lastMovementAt: now,
+      updatedAt: now,
+      updatedBy: actorId,
+      version: current.version + 1,
+    });
+    return {
+      asset: updated,
+      source: endpointFromAsset(current),
+      destination: endpointFromAsset(updated),
+      changes: changes(current, updated),
+    };
   }
 
   sell(
@@ -153,38 +159,34 @@ export class WarehouseMovementService implements DomainService {
     now: Date,
   ): WarehouseTransition {
     requireMovable(current, input.expectedVersion);
-
     if (current.custodyType === "customer" && current.customerId) {
       throw new WarehouseError(
         "ASSET_ALREADY_SOLD",
         "The asset is already assigned to a customer.",
       );
     }
-
-    if (!current.branchId) {
+    if (!current.warehouseId) {
       throw new WarehouseError(
         "INVALID_MOVEMENT",
-        "The selling branch is required.",
+        "The selling warehouse is required.",
       );
     }
-
     const customerId = normalizeRequired(input.customerId, "Customer");
     const destinationLocationName = normalizeRequired(
       input.destinationLocationName,
       "Customer location",
     );
-    const updated: Asset = {
+    const updated = withUpdatedSearch({
       ...current,
       custodyType: "customer",
-      branchId: null,
+      warehouseId: null,
       customerId,
       locationName: destinationLocationName,
       lastMovementAt: now,
       updatedAt: now,
       updatedBy: actorId,
       version: current.version + 1,
-    };
-
+    });
     return {
       asset: updated,
       source: endpointFromAsset(current),

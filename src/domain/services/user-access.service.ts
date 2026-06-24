@@ -26,7 +26,7 @@ export class UserAccessService implements DomainService {
   validateCreate(input: ManagedUserCreateInput): ManagedUserCreateInput {
     return {
       ...input,
-      ...this.normalizeScope(input.role, input.branchId, input.customerId),
+      ...this.normalizeScope(input.role, input.warehouseId, input.customerId),
     };
   }
 
@@ -47,23 +47,23 @@ export class UserAccessService implements DomainService {
 
     return {
       ...input,
-      ...this.normalizeScope(input.role, input.branchId, input.customerId),
+      ...this.normalizeScope(input.role, input.warehouseId, input.customerId),
     };
   }
 
   private normalizeScope(
     role: ManagedUserCreateInput["role"],
-    branchId: string | null,
+    warehouseId: string | null,
     customerId: string | null,
-  ): { branchId: string | null; customerId: string | null } {
+  ): { warehouseId: string | null; customerId: string | null } {
     if (role === "branch") {
-      if (!branchId) {
+      if (!warehouseId) {
         throw new UserManagementError(
           "INVALID_USER_SCOPE",
           "Branch users require a Branch ID.",
         );
       }
-      return { branchId, customerId: null };
+      return { warehouseId, customerId: null };
     }
 
     if (role === "customer") {
@@ -73,9 +73,9 @@ export class UserAccessService implements DomainService {
           "Customer users require a Customer ID.",
         );
       }
-      return { branchId: null, customerId };
+      return { warehouseId: null, customerId };
     }
 
-    return { branchId: null, customerId: null };
+    return { warehouseId: null, customerId: null };
   }
 }

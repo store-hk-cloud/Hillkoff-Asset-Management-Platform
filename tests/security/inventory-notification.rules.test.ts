@@ -23,7 +23,7 @@ function user(uid: string, role: string) {
     photoURL: null,
     role,
     status: "active",
-    branchId: null,
+    warehouseId: null,
     customerId: null,
     lastLoginAt: null,
     createdAt: now,
@@ -52,6 +52,10 @@ beforeEach(async () => {
         user("technician", "technician"),
       ),
       setDoc(
+        doc(context.firestore(), "users", "other-technician"),
+        user("other-technician", "technician"),
+      ),
+      setDoc(
         doc(context.firestore(), "users", "executive"),
         user("executive", "executive"),
       ),
@@ -64,6 +68,7 @@ beforeEach(async () => {
       }),
       setDoc(doc(context.firestore(), "notification_queue", "notice-1"), {
         id: "notice-1",
+        recipientUserIds: ["technician"],
         createdAt: Timestamp.now(),
       }),
     ]);
@@ -104,7 +109,7 @@ describe("Inventory and notification rules", () => {
     );
   });
 
-  it("restricts notification queue to executive/admin and keeps it read-only", async () => {
+  it("allows only the assigned technician and executive/admin to read notifications", async () => {
     await assertSucceeds(
       getDoc(
         doc(
@@ -114,10 +119,19 @@ describe("Inventory and notification rules", () => {
         ),
       ),
     );
-    await assertFails(
+    await assertSucceeds(
       getDoc(
         doc(
           firestore("technician", "technician"),
+          "notification_queue",
+          "notice-1",
+        ),
+      ),
+    );
+    await assertFails(
+      getDoc(
+        doc(
+          firestore("other-technician", "technician"),
           "notification_queue",
           "notice-1",
         ),

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/language-provider";
 import type { UserStatus } from "@/domain/entities/user-profile";
 import { USER_ROLES, type UserRole } from "@/domain/value-objects/user-role";
+import { WAREHOUSES } from "@/domain/master-data/warehouses";
 import {
   createManagedUser,
   sendManagedUserPasswordReset,
@@ -21,7 +22,7 @@ export interface ManagedUserFormValues {
   readonly displayName: string;
   readonly role: UserRole;
   readonly status: UserStatus;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly version: number;
 }
@@ -52,7 +53,7 @@ export function UserForm({
     const common = {
       displayName: form.get("displayName"),
       role: form.get("role"),
-      branchId: form.get("branchId") || null,
+      warehouseId: form.get("warehouseId") || null,
       customerId: form.get("customerId") || null,
     };
 
@@ -74,7 +75,11 @@ export function UserForm({
           ...common,
           email: form.get("email"),
         });
-        router.replace(`/users/${result.id}`);
+        router.replace(
+          `/users/${result.id}?invitation=${
+            result.invitationSent === false ? "failed" : "sent"
+          }`,
+        );
         router.refresh();
       }
     } catch (submitError) {
@@ -95,7 +100,9 @@ export function UserForm({
     setMessage(null);
     try {
       await sendManagedUserPasswordReset(initialValues.uid);
-      setMessage(`ส่งอีเมลตั้งรหัสผ่านไปที่ ${initialValues.email} แล้ว`);
+      setMessage(
+        `ส่งคำเชิญตั้งรหัสผ่านอายุ 72 ชั่วโมงไปที่ ${initialValues.email} แล้ว`,
+      );
     } catch (resetError) {
       setError(
         resetError instanceof Error
@@ -161,6 +168,9 @@ export function UserForm({
               id="status"
               name="status"
             >
+              <option value="invited">
+                {locale === "th" ? "รอตั้งรหัสผ่าน" : "Invited"}
+              </option>
               <option value="active">
                 {locale === "th" ? "ใช้งานอยู่" : "Active"}
               </option>
@@ -175,14 +185,26 @@ export function UserForm({
         ) : null}
         {role === "branch" ? (
           <div className="space-y-2">
-            <Label htmlFor="branchId">{t("field.branchId")} *</Label>
-            <Input
-              defaultValue={initialValues?.branchId ?? ""}
-              id="branchId"
-              maxLength={120}
-              name="branchId"
+            <Label htmlFor="warehouseId">
+              {locale === "th" ? "คลังที่รับผิดชอบ" : "Assigned warehouse"} *
+            </Label>
+            <select
+              className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
+              defaultValue={initialValues?.warehouseId ?? ""}
+              id="warehouseId"
+              name="warehouseId"
               required
-            />
+            >
+              <option value="">
+                {locale === "th" ? "เลือกคลัง" : "Select warehouse"}
+              </option>
+              {WAREHOUSES.map((warehouse) => (
+                <option key={warehouse.id} value={warehouse.id}>
+                  {warehouse.id} —{" "}
+                  {locale === "th" ? warehouse.nameTh : warehouse.nameEn}
+                </option>
+              ))}
+            </select>
           </div>
         ) : null}
         {role === "customer" ? (
@@ -214,12 +236,14 @@ export function UserForm({
         <div>
           {initialValues ? (
             <Button
-              disabled={busy}
+              disabled={busy || initialValues.status === "disabled"}
               onClick={handlePasswordReset}
               type="button"
               variant="outline"
             >
-              {t("users.resetPassword")}
+              {locale === "th"
+                ? "ส่งคำเชิญตั้งรหัสผ่าน"
+                : "Send password invitation"}
             </Button>
           ) : null}
         </div>

@@ -2,7 +2,7 @@ import type { Entity } from "@/domain/entities/entity";
 import type { UserId } from "@/domain/value-objects/user-id";
 import type { UserRole } from "@/domain/value-objects/user-role";
 
-export const USER_STATUSES = ["active", "disabled"] as const;
+export const USER_STATUSES = ["invited", "active", "disabled"] as const;
 
 export type UserStatus = (typeof USER_STATUSES)[number];
 
@@ -14,7 +14,7 @@ export interface UserProfile extends Entity<UserId> {
   readonly photoURL: string | null;
   readonly role: UserRole;
   readonly status: UserStatus;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly lastLoginAt: Date | null;
   readonly createdAt: Date;
@@ -32,7 +32,7 @@ export interface ManagedUserCreateInput {
   readonly email: string;
   readonly displayName: string;
   readonly role: UserRole;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
 }
 
@@ -40,7 +40,7 @@ export interface ManagedUserUpdateInput {
   readonly displayName: string;
   readonly role: UserRole;
   readonly status: UserStatus;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly expectedVersion: number;
 }

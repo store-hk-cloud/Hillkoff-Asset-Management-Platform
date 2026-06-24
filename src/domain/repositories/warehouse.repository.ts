@@ -13,7 +13,7 @@ export interface WarehouseCommit {
 
 export interface MovementSearchCriteria {
   readonly type: MovementType | "all";
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly limit: number;
 }
 

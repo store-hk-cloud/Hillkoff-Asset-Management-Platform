@@ -30,7 +30,7 @@ export function UserList({ users }: { users: readonly UserProfile[] }) {
               <div>
                 <p className="text-sm font-medium">{user.role}</p>
                 <p className="text-muted-foreground text-xs">
-                  {user.branchId ??
+                  {user.warehouseId ??
                     user.customerId ??
                     (locale === "th" ? "ทุกขอบเขต" : "All scope")}
                 </p>
@@ -45,7 +45,9 @@ export function UserList({ users }: { users: readonly UserProfile[] }) {
                 {locale === "th"
                   ? user.status === "active"
                     ? "ใช้งานอยู่"
-                    : "ปิดใช้งาน"
+                    : user.status === "invited"
+                      ? "รอตั้งรหัสผ่าน"
+                      : "ปิดใช้งาน"
                   : user.status}
               </span>
             </CardContent>

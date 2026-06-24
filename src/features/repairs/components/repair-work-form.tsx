@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Camera, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -17,6 +17,14 @@ import {
   uploadRepairPhoto,
   type UploadedRepairPhoto,
 } from "@/features/repairs/services/repair-storage.service";
+import { OfflineWorkStatus } from "@/features/technician/components/offline-work-status";
+import {
+  clearOfflineFiles,
+  deleteOfflineDraft,
+  loadOfflineDraft,
+  queueOfflineFiles,
+  saveOfflinePayload,
+} from "@/features/technician/services/offline-work.service";
 
 const NEXT_STATUSES: Record<RepairStatus, readonly RepairStatus[]> = {
   new: [],
@@ -66,10 +74,49 @@ export function RepairWorkForm({
   const [targetStatus, setTargetStatus] = useState<RepairStatus | "">("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingFiles, setPendingFiles] = useState(0);
+  const draftKey = `repair:${repairId}`;
+
+  useEffect(() => {
+    let active = true;
+    async function flush() {
+      const draft = await loadOfflineDraft<{
+        photos: readonly UploadedRepairPhoto[];
+      }>(draftKey);
+      if (!active || !draft) return;
+      setPhotos([...draft.payload.photos]);
+      setPendingFiles(draft.files.length);
+      if (!navigator.onLine || draft.files.length === 0) return;
+      const uploaded: UploadedRepairPhoto[] = [];
+      for (const file of draft.files) {
+        uploaded.push(await uploadRepairPhoto(repairId, file));
+      }
+      if (!active) return;
+      const nextPhotos = [...draft.payload.photos, ...uploaded];
+      setPhotos(nextPhotos);
+      await saveOfflinePayload(draftKey, { photos: nextPhotos });
+      await clearOfflineFiles(draftKey);
+      setPendingFiles(0);
+    }
+    void flush().catch((reason: unknown) =>
+      setError(reason instanceof Error ? reason.message : "Photo sync failed."),
+    );
+    window.addEventListener("online", flush);
+    return () => {
+      active = false;
+      window.removeEventListener("online", flush);
+    };
+  }, [draftKey, repairId]);
 
   async function upload(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
     if (files.length === 0) return;
+    if (!navigator.onLine) {
+      const count = await queueOfflineFiles(draftKey, files, { photos });
+      setPendingFiles(count);
+      event.target.value = "";
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -77,7 +124,9 @@ export function RepairWorkForm({
       for (const file of files) {
         uploaded.push(await uploadRepairPhoto(repairId, file));
       }
-      setPhotos((current) => [...current, ...uploaded]);
+      const nextPhotos = [...photos, ...uploaded];
+      setPhotos(nextPhotos);
+      await saveOfflinePayload(draftKey, { photos: nextPhotos });
     } catch (uploadError) {
       setError(
         uploadError instanceof Error ? uploadError.message : "อัปโหลดรูปไม่ได้",
@@ -136,6 +185,7 @@ export function RepairWorkForm({
         laborCost: Number(data.get("laborCost")),
         partsUsed: parts,
       });
+      await deleteOfflineDraft(draftKey);
       setVersion(Number(result.version));
       if (typeof result.status === "string") {
         setStatus(result.status as RepairStatus);
@@ -155,6 +205,7 @@ export function RepairWorkForm({
 
   return (
     <form className="space-y-8" onSubmit={submit}>
+      <OfflineWorkStatus pendingFiles={pendingFiles} />
       <section className="space-y-3">
         <h2 className="font-semibold">
           {locale === "th" ? "รูปภาพงานซ่อม" : "Repair Photos"}

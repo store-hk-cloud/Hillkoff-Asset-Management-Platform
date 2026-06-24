@@ -13,7 +13,7 @@ import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 const PROJECT_ID = "demo-hillkoff-auth";
 let testEnvironment: RulesTestEnvironment;
 
-function user(uid: string, role: string, branchId: string | null = null) {
+function user(uid: string, role: string, warehouseId: string | null = null) {
   const now = Timestamp.now();
   return {
     uid,
@@ -23,7 +23,7 @@ function user(uid: string, role: string, branchId: string | null = null) {
     photoURL: null,
     role,
     status: "active",
-    branchId,
+    warehouseId,
     customerId: null,
     lastLoginAt: null,
     createdAt: now,
@@ -60,7 +60,7 @@ beforeEach(async () => {
       ),
       setDoc(doc(firestore, "movement_logs", "movement-1"), {
         id: "movement-1",
-        involvedBranchIds: ["branch-a", "branch-b"],
+        involvedWarehouseIds: ["branch-a", "branch-b"],
         occurredAt: Timestamp.now(),
       }),
     ]);
@@ -115,7 +115,7 @@ describe("Warehouse movement rules", () => {
 
     await assertFails(
       setDoc(doc(firestore, "movement_logs", "unauthorized"), {
-        involvedBranchIds: [],
+        involvedWarehouseIds: [],
         occurredAt: Timestamp.now(),
       }),
     );

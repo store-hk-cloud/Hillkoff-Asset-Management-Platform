@@ -6,7 +6,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { doc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 
 const PROJECT_ID = "demo-hillkoff-auth";
@@ -22,7 +22,7 @@ function user(uid: string, role: string) {
     photoURL: null,
     role,
     status: "active",
-    branchId: null,
+    warehouseId: null,
     customerId: null,
     lastLoginAt: null,
     createdAt: now,
@@ -83,6 +83,23 @@ describe("User management rules", () => {
         status: "disabled",
         updatedAt: Timestamp.now(),
         version: 1,
+      }),
+    );
+  });
+
+  it("keeps invitation tokens server-only", async () => {
+    const firestore = environment
+      .authenticatedContext("admin", {
+        role: "admin",
+        email: "admin@example.com",
+      })
+      .firestore();
+
+    await assertFails(getDoc(doc(firestore, "user_invitations", "token-hash")));
+    await assertFails(
+      setDoc(doc(firestore, "user_invitations", "token-hash"), {
+        userId: "employee",
+        status: "pending",
       }),
     );
   });

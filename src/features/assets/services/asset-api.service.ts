@@ -1,5 +1,7 @@
 "use client";
 
+import type { AssetCatalog } from "@/domain/entities/asset";
+
 async function getCsrfToken(): Promise<string> {
   const response = await fetch("/api/auth/csrf", {
     cache: "no-store",
@@ -51,4 +53,25 @@ export function updateAsset(id: string, body: unknown) {
 
 export function archiveAsset(id: string) {
   return mutateAsset(`/api/assets/${id}`, "DELETE");
+}
+
+export async function findAssetCatalog(
+  assetCode: string,
+): Promise<AssetCatalog | null> {
+  const response = await fetch(
+    `/api/assets/catalog/${encodeURIComponent(assetCode)}`,
+    { cache: "no-store", credentials: "same-origin" },
+  );
+  const payload = (await response.json()) as {
+    data?: AssetCatalog | null;
+    error?: { message?: string };
+  };
+
+  if (!response.ok) {
+    throw new Error(
+      payload.error?.message ?? "Unable to load asset master data.",
+    );
+  }
+
+  return payload.data ?? null;
 }

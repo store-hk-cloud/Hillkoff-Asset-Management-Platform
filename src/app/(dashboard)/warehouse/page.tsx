@@ -1,9 +1,4 @@
-import {
-  ArrowRightLeft,
-  History,
-  PackageCheck,
-  ShoppingCart,
-} from "lucide-react";
+import { ArrowRightLeft, History, ShoppingCart } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { WarehouseActionCard } from "@/features/warehouse/components/warehouse-action-card";
@@ -38,24 +33,12 @@ export default async function WarehousePage() {
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        {warehouseService.canReceive(profile) ? (
-          <WarehouseActionCard
-            description={
-              locale === "th"
-                ? "รับทรัพย์สินเข้าคลังหรือสาขาปลายทาง"
-                : "Receive an asset into a warehouse or destination branch"
-            }
-            href="/warehouse/receive"
-            icon={<PackageCheck aria-hidden="true" className="size-6" />}
-            title={t("warehouse.receive")}
-          />
-        ) : null}
         {warehouseService.canTransfer(profile) ? (
           <WarehouseActionCard
             description={
               locale === "th"
-                ? "โอนทรัพย์สินระหว่างสาขา"
-                : "Transfer an asset between branches"
+                ? "ย้ายทรัพย์สินจากคลังปัจจุบันไปคลังปลายทางทันที"
+                : "Move an asset directly between warehouses"
             }
             href="/warehouse/transfer"
             icon={<ArrowRightLeft aria-hidden="true" className="size-6" />}

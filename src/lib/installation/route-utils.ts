@@ -3,6 +3,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import type { UserProfile } from "@/domain/entities/user-profile";
+import { AssetError } from "@/domain/errors/asset.error";
 import { InstallationError } from "@/domain/errors/installation.error";
 import type { InstallationRequestContext } from "@/services/installation-management.service";
 
@@ -20,6 +21,13 @@ export function createInstallationContext(
 }
 
 export function installationErrorResponse(error: unknown) {
+  if (error instanceof AssetError) {
+    return NextResponse.json(
+      { success: false, error: { code: error.code, message: error.message } },
+      { status: error.code === "ASSET_NOT_FOUND" ? 404 : 409 },
+    );
+  }
+
   if (error instanceof InstallationError) {
     const status =
       error.code === "INSTALLATION_ACCESS_DENIED"

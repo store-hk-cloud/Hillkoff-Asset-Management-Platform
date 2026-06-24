@@ -55,6 +55,9 @@ export class InstallationDomainService {
       scheduledAt: input.scheduledAt,
       assignedTechnicianId: input.assignedTechnicianId,
       assignedTechnicianName: input.assignedTechnicianName.trim(),
+      assignmentStatus: "pending",
+      assignmentRespondedAt: null,
+      assignmentRejectionReason: null,
       status: "scheduled",
       checklist: DEFAULT_CHECKLIST.map((label, index) => ({
         id: `check-${index + 1}`,

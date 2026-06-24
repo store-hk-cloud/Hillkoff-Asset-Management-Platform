@@ -43,13 +43,14 @@ data-access layer and route handlers.
 | `/users/{id}`                      | Administrator access management                        |
 | `/api/users`                       | Admin-only list/create                                 |
 | `/api/users/{id}`                  | Admin-only detail/update                               |
-| `/api/users/{id}/password-reset`   | Admin-only password reset email                        |
+| `/api/users/{id}/password-reset`   | Admin-only resend of the 72-hour password invitation   |
+| `/set-password`                    | Public one-time employee invitation landing page       |
+| `/api/auth/invitations/redeem`     | Exchanges an invitation for a fresh Firebase reset URL |
 | `/assets`                          | Authenticated and scope-filtered                       |
 | `/assets/new`                      | Admin or warehouse                                     |
 | `/assets/{id}`                     | Authenticated and scope-filtered                       |
 | `/assets/{id}/edit`                | Admin or warehouse; active assets only                 |
 | `/warehouse`                       | Warehouse operation menu                               |
-| `/warehouse/receive`               | Admin or warehouse                                     |
 | `/warehouse/transfer`              | Admin or warehouse                                     |
 | `/warehouse/sale`                  | Admin, warehouse, or sales                             |
 | `/warehouse/movements`             | Admin, warehouse, executive, or scoped branch          |
@@ -79,6 +80,8 @@ data-access layer and route handlers.
 | `/api/inventory/parts/{id}`        | Admin/warehouse update or deactivate                   |
 | `/api/inventory/movements`         | Scoped history; admin/warehouse mutations              |
 | `/notifications`                   | Admin or executive read-only queue                     |
+| `/technician`                      | Technician mobile workspace and assigned work          |
+| `/technicians/[technicianId]`      | Admin/executive technician workload and history        |
 | `/api/analytics/export/excel`      | Admin or executive Excel export                        |
 | `/api/analytics/export/pdf`        | Admin or executive PDF export                          |
 | `/api/agent/commands`              | Admin command dispatcher with CSRF and idempotency     |

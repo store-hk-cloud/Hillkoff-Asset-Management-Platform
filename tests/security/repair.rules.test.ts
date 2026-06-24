@@ -16,7 +16,7 @@ let testEnvironment: RulesTestEnvironment;
 function user(
   uid: string,
   role: string,
-  branchId: string | null = null,
+  warehouseId: string | null = null,
   customerId: string | null = null,
 ) {
   const now = Timestamp.now();
@@ -28,7 +28,7 @@ function user(
     photoURL: null,
     role,
     status: "active",
-    branchId,
+    warehouseId,
     customerId,
     lastLoginAt: null,
     createdAt: now,
@@ -74,7 +74,7 @@ beforeEach(async () => {
       setDoc(doc(firestore, "repair_tickets", "repair-1"), {
         id: "repair-1",
         assignedTechnicianId: "technician-1",
-        branchId: "branch-1",
+        warehouseId: "branch-1",
         customerId: "customer-1",
         status: "in_progress",
         updatedAt: Timestamp.now(),
@@ -118,7 +118,7 @@ describe("Repair ticket rules", () => {
     );
   });
 
-  it("scopes branch and customer reads", async () => {
+  it("scopes warehouse and customer reads", async () => {
     await assertSucceeds(
       getDoc(
         doc(firestore("branch-user", "branch"), "repair_tickets", "repair-1"),

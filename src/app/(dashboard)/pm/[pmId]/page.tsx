@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PmError } from "@/domain/errors/pm.error";
 import { PmCompletionForm } from "@/features/pm/components/pm-completion-form";
+import { TechnicianAssignmentForm } from "@/features/technician/components/technician-assignment-form";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { PmManagementService } from "@/services/pm-management.service";
@@ -101,6 +102,23 @@ export default async function PmDetailPage({ params }: Props) {
           ) : null}
         </CardContent>
       </Card>
+
+      {service.canSchedule(profile) && job.assignmentStatus === "rejected" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {locale === "th" ? "มอบหมายช่างใหม่" : "Reassign technician"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TechnicianAssignmentForm
+              type="pm"
+              version={job.version}
+              workId={job.id}
+            />
+          </CardContent>
+        </Card>
+      ) : null}
 
       {job.status === "scheduled" && service.canComplete(profile, job) ? (
         <Card>

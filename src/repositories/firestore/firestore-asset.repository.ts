@@ -9,12 +9,19 @@ import {
 
 import type {
   Asset,
+  AssetCatalog,
+  AssetCategoryCounts,
   AssetCondition,
   AssetCustodyType,
   AssetDocument,
   AssetSearchCriteria,
   AssetStatus,
 } from "@/domain/entities/asset";
+import {
+  ASSET_CATEGORY_KEYS,
+  inferAssetCategoryKey,
+  isAssetCategoryKey,
+} from "@/domain/master-data/asset-categories";
 import type {
   AssetEvent,
   AssetEventType,
@@ -58,6 +65,31 @@ function nullableString(data: DocumentData, field: string): string | null {
   return value;
 }
 
+function normalizeAssetCode(value: string): string {
+  return value.trim().toUpperCase();
+}
+
+function normalizeSerialNumber(value: string): string {
+  return value.trim().toUpperCase();
+}
+
+function normalizeWarehouseId(value: unknown): string | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const aliases: Readonly<Record<string, string>> = {
+    Ratika: "RAT",
+    TD: "TDP",
+  };
+  return aliases[value] ?? (value === "Pa-Pang" ? null : value);
+}
+
+function assetCatalogId(assetCode: string): string {
+  return encodeURIComponent(normalizeAssetCode(assetCode));
+}
+
+function serialRegistryId(serialNumber: string): string {
+  return encodeURIComponent(normalizeSerialNumber(serialNumber));
+}
+
 function requireTimestamp(data: DocumentData, field: string): Date {
   const value = data[field];
 
@@ -95,7 +127,7 @@ function isAssetCondition(value: unknown): value is AssetCondition {
 }
 
 function isAssetCustodyType(value: unknown): value is AssetCustodyType {
-  return value === "branch" || value === "customer";
+  return value === "warehouse" || value === "customer";
 }
 
 function mapDocumentMetadata(data: DocumentData): AssetDocument {
@@ -116,7 +148,7 @@ function mapAsset(data: DocumentData): Asset {
   const inferredCustodyType =
     data.customerId !== null && data.customerId !== undefined
       ? "customer"
-      : "branch";
+      : "warehouse";
   const custodyType = isAssetCustodyType(data.custodyType)
     ? data.custodyType
     : inferredCustodyType;
@@ -140,11 +172,15 @@ function mapAsset(data: DocumentData): Asset {
     name: requireString(data, "name"),
     description: requireString(data, "description"),
     category: requireString(data, "category"),
+    categoryKey: isAssetCategoryKey(data.categoryKey)
+      ? data.categoryKey
+      : inferAssetCategoryKey(requireString(data, "category")),
     serialNumber: nullableString(data, "serialNumber"),
+    color: typeof data.color === "string" ? data.color : "",
     condition,
     status,
     custodyType,
-    branchId: nullableString(data, "branchId"),
+    warehouseId: normalizeWarehouseId(data.warehouseId),
     customerId: nullableString(data, "customerId"),
     locationName: requireString(data, "locationName"),
     installedAt: nullableTimestamp(data, "installedAt"),
@@ -206,6 +242,15 @@ function mapAsset(data: DocumentData): Asset {
           (keyword): keyword is string => typeof keyword === "string",
         )
       : [],
+    searchPrefixes: Array.isArray(data.searchPrefixes)
+      ? data.searchPrefixes.filter(
+          (prefix): prefix is string => typeof prefix === "string",
+        )
+      : Array.isArray(data.searchKeywords)
+        ? data.searchKeywords.filter(
+            (keyword): keyword is string => typeof keyword === "string",
+          )
+        : [],
     version,
     createdAt: requireTimestamp(data, "createdAt"),
     createdBy: createUserId(requireString(data, "createdBy")),
@@ -245,6 +290,9 @@ function serializeAsset(asset: Asset): DocumentData {
   return {
     ...asset,
     id: asset.id,
+    normalizedSerialNumber: asset.serialNumber
+      ? normalizeSerialNumber(asset.serialNumber)
+      : null,
     installedAt: asset.installedAt
       ? Timestamp.fromDate(asset.installedAt)
       : null,
@@ -307,11 +355,83 @@ export class FirestoreAssetRepository implements AssetRepository {
   async findByCode(assetCode: string): Promise<Asset | null> {
     const snapshot = await this.firestore
       .collection("assets")
-      .where("assetCode", "==", assetCode.trim().toUpperCase())
-      .limit(1)
+      .where("assetCode", "==", normalizeAssetCode(assetCode))
+      .limit(2)
       .get();
+
+    if (snapshot.size > 1) {
+      throw new AssetError(
+        "ASSET_REFERENCE_AMBIGUOUS",
+        "More than one machine uses this asset code. Enter the serial number or scan its QR/NFC tag.",
+      );
+    }
+
     const document = snapshot.docs[0];
     return document ? mapAsset(document.data()) : null;
+  }
+
+  async findByReference(reference: string): Promise<Asset | null> {
+    const normalized = reference.trim();
+
+    if (!normalized) {
+      return null;
+    }
+
+    try {
+      const url = new URL(normalized);
+      const match = url.pathname.match(/^\/app\/a\/([^/]+)\/?$/);
+      const publicId = match?.[1];
+      if (publicId) {
+        return this.findByPublicId(createPublicId(publicId));
+      }
+    } catch {
+      // Not a URL; continue with Asset ID, serial number, and Asset Code.
+    }
+
+    const direct = await this.findById(createAssetId(normalized));
+    if (direct) {
+      return direct;
+    }
+
+    const normalizedSerial = normalizeSerialNumber(normalized);
+    const normalizedSerialSnapshot = await this.firestore
+      .collection("assets")
+      .where("normalizedSerialNumber", "==", normalizedSerial)
+      .limit(2)
+      .get();
+    const serialSnapshot = normalizedSerialSnapshot.empty
+      ? await this.firestore
+          .collection("assets")
+          .where("serialNumber", "in", [
+            ...new Set([normalizedSerial, normalized]),
+          ])
+          .limit(2)
+          .get()
+      : normalizedSerialSnapshot;
+
+    if (serialSnapshot.size > 1) {
+      throw new AssetError(
+        "ASSET_SERIAL_CONFLICT",
+        "Duplicate serial numbers exist. Contact an administrator before continuing.",
+      );
+    }
+
+    const serialDocument = serialSnapshot.docs[0];
+    if (serialDocument) {
+      return mapAsset(serialDocument.data());
+    }
+
+    const publicIdSnapshot = await this.firestore
+      .collection("assets")
+      .where("publicId", "==", normalized)
+      .limit(1)
+      .get();
+    const publicIdDocument = publicIdSnapshot.docs[0];
+    if (publicIdDocument) {
+      return mapAsset(publicIdDocument.data());
+    }
+
+    return this.findByCode(normalized);
   }
 
   async findByPublicId(publicId: PublicId): Promise<Asset | null> {
@@ -322,6 +442,98 @@ export class FirestoreAssetRepository implements AssetRepository {
       .get();
     const document = snapshot.docs[0];
     return document ? mapAsset(document.data()) : null;
+  }
+
+  async findCatalogByCode(assetCode: string): Promise<AssetCatalog | null> {
+    const normalizedCode = normalizeAssetCode(assetCode);
+    const catalogSnapshot = await this.firestore
+      .collection("asset_catalog")
+      .doc(assetCatalogId(normalizedCode))
+      .get();
+
+    if (catalogSnapshot.exists) {
+      const data = catalogSnapshot.data() ?? {};
+      return {
+        assetCode: requireString(data, "assetCode"),
+        name: requireString(data, "name"),
+        description: requireString(data, "description"),
+        category: requireString(data, "category"),
+        categoryKey: isAssetCategoryKey(data.categoryKey)
+          ? data.categoryKey
+          : inferAssetCategoryKey(requireString(data, "category")),
+        defaultWarehouseId: normalizeWarehouseId(data.defaultWarehouseId),
+        defaultLocationName:
+          typeof data.defaultLocationName === "string"
+            ? data.defaultLocationName
+            : "",
+        updatedAt: requireTimestamp(data, "updatedAt"),
+      };
+    }
+
+    const assetSnapshot = await this.firestore
+      .collection("assets")
+      .where("assetCode", "==", normalizedCode)
+      .limit(1)
+      .get();
+    const document = assetSnapshot.docs[0];
+
+    if (!document) {
+      return null;
+    }
+
+    const asset = mapAsset(document.data());
+    return {
+      assetCode: asset.assetCode,
+      name: asset.name,
+      description: asset.description,
+      category: asset.category,
+      categoryKey: asset.categoryKey,
+      defaultWarehouseId: asset.warehouseId ?? null,
+      defaultLocationName: asset.locationName,
+      updatedAt: asset.updatedAt,
+    };
+  }
+
+  async countInStockByCode(assetCode: string): Promise<number> {
+    const snapshot = await this.firestore
+      .collection("assets")
+      .where("assetCode", "==", normalizeAssetCode(assetCode))
+      .where("status", "==", "active")
+      .where("custodyType", "==", "warehouse")
+      .count()
+      .get();
+    return snapshot.data().count;
+  }
+
+  async countByCategory(
+    criteria: Pick<
+      AssetSearchCriteria,
+      "status" | "warehouseId" | "customerId"
+    >,
+  ): Promise<AssetCategoryCounts> {
+    const entries = await Promise.all(
+      ASSET_CATEGORY_KEYS.map(async (categoryKey) => {
+        let query: Query = this.firestore.collection("assets");
+
+        if (criteria.status !== "all") {
+          query = query.where("status", "==", criteria.status);
+        }
+        if (criteria.warehouseId) {
+          query = query.where("warehouseId", "==", criteria.warehouseId);
+        }
+        if (criteria.customerId) {
+          query = query.where("customerId", "==", criteria.customerId);
+        }
+
+        const snapshot = await query
+          .where("categoryKey", "==", categoryKey)
+          .count()
+          .get();
+        return [categoryKey, snapshot.data().count] as const;
+      }),
+    );
+
+    return Object.fromEntries(entries) as AssetCategoryCounts;
   }
 
   async search(criteria: AssetSearchCriteria): Promise<readonly Asset[]> {
@@ -335,16 +547,24 @@ export class FirestoreAssetRepository implements AssetRepository {
       query = query.where("status", "==", criteria.status);
     }
 
-    if (criteria.branchId) {
-      query = query.where("branchId", "==", criteria.branchId);
+    if (criteria.warehouseId) {
+      query = query.where("warehouseId", "==", criteria.warehouseId);
     }
 
     if (criteria.customerId) {
       query = query.where("customerId", "==", criteria.customerId);
     }
 
+    if (criteria.categoryKey !== "all") {
+      query = query.where("categoryKey", "==", criteria.categoryKey);
+    }
+
     if (firstKeyword) {
-      query = query.where("searchKeywords", "array-contains", firstKeyword);
+      query = query.where(
+        firstKeyword.length >= 2 ? "searchPrefixes" : "searchKeywords",
+        "array-contains",
+        firstKeyword,
+      );
     }
 
     const snapshot = await query
@@ -361,7 +581,7 @@ export class FirestoreAssetRepository implements AssetRepository {
       .map((document) => mapAsset(document.data()))
       .filter((asset) =>
         queryKeywords.every((keyword) =>
-          asset.searchKeywords.includes(keyword),
+          asset.searchPrefixes.includes(keyword),
         ),
       );
   }
@@ -392,14 +612,60 @@ export class FirestoreAssetRepository implements AssetRepository {
     const auditReference = this.firestore
       .collection("audit_logs")
       .doc(commit.auditLog.id);
+    const serialReference = commit.asset.serialNumber
+      ? this.firestore
+          .collection("asset_serials")
+          .doc(serialRegistryId(commit.asset.serialNumber))
+      : null;
+    const catalogReference = this.firestore
+      .collection("asset_catalog")
+      .doc(assetCatalogId(commit.asset.assetCode));
 
     await this.firestore.runTransaction(async (transaction) => {
       const currentSnapshot = await transaction.get(assetReference);
-      const codeQuery = this.firestore
-        .collection("assets")
-        .where("assetCode", "==", commit.asset.assetCode)
-        .limit(2);
-      const codeSnapshot = await transaction.get(codeQuery);
+      const currentAsset = currentSnapshot.exists
+        ? mapAsset(currentSnapshot.data() ?? {})
+        : null;
+      const currentSerialReference =
+        currentAsset?.serialNumber &&
+        normalizeSerialNumber(currentAsset.serialNumber) !==
+          normalizeSerialNumber(commit.asset.serialNumber ?? "")
+          ? this.firestore
+              .collection("asset_serials")
+              .doc(serialRegistryId(currentAsset.serialNumber))
+          : null;
+      const serialSnapshot = serialReference
+        ? await transaction.get(serialReference)
+        : null;
+      const currentSerialSnapshot = currentSerialReference
+        ? await transaction.get(currentSerialReference)
+        : null;
+      const serialQuery = commit.asset.serialNumber
+        ? this.firestore
+            .collection("assets")
+            .where(
+              "normalizedSerialNumber",
+              "==",
+              normalizeSerialNumber(commit.asset.serialNumber),
+            )
+            .limit(2)
+        : null;
+      const duplicateSerialSnapshot = serialQuery
+        ? await transaction.get(serialQuery)
+        : null;
+      const legacySerialQuery = commit.asset.serialNumber
+        ? this.firestore
+            .collection("assets")
+            .where(
+              "serialNumber",
+              "==",
+              normalizeSerialNumber(commit.asset.serialNumber),
+            )
+            .limit(2)
+        : null;
+      const legacyDuplicateSerialSnapshot = legacySerialQuery
+        ? await transaction.get(legacySerialQuery)
+        : null;
       const publicIdQuery = commit.asset.publicId
         ? this.firestore
             .collection("assets")
@@ -409,14 +675,21 @@ export class FirestoreAssetRepository implements AssetRepository {
       const publicIdSnapshot = publicIdQuery
         ? await transaction.get(publicIdQuery)
         : null;
-      const conflictingCode = codeSnapshot.docs.some(
-        (document) => document.id !== commit.asset.id,
-      );
+      const conflictingSerial =
+        (serialSnapshot?.exists &&
+          serialSnapshot.get("assetId") !== commit.asset.id) ||
+        duplicateSerialSnapshot?.docs.some(
+          (document) => document.id !== commit.asset.id,
+        ) ||
+        legacyDuplicateSerialSnapshot?.docs.some(
+          (document) => document.id !== commit.asset.id,
+        ) ||
+        false;
 
-      if (conflictingCode) {
+      if (conflictingSerial) {
         throw new AssetError(
-          "ASSET_CODE_CONFLICT",
-          "This asset code is already in use.",
+          "ASSET_SERIAL_CONFLICT",
+          "This serial number is already in use.",
         );
       }
 
@@ -445,9 +718,7 @@ export class FirestoreAssetRepository implements AssetRepository {
           throw new AssetError("ASSET_NOT_FOUND", "Asset was not found.");
         }
 
-        const currentAsset = mapAsset(currentSnapshot.data() ?? {});
-
-        if (currentAsset.version !== commit.expectedVersion) {
+        if (!currentAsset || currentAsset.version !== commit.expectedVersion) {
           throw new AssetError(
             "ASSET_VERSION_CONFLICT",
             "The asset has changed. Reload and try again.",
@@ -457,6 +728,43 @@ export class FirestoreAssetRepository implements AssetRepository {
         transaction.set(assetReference, serializeAsset(commit.asset));
       }
 
+      if (currentSerialReference) {
+        if (
+          currentSerialSnapshot?.exists &&
+          currentSerialSnapshot.get("assetId") === commit.asset.id
+        ) {
+          transaction.delete(currentSerialReference);
+        }
+      }
+
+      if (serialReference && commit.asset.serialNumber) {
+        transaction.set(serialReference, {
+          assetId: commit.asset.id,
+          serialNumber: commit.asset.serialNumber,
+          normalizedSerialNumber: normalizeSerialNumber(
+            commit.asset.serialNumber,
+          ),
+          updatedAt: Timestamp.fromDate(commit.asset.updatedAt),
+        });
+      }
+      transaction.set(
+        catalogReference,
+        {
+          assetCode: commit.asset.assetCode,
+          name: commit.asset.name,
+          description: commit.asset.description,
+          category: commit.asset.category,
+          categoryKey: commit.asset.categoryKey,
+          ...(commit.asset.custodyType === "warehouse"
+            ? {
+                defaultWarehouseId: commit.asset.warehouseId ?? null,
+                defaultLocationName: commit.asset.locationName,
+              }
+            : {}),
+          updatedAt: Timestamp.fromDate(commit.asset.updatedAt),
+        },
+        { merge: true },
+      );
       transaction.create(eventReference, serializeEvent(commit.event));
       transaction.create(auditReference, serializeAuditLog(commit));
     });

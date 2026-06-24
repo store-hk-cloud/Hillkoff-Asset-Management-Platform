@@ -20,9 +20,11 @@ const createInput: AssetCreateInput = {
   name: " Coffee Machine ",
   description: " Main machine ",
   category: " Equipment ",
+  categoryKey: "other",
   serialNumber: " SN-001 ",
+  color: "Black",
   condition: "operational",
-  branchId: " branch-a ",
+  warehouseId: "HK1",
   customerId: null,
   locationName: " Chiang Mai ",
   installedAt: now,
@@ -34,7 +36,9 @@ function updateInput(expectedVersion: number): AssetUpdateInput {
     name: createInput.name,
     description: createInput.description,
     category: createInput.category,
+    categoryKey: createInput.categoryKey,
     serialNumber: createInput.serialNumber,
+    color: createInput.color,
     condition: createInput.condition,
     installedAt: createInput.installedAt,
     expectedVersion,
@@ -50,11 +54,24 @@ describe("AssetLifecycleService", () => {
     const transition = service.create(assetId, createInput, actorId, now);
 
     expect(transition.asset.assetCode).toBe("HK-001");
+    expect(transition.asset.serialNumber).toBe("SN-001");
     expect(transition.asset.name).toBe("Coffee Machine");
     expect(transition.asset.status).toBe("active");
     expect(transition.asset.version).toBe(0);
     expect(transition.asset.searchKeywords).toContain("hk-001");
+    expect(transition.asset.searchPrefixes).toContain("cof");
     expect(transition.changes).toHaveProperty("created");
+  });
+
+  it("requires a serial number for every newly created machine", () => {
+    expect(() =>
+      service.create(
+        assetId,
+        { ...createInput, serialNumber: " " },
+        actorId,
+        now,
+      ),
+    ).toThrowError(AssetError);
   });
 
   it("updates editable fields without leaking expectedVersion", () => {

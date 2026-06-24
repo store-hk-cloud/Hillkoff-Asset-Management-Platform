@@ -13,6 +13,7 @@ import { AssetAccessService } from "@/domain/services/asset-access.service";
 import { PmDomainService } from "@/domain/services/pm-domain.service";
 import { FirestoreAssetRepository } from "@/repositories/firestore/firestore-asset.repository";
 import { FirestorePmRepository } from "@/repositories/firestore/firestore-pm.repository";
+import { FirestoreUserRepository } from "@/repositories/firestore/firestore-user.repository";
 
 export interface PmRequestContext {
   readonly actor: UserProfile;
@@ -27,6 +28,7 @@ export class PmManagementService {
     private readonly assetRepository = new FirestoreAssetRepository(),
     private readonly domainService = new PmDomainService(),
     private readonly assetAccessService = new AssetAccessService(),
+    private readonly userRepository = new FirestoreUserRepository(),
   ) {}
 
   canView(profile: UserProfile): boolean {
@@ -48,7 +50,8 @@ export class PmManagementService {
     return (
       profile.role === "admin" ||
       (profile.role === "technician" &&
-        job.assignedTechnicianId === profile.uid)
+        job.assignedTechnicianId === profile.uid &&
+        job.assignmentStatus === "accepted")
     );
   }
 
@@ -64,14 +67,14 @@ export class PmManagementService {
       throw new PmError("PM_ACCESS_DENIED", "You cannot view PM jobs.");
     }
     if (
-      (profile.role === "branch" && !profile.branchId) ||
+      (profile.role === "branch" && !profile.warehouseId) ||
       (profile.role === "customer" && !profile.customerId)
     ) {
       return [];
     }
     const jobs = await this.repository.list({
       technicianId: profile.role === "technician" ? profile.uid : null,
-      branchId: profile.role === "branch" ? profile.branchId : null,
+      warehouseId: profile.role === "branch" ? profile.warehouseId : null,
       customerId: profile.role === "customer" ? profile.customerId : null,
       status: options.status,
       from: options.from ?? null,
@@ -96,8 +99,8 @@ export class PmManagementService {
       (profile.role === "technician" &&
         job.assignedTechnicianId === profile.uid) ||
       (profile.role === "branch" &&
-        profile.branchId !== null &&
-        job.branchId === profile.branchId) ||
+        profile.warehouseId !== null &&
+        job.warehouseId === profile.warehouseId) ||
       (profile.role === "customer" &&
         profile.customerId !== null &&
         job.customerId === profile.customerId);
@@ -114,16 +117,29 @@ export class PmManagementService {
     if (!this.canSchedule(context.actor)) {
       throw new PmError("PM_ACCESS_DENIED", "You cannot schedule PM jobs.");
     }
-    const asset = await this.assetRepository.findByCode(input.assetCode);
+    const asset = await this.assetRepository.findByReference(input.assetCode);
     if (!asset) throw new PmError("ASSET_NOT_FOUND", "Asset was not found.");
     if (!this.assetAccessService.canRead(context.actor, asset)) {
       throw new PmError("PM_ACCESS_DENIED", "You cannot access this asset.");
+    }
+    const technician = await this.userRepository.findById(
+      input.assignedTechnicianId,
+    );
+    if (
+      !technician ||
+      technician.role !== "technician" ||
+      technician.status === "disabled"
+    ) {
+      throw new PmError(
+        "PM_ACCESS_DENIED",
+        "Select an active technician account.",
+      );
     }
     const now = new Date();
     const job = this.domainService.schedule(
       this.repository.createId(),
       asset,
-      input,
+      { ...input, assignedTechnicianName: technician.displayName },
       context.actor.uid,
       now,
     );

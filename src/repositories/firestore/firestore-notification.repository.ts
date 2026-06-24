@@ -1,6 +1,10 @@
 import "server-only";
 
-import { Timestamp, type DocumentData } from "firebase-admin/firestore";
+import {
+  Timestamp,
+  type DocumentData,
+  type Query,
+} from "firebase-admin/firestore";
 
 import type {
   NotificationQueueItem,
@@ -34,9 +38,20 @@ function status(value: unknown): NotificationStatus {
 }
 
 export class FirestoreNotificationRepository {
-  async list(limit = 200): Promise<readonly NotificationQueueItem[]> {
-    const snapshot = await getFirebaseAdminFirestore()
-      .collection("notification_queue")
+  async list(
+    recipientUserId: string | null = null,
+    limit = 200,
+  ): Promise<readonly NotificationQueueItem[]> {
+    let query: Query =
+      getFirebaseAdminFirestore().collection("notification_queue");
+    if (recipientUserId) {
+      query = query.where(
+        "recipientUserIds",
+        "array-contains",
+        recipientUserId,
+      );
+    }
+    const snapshot = await query
       .orderBy("createdAt", "desc")
       .limit(limit)
       .get();

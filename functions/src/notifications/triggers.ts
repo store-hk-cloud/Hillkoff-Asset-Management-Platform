@@ -1,4 +1,7 @@
-import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import {
+  onDocumentCreated,
+  onDocumentUpdated,
+} from "firebase-functions/v2/firestore";
 
 import { enqueueNotification } from "./queue.js";
 
@@ -7,7 +10,14 @@ export const enqueueRepairNotification = onDocumentUpdated(
   async (event) => {
     const before = event.data?.before.data();
     const after = event.data?.after.data();
-    if (!before || !after || before.status === after.status) return;
+    if (
+      !before ||
+      !after ||
+      (before.status === after.status &&
+        before.assignedTechnicianId === after.assignedTechnicianId)
+    ) {
+      return;
+    }
     await enqueueNotification({
       type: "repair",
       recipientUserIds:
@@ -27,14 +37,22 @@ export const enqueuePmNotification = onDocumentUpdated(
   async (event) => {
     const before = event.data?.before.data();
     const after = event.data?.after.data();
-    if (
-      !before ||
-      !after ||
-      before.status === after.status ||
-      after.status !== "completed"
-    ) {
-      return;
+    if (!before || !after) return;
+    const assignmentChanged =
+      before.assignedTechnicianId !== after.assignedTechnicianId ||
+      (before.assignmentStatus !== "pending" &&
+        after.assignmentStatus === "pending");
+    if (assignmentChanged && typeof after.assignedTechnicianId === "string") {
+      await enqueueNotification({
+        type: "pm",
+        recipientUserIds: [after.assignedTechnicianId],
+        title: `New PM assignment: ${after.jobNumber}`,
+        body: `${after.assetCode} is scheduled for preventive maintenance.`,
+        entityType: "pm",
+        entityId: event.params.pmId,
+      });
     }
+    if (before.status === after.status || after.status !== "completed") return;
     await enqueueNotification({
       type: "pm",
       recipientUserIds:
@@ -45,6 +63,67 @@ export const enqueuePmNotification = onDocumentUpdated(
       body: `${after.assetCode} preventive maintenance was completed.`,
       entityType: "pm",
       entityId: event.params.pmId,
+    });
+  },
+);
+
+export const enqueueInstallationUpdateNotification = onDocumentUpdated(
+  "installations/{installationId}",
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (!before || !after) return;
+    const assignmentChanged =
+      before.assignedTechnicianId !== after.assignedTechnicianId ||
+      (before.assignmentStatus !== "pending" &&
+        after.assignmentStatus === "pending");
+    if (!assignmentChanged || typeof after.assignedTechnicianId !== "string") {
+      return;
+    }
+    await enqueueNotification({
+      type: "system",
+      recipientUserIds: [after.assignedTechnicianId],
+      title: `New installation: ${after.installationNumber}`,
+      body: `${after.assetCode} installation was assigned to you.`,
+      entityType: "system",
+      entityId: event.params.installationId,
+    });
+  },
+);
+
+export const enqueuePmAssignmentNotification = onDocumentCreated(
+  "pm_jobs/{pmId}",
+  async (event) => {
+    const job = event.data?.data();
+    if (!job || typeof job.assignedTechnicianId !== "string") return;
+    await enqueueNotification({
+      type: "pm",
+      recipientUserIds: [job.assignedTechnicianId],
+      title: `New PM assignment: ${job.jobNumber}`,
+      body: `${job.assetCode} is scheduled for preventive maintenance.`,
+      entityType: "pm",
+      entityId: event.params.pmId,
+    });
+  },
+);
+
+export const enqueueInstallationAssignmentNotification = onDocumentCreated(
+  "installations/{installationId}",
+  async (event) => {
+    const installation = event.data?.data();
+    if (
+      !installation ||
+      typeof installation.assignedTechnicianId !== "string"
+    ) {
+      return;
+    }
+    await enqueueNotification({
+      type: "system",
+      recipientUserIds: [installation.assignedTechnicianId],
+      title: `New installation: ${installation.installationNumber}`,
+      body: `${installation.assetCode} installation was assigned to you.`,
+      entityType: "system",
+      entityId: event.params.installationId,
     });
   },
 );

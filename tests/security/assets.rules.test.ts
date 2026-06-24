@@ -16,7 +16,7 @@ let testEnvironment: RulesTestEnvironment;
 function userDocument(
   uid: string,
   role: string,
-  branchId: string | null = null,
+  warehouseId: string | null = null,
   customerId: string | null = null,
 ) {
   const now = Timestamp.now();
@@ -29,7 +29,7 @@ function userDocument(
     photoURL: null,
     role,
     status: "active",
-    branchId,
+    warehouseId,
     customerId,
     lastLoginAt: null,
     createdAt: now,
@@ -40,7 +40,7 @@ function userDocument(
 
 function assetDocument(
   id: string,
-  branchId: string | null,
+  warehouseId: string | null,
   customerId: string | null,
 ) {
   const now = Timestamp.now();
@@ -54,7 +54,7 @@ function assetDocument(
     serialNumber: null,
     condition: "operational",
     status: "active",
-    branchId,
+    warehouseId,
     customerId,
     locationName: "",
     installedAt: null,
@@ -131,7 +131,7 @@ describe("Asset security rules", () => {
     await assertSucceeds(getDoc(doc(firestore, "assets", "asset-a")));
   });
 
-  it("scopes branch users to their branch", async () => {
+  it("scopes branch users to their warehouse", async () => {
     const firestore = testEnvironment
       .authenticatedContext("branch-user", {
         role: "branch",
@@ -177,6 +177,22 @@ describe("Asset security rules", () => {
     await assertFails(
       updateDoc(doc(firestore, "assets", "asset-a"), {
         name: "Unauthorized direct write",
+      }),
+    );
+  });
+
+  it("keeps asset catalog and serial registry server-only", async () => {
+    const firestore = testEnvironment
+      .authenticatedContext("admin", {
+        role: "admin",
+        email: "admin@example.com",
+      })
+      .firestore();
+
+    await assertFails(getDoc(doc(firestore, "asset_catalog", "ASSET-A")));
+    await assertFails(
+      setDoc(doc(firestore, "asset_serials", "SN-001"), {
+        assetId: "asset-a",
       }),
     );
   });

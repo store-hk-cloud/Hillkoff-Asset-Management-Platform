@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,12 @@ import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/language-provider";
 import type { PmChecklistItem } from "@/domain/entities/pm-job";
 import { completePm } from "@/features/pm/services/pm-api.service";
+import { OfflineWorkStatus } from "@/features/technician/components/offline-work-status";
+import {
+  deleteOfflineDraft,
+  loadOfflineDraft,
+  saveOfflinePayload,
+} from "@/features/technician/services/offline-work.service";
 
 type Props = Readonly<{
   pmId: string;
@@ -21,6 +27,27 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
   const [checklist, setChecklist] = useState([...initialChecklist]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [completionNotes, setCompletionNotes] = useState("");
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const draftKey = `pm:${pmId}`;
+
+  useEffect(() => {
+    void loadOfflineDraft<{
+      checklist: readonly PmChecklistItem[];
+      completionNotes: string;
+    }>(draftKey).then((draft) => {
+      if (draft) {
+        setChecklist([...draft.payload.checklist]);
+        setCompletionNotes(draft.payload.completionNotes);
+      }
+      setDraftLoaded(true);
+    });
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!draftLoaded) return;
+    void saveOfflinePayload(draftKey, { checklist, completionNotes });
+  }, [checklist, completionNotes, draftKey, draftLoaded]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,6 +60,7 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
         checklist,
         completionNotes: data.get("completionNotes"),
       });
+      await deleteOfflineDraft(draftKey);
       router.refresh();
     } catch (submitError) {
       setError(
@@ -47,6 +75,7 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
 
   return (
     <form className="space-y-6" onSubmit={submit}>
+      <OfflineWorkStatus />
       <div className="space-y-3">
         {checklist.map((item, index) => (
           <div className="rounded-lg border p-3" key={item.id}>
@@ -94,6 +123,8 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
           id="completionNotes"
           maxLength={3000}
           name="completionNotes"
+          onChange={(event) => setCompletionNotes(event.currentTarget.value)}
+          value={completionNotes}
         />
       </div>
       {error ? (

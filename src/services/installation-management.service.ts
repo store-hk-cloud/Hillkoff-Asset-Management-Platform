@@ -12,6 +12,7 @@ import { InstallationError } from "@/domain/errors/installation.error";
 import { InstallationDomainService } from "@/domain/services/installation-domain.service";
 import { FirestoreAssetRepository } from "@/repositories/firestore/firestore-asset.repository";
 import { FirestoreInstallationRepository } from "@/repositories/firestore/firestore-installation.repository";
+import { FirestoreUserRepository } from "@/repositories/firestore/firestore-user.repository";
 
 export interface InstallationRequestContext {
   readonly actor: UserProfile;
@@ -25,6 +26,7 @@ export class InstallationManagementService {
     private readonly repository = new FirestoreInstallationRepository(),
     private readonly assetRepository = new FirestoreAssetRepository(),
     private readonly domainService = new InstallationDomainService(),
+    private readonly userRepository = new FirestoreUserRepository(),
   ) {}
 
   canView(profile: UserProfile): boolean {
@@ -41,7 +43,9 @@ export class InstallationManagementService {
     return (
       profile.role === "admin" ||
       (profile.role === "technician" &&
-        (!installation || installation.assignedTechnicianId === profile.uid))
+        (!installation ||
+          (installation.assignedTechnicianId === profile.uid &&
+            installation.assignmentStatus === "accepted")))
     );
   }
 
@@ -97,15 +101,28 @@ export class InstallationManagementService {
         "You cannot schedule installations.",
       );
     }
-    const asset = await this.assetRepository.findByCode(input.assetCode);
+    const asset = await this.assetRepository.findByReference(input.assetCode);
     if (!asset) {
       throw new InstallationError("ASSET_NOT_FOUND", "Asset was not found.");
+    }
+    const technician = await this.userRepository.findById(
+      input.assignedTechnicianId,
+    );
+    if (
+      !technician ||
+      technician.role !== "technician" ||
+      technician.status === "disabled"
+    ) {
+      throw new InstallationError(
+        "INSTALLATION_ACCESS_DENIED",
+        "Select an active technician account.",
+      );
     }
     const now = new Date();
     const installation = this.domainService.schedule(
       this.repository.createId(),
       asset,
-      input,
+      { ...input, assignedTechnicianName: technician.displayName },
       context.actor.uid,
       now,
     );

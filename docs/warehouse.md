@@ -2,68 +2,49 @@
 
 ## Scope
 
-The Warehouse module supports:
+The Warehouse module exposes three operational workflows:
 
-- Receiving an asset into a branch.
-- Transferring an asset between branches.
-- Selling and assigning an asset to a customer.
-- Reviewing immutable movement history.
+- Move an asset directly between warehouses.
+- Sell and assign an asset to a customer.
+- Review immutable movement history.
 
-## Atomic transaction
+The former external Receive workflow and two-sided branch-transfer queue have
+been removed. Historical movements remain available through `movement_logs`.
 
-Every warehouse command uses one Firestore transaction:
+## Warehouse master data
 
-1. Read the current asset and verify its optimistic version.
-2. Update the asset custody and location.
-3. Create `movement_logs/{movementId}`.
-4. Create `asset_events/{eventId}`.
-5. Create `audit_logs/{auditId}`.
+New records must select one of the 13 approved warehouses:
 
-No partial result is committed.
+`ENG-SPT`, `ENG`, `FAC-EXP`, `FAC-STORE`, `HK1`, `HK1-SW`, `HQ`, `MHD`,
+`MKT`, `RAT`, `SME`, `Z03`, and `TDP`.
 
-## Domain ownership
+The Asset stores `warehouseId` and the derived Thai `locationName`.
 
-- `WarehouseMovementService` validates movement state transitions.
-- `WarehouseManagementService` performs authorization and orchestration.
-- `WarehouseRepository` owns the four-record Firestore transaction.
-- The existing Asset aggregate, Asset Event, Audit Log, authentication DAL, and
-  CSRF boundary are reused.
+## Direct warehouse movement
 
-## Movement types
+Every move uses one Firestore transaction:
 
-| Type              | Effect                                                          |
-| ----------------- | --------------------------------------------------------------- |
-| `received`        | Custody becomes branch and customer assignment is cleared       |
-| `branch_transfer` | Branch and location change                                      |
-| `customer_sale`   | Custody becomes customer while source branch remains in history |
+1. Resolve the exact Asset by Serial Number, Asset ID, QR/NFC reference, or an
+   unambiguous Asset Code.
+2. Validate optimistic version, lifecycle state, current custody, and that the
+   destination differs from the current warehouse.
+3. Update `warehouseId` and `locationName`.
+4. Create `movement_logs/{movementId}`.
+5. Create `asset_events/{eventId}`.
+6. Create `audit_logs/{auditId}`.
 
-## Permissions
+Stock leaves the source and enters the destination in the same atomic
+transaction. There is no dispatch or destination-confirmation queue.
 
-| Role                | Receive | Transfer | Sell | View movements       |
-| ------------------- | ------- | -------- | ---- | -------------------- |
-| admin               | Yes     | Yes      | Yes  | All                  |
-| warehouse           | Yes     | Yes      | Yes  | All                  |
-| sales               | No      | No       | Yes  | No                   |
-| executive           | No      | No       | No   | All                  |
-| branch              | No      | No       | No   | Involved branch only |
-| technician/customer | No      | No       | No   | No                   |
+## Asset creation
 
-All direct Firestore writes to assets, movement logs, asset events, and audit
-logs remain denied.
+Asset creation includes a free-text `color` field and a required warehouse
+dropdown. Asset Code catalog autofill does not overwrite color or Serial Number,
+because those values belong to the individual machine.
 
-Custody fields (`branchId`, `customerId`, and `locationName`) are read-only in
-generic Asset Edit. They can change only through Warehouse commands, preventing
-movement history from being bypassed.
+## Production migration
 
-## Mobile workflow
-
-Each action starts with Asset Code input suitable for keyboard, barcode, or QR
-scanner integration. The current asset state is shown before confirmation.
-Forms use a single-column mobile layout, large touch targets, and disable repeat
-submission while a transaction is pending.
-
-## Backward compatibility
-
-Assets created before Phase 4 may not contain `custodyType` or
-`lastMovementAt`. Repository mapping infers custody from `customerId` and treats
-the missing movement timestamp as null.
+The warehouse-only migration was applied to Production after a reviewed dry
+run. Assets, users, catalog data, movements, and historical events no longer
+contain the obsolete branch-transfer fields. The migration record is retained
+in `audit_logs/warehouse-model-v2`.

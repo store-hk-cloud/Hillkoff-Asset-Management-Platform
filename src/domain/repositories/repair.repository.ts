@@ -21,7 +21,7 @@ export interface RepairCommit {
 
 export interface RepairSearchCriteria {
   readonly technicianId: UserId | null;
-  readonly branchId: string | null;
+  readonly warehouseId: string | null;
   readonly customerId: string | null;
   readonly limit: number;
 }
@@ -30,5 +30,6 @@ export interface RepairRepository {
   createId(): string;
   findById(id: string): Promise<RepairTicket | null>;
   list(criteria: RepairSearchCriteria): Promise<readonly RepairTicket[]>;
+  findLatestOpenByAsset(assetId: string): Promise<RepairTicket | null>;
   commit(commit: RepairCommit): Promise<void>;
 }

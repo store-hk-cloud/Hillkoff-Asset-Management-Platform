@@ -32,6 +32,8 @@ function assetErrorResponse(error: unknown) {
       error.code === "ASSET_ACCESS_DENIED"
         ? 403
         : error.code === "ASSET_CODE_CONFLICT" ||
+            error.code === "ASSET_SERIAL_CONFLICT" ||
+            error.code === "ASSET_REFERENCE_AMBIGUOUS" ||
             error.code === "ASSET_VERSION_CONFLICT"
           ? 409
           : error.code === "ASSET_NOT_FOUND"
@@ -66,6 +68,7 @@ export async function GET(request: Request) {
       query: url.searchParams.get("query") ?? "",
       status: url.searchParams.get("status") ?? "active",
       limit: url.searchParams.get("limit") ?? "50",
+      categoryKey: url.searchParams.get("categoryKey") ?? "all",
     });
     const assets = await assetService.list(criteria, session.profile);
 

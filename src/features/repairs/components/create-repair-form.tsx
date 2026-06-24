@@ -43,9 +43,20 @@ export function CreateRepairForm() {
     <form className="space-y-5" onSubmit={submit}>
       <div className="space-y-2">
         <Label htmlFor="assetCode">
-          {locale === "th" ? "รหัสทรัพย์สิน" : "Asset Code"}
+          {locale === "th"
+            ? "Serial Number / Asset ID / รหัสทรัพย์สิน"
+            : "Serial number / Asset ID / Asset code"}
         </Label>
-        <Input id="assetCode" name="assetCode" required />
+        <Input
+          id="assetCode"
+          name="assetCode"
+          placeholder={
+            locale === "th"
+              ? "แนะนำให้ใช้ Serial Number"
+              : "Serial number is recommended"
+          }
+          required
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="title">
