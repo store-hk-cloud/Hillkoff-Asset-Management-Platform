@@ -58,8 +58,7 @@ export default async function MovementsPage({
           <option value="all">
             {locale === "th" ? "ทุกการเคลื่อนไหว" : "All movements"}
           </option>
-          <option value="received">{t("warehouse.receive")}</option>
-          <option value="branch_transfer">{t("warehouse.transfer")}</option>
+          <option value="warehouse_movement">{t("warehouse.transfer")}</option>
           <option value="customer_sale">{t("warehouse.sale")}</option>
         </select>
         <button

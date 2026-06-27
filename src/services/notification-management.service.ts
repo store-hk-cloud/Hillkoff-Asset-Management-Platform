@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { UserProfile } from "@/domain/entities/user-profile";
+import { NotificationError } from "@/domain/errors/notification.error";
 import { FirestoreNotificationRepository } from "@/repositories/firestore/firestore-notification.repository";
 
 export class NotificationManagementService {
@@ -18,7 +19,10 @@ export class NotificationManagementService {
 
   async list(profile: UserProfile) {
     if (!this.canView(profile)) {
-      throw new Error("Notification access denied.");
+      throw new NotificationError(
+        "NOTIFICATION_ACCESS_DENIED",
+        "You do not have access to the notification queue.",
+      );
     }
     return this.repository.list(
       profile.role === "technician" ? profile.uid : null,

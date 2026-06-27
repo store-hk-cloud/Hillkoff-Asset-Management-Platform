@@ -161,6 +161,64 @@ export class WarehouseManagementService {
     );
   }
 
+  async transferBulk(
+    assetCodes: readonly string[],
+    destinationWarehouseId: string,
+    context: WarehouseRequestContext,
+    referenceNumber: string | null = null,
+    notes = "",
+  ): Promise<{
+    succeeded: readonly MovementLog[];
+    failed: readonly { assetCode: string; error: string }[];
+  }> {
+    this.requirePermission(this.canTransfer(context.actor));
+    const succeeded: MovementLog[] = [];
+    const failed: { assetCode: string; error: string }[] = [];
+
+    for (const assetCode of assetCodes) {
+      try {
+        const current = await this.findAssetByReference(
+          assetCode.trim(),
+          context.actor,
+        );
+        const now = new Date();
+        const transition = this.movementService.transfer(
+          current,
+          {
+            assetCode: current.assetCode,
+            destinationWarehouseId,
+            destinationLocationName: "",
+            referenceNumber,
+            notes,
+            expectedVersion: current.version,
+          },
+          context.actor.uid,
+          now,
+        );
+        const movement = await this.commit(
+          "warehouse_movement",
+          "warehouse_moved",
+          "Asset moved between warehouses",
+          current,
+          transition,
+          referenceNumber,
+          notes,
+          context,
+          now,
+        );
+        succeeded.push(movement);
+      } catch (error) {
+        failed.push({
+          assetCode,
+          error:
+            error instanceof Error ? error.message : "Transfer failed",
+        });
+      }
+    }
+
+    return { succeeded, failed };
+  }
+
   async listMovements(
     profile: UserProfile,
     type: MovementType | "all",
