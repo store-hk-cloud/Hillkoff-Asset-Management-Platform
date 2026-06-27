@@ -383,8 +383,8 @@ export function MovementForm({ action }: MovementFormProps) {
           <div className="space-y-2">
             <Label htmlFor="bulkCodes">
               {locale === "th"
-                ? "รหัสทรัพย์สิน (หลายรายการ คั่นด้วย Enter หรือ ,)"
-                : "Asset codes (multiple, separated by Enter or ,)"} *
+                ? "รหัสทรัพย์สิน / Serial Number (หลายรายการ คั่นด้วย Enter หรือ ,)"
+                : "Asset code / Serial number (multiple, separated by Enter or ,)"} *
             </Label>
             <textarea
               className="border-input bg-background min-h-24 w-full rounded-md border px-3 py-2 text-sm font-mono"
@@ -393,8 +393,8 @@ export function MovementForm({ action }: MovementFormProps) {
               onChange={(e) => setBulkCodes(e.currentTarget.value)}
               placeholder={
                 locale === "th"
-                  ? "ระบุรหัสทีละบรรทัด หรือคั่นด้วย ,\nHK-CM-001\nHK-GR-015"
-                  : "One per line or comma-separated\nHK-CM-001\nHK-GR-015"
+                  ? "ระบุ Serial Number หรือรหัสทีละบรรทัด\nHK-CM-001\nHK-GR-015\n20250601-001"
+                  : "Serial number or asset code, one per line\nHK-CM-001\nHK-GR-015\n20250601-001"
               }
               value={bulkCodes}
             />
