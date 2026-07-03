@@ -62,7 +62,7 @@ export function SchedulePmForm() {
         <Field
           label={
             locale === "th"
-              ? "Serial Number / Asset ID / รหัสทรัพย์สิน"
+              ? "Serial Number / Asset ID / รหัสเครื่อง"
               : "Serial number / Asset ID / Asset code"
           }
           name="assetCode"

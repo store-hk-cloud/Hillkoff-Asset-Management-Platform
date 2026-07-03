@@ -131,7 +131,7 @@ export default async function PublicAssetPage({
             <div className="space-y-2 sm:col-span-2">
               <p className="text-muted-foreground text-xs">
                 {locale === "th"
-                  ? "งานที่ได้รับมอบหมายสำหรับทรัพย์สินนี้"
+                  ? "งานที่ได้รับมอบหมายสำหรับเครื่องนี้"
                   : "Your assigned work for this asset"}
               </p>
               {assignedWork.length ? (

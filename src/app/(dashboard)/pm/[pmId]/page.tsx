@@ -67,7 +67,7 @@ export default async function PmDetailPage({ params }: Props) {
         </CardHeader>
         <CardContent className="grid gap-4 text-sm sm:grid-cols-2">
           <Detail
-            label={locale === "th" ? "ทรัพย์สิน" : "Asset"}
+            label={locale === "th" ? "เครื่อง" : "Asset"}
             value={`${job.assetCode} · ${job.assetName}`}
           />
           <Detail

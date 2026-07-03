@@ -21,7 +21,7 @@ type EditAssetPageProps = {
 };
 
 export const metadata = {
-  title: "แก้ไขทรัพย์สิน",
+  title: "แก้ไขเครื่อง",
 };
 
 export default async function EditAssetPage({ params }: EditAssetPageProps) {

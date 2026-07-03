@@ -137,7 +137,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : "ไม่สามารถบันทึกทรัพย์สินได้",
+          : "ไม่สามารถบันทึกเครื่องได้",
       );
     } finally {
       setSubmitting(false);
@@ -149,7 +149,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="assetCode">
-            {locale === "th" ? "รหัสทรัพย์สิน" : "Asset code"} *
+            {locale === "th" ? "รหัสเครื่อง" : "Asset code"} *
           </Label>
           <Input
             defaultValue={initialValues?.assetCode}
@@ -165,7 +165,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
             <p className="text-muted-foreground text-xs">
               {loadingCatalog
                 ? locale === "th"
-                  ? "กำลังดึงข้อมูลทรัพย์สิน…"
+                  ? "กำลังดึงข้อมูลเครื่อง…"
                   : "Loading asset master data…"
                 : locale === "th"
                   ? "หากมีรหัสนี้แล้ว ระบบจะเติมข้อมูลถัดไปให้อัตโนมัติ"

@@ -81,7 +81,7 @@ export function NfcRegistration({
       setMessage(
         result.status === "verified"
           ? "NFC tag ถูกต้อง"
-          : "NFC tag ไม่ตรงกับทรัพย์สิน",
+          : "NFC tag ไม่ตรงกับเครื่อง",
       );
       router.refresh();
     } catch (verifyError) {

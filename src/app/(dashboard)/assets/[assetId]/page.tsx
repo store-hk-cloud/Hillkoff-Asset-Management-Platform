@@ -160,7 +160,7 @@ export default async function AssetDetailPage({
       ) : null}
 
       <nav
-        aria-label={locale === "th" ? "รายละเอียดทรัพย์สิน" : "Asset detail"}
+        aria-label={locale === "th" ? "รายละเอียดเครื่อง" : "Asset detail"}
         className="flex gap-1 overflow-x-auto border-b"
       >
         {tabs.map(([tab, label]) => (
@@ -331,7 +331,7 @@ export default async function AssetDetailPage({
             />
             <p className="text-muted-foreground text-sm">
               {locale === "th"
-                ? "ยังไม่มีเอกสารสำหรับทรัพย์สินนี้"
+                ? "ยังไม่มีเอกสารสำหรับเครื่องนี้"
                 : "No documents for this asset"}
             </p>
           </div>

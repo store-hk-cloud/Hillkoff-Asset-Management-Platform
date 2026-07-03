@@ -24,7 +24,7 @@ export function ArchiveAssetButton({
   async function handleArchive() {
     const confirmed = window.confirm(
       locale === "th"
-        ? `ยืนยันการเก็บทรัพย์สิน ${assetCode} เป็นรายการถาวร?`
+        ? `ยืนยันการเก็บเครื่อง ${assetCode} เป็นรายการถาวร?`
         : `Archive asset ${assetCode}?`,
     );
 
@@ -41,7 +41,7 @@ export function ArchiveAssetButton({
       window.alert(
         error instanceof Error
           ? error.message
-          : "ไม่สามารถ Archive ทรัพย์สินได้",
+          : "ไม่สามารถ Archive เครื่องได้",
       );
     } finally {
       setSubmitting(false);

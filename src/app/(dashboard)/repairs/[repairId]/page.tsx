@@ -73,7 +73,7 @@ export default async function RepairDetailPage({ params }: Props) {
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <Detail
-              label={locale === "th" ? "ทรัพย์สิน" : "Asset"}
+              label={locale === "th" ? "เครื่อง" : "Asset"}
               value={`${ticket.assetCode} · ${ticket.assetName}`}
             />
             <Detail

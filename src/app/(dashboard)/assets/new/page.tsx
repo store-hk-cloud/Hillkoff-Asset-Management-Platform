@@ -15,7 +15,7 @@ import { getServerTranslator } from "@/lib/i18n/server";
 const accessService = new AssetAccessService();
 
 export const metadata = {
-  title: "เพิ่มทรัพย์สิน",
+  title: "เพิ่มเครื่อง",
 };
 
 export default async function NewAssetPage() {

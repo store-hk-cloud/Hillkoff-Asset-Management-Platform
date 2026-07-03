@@ -76,7 +76,7 @@ export default async function DashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Metric
-          title={locale === "th" ? "ทรัพย์สินทั้งหมด" : "Total Assets"}
+          title={locale === "th" ? "เครื่องทั้งหมด" : "Total Assets"}
           value={snapshot.totalAssets.toString()}
         />
         <Metric
@@ -104,7 +104,7 @@ export default async function DashboardPage() {
           items={Object.entries(snapshot.assetsByStatus).map(
             ([label, value]) => ({ label, value: value.toString() }),
           )}
-          title={locale === "th" ? "ทรัพย์สินตามสถานะ" : "Assets By Status"}
+          title={locale === "th" ? "เครื่องตามสถานะ" : "Assets By Status"}
         />
         <ListCard
           items={snapshot.lowStockParts.map((part) => ({
@@ -119,7 +119,7 @@ export default async function DashboardPage() {
             value: asset.value.toString(),
           }))}
           title={
-            locale === "th" ? "ทรัพย์สินที่เสียบ่อย" : "Top Failure Assets"
+            locale === "th" ? "เครื่องที่เสียบ่อย" : "Top Failure Assets"
           }
         />
         <ListCard
@@ -127,7 +127,7 @@ export default async function DashboardPage() {
             label: `${asset.assetCode} · ${asset.assetName}`,
             value: `${asset.value.toLocaleString("th-TH")} THB`,
           }))}
-          title={locale === "th" ? "ทรัพย์สินค่าซ่อมสูง" : "Top Repair Cost"}
+          title={locale === "th" ? "เครื่องค่าซ่อมสูง" : "Top Repair Cost"}
         />
       </div>
     </section>

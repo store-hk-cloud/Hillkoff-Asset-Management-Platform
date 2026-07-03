@@ -80,7 +80,7 @@ export function TechnicianWorkspace({
       } else if (result.work.length === 0) {
         setError(
           locale === "th"
-            ? "ไม่พบงานของคุณสำหรับทรัพย์สินนี้"
+            ? "ไม่พบงานของคุณสำหรับเครื่องนี้"
             : "No assigned work found for this asset.",
         );
       } else {

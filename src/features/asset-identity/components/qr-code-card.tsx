@@ -29,7 +29,7 @@ export function QrCodeCard({ assetId, qrUrl }: QrCodeCardProps) {
         </CardTitle>
         <CardDescription>
           {locale === "th"
-            ? "เปิดหน้าตรวจสอบทรัพย์สินสาธารณะ"
+            ? "เปิดหน้าตรวจสอบเครื่องสาธารณะ"
             : "Open the public asset lookup"}
         </CardDescription>
       </CardHeader>

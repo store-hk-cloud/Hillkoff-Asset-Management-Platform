@@ -35,7 +35,7 @@ export default async function PmPage() {
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
             {locale === "th"
-              ? "วางแผน ติดตาม และบันทึกประวัติ PM ของทรัพย์สิน"
+              ? "วางแผน ติดตาม และบันทึกประวัติ PM ของเครื่อง"
               : "Plan, track, and record preventive maintenance history."}
           </p>
         </div>

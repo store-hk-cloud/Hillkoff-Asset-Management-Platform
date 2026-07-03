@@ -37,7 +37,7 @@ export default async function WarehousePage() {
           <WarehouseActionCard
             description={
               locale === "th"
-                ? "ย้ายทรัพย์สินจากคลังปัจจุบันไปคลังปลายทางทันที"
+                ? "ย้ายเครื่องจากคลังปัจจุบันไปคลังปลายทางทันที"
                 : "Move an asset directly between warehouses"
             }
             href="/warehouse/transfer"
@@ -49,7 +49,7 @@ export default async function WarehousePage() {
           <WarehouseActionCard
             description={
               locale === "th"
-                ? "ขายและส่งมอบทรัพย์สินให้ลูกค้า"
+                ? "ขายและส่งมอบเครื่องให้ลูกค้า"
                 : "Sell and deliver an asset to a customer"
             }
             href="/warehouse/sale"
