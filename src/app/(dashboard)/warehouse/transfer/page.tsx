@@ -26,8 +26,8 @@ export default async function TransferPage() {
         <CardHeader>
           <CardTitle>
             {locale === "th"
-              ? "ย้ายทรัพย์สินระหว่างคลัง"
-              : "Move asset between warehouses"}
+              ? "ย้ายเครื่องระหว่างคลัง"
+              : "Move machines between warehouses"}
           </CardTitle>
           <CardDescription>
             {locale === "th"

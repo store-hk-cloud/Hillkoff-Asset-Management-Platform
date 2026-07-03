@@ -16,7 +16,7 @@ export function MovementSummary({ asset }: MovementSummaryProps) {
       <CardContent className="grid gap-3 p-4 text-sm sm:grid-cols-2">
         <div>
           <p className="text-muted-foreground text-xs">
-            {locale === "th" ? "ทรัพย์สิน" : "Asset"}
+            {locale === "th" ? "เครื่อง" : "Machine"}
           </p>
           <p className="font-semibold">{asset.name}</p>
           <p className="font-mono text-xs">{asset.assetCode}</p>

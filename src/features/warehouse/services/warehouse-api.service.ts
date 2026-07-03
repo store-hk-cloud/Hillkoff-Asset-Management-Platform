@@ -26,7 +26,7 @@ export async function findWarehouseAsset(reference: string): Promise<Asset> {
   };
 
   if (!response.ok || !payload.data) {
-    throw new Error(payload.error?.message ?? "ไม่พบทรัพย์สิน");
+    throw new Error(payload.error?.message ?? "ไม่พบเครื่อง");
   }
 
   return payload.data;

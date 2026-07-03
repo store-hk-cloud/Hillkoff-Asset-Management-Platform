@@ -97,7 +97,7 @@ export function MovementForm({ action }: MovementFormProps) {
       referenceOverride?.trim() ?? assetCodeInputRef.current?.value.trim();
 
     if (!assetReference) {
-      setError("กรุณาระบุรหัสทรัพย์สิน");
+      setError("กรุณาระบุรหัสเครื่อง");
       return;
     }
 
@@ -109,7 +109,7 @@ export function MovementForm({ action }: MovementFormProps) {
     } catch (lookupError) {
       setAsset(null);
       setError(
-        lookupError instanceof Error ? lookupError.message : "ไม่พบทรัพย์สิน",
+        lookupError instanceof Error ? lookupError.message : "ไม่พบเครื่อง",
       );
     } finally {
       setLoadingAsset(false);
@@ -160,7 +160,7 @@ export function MovementForm({ action }: MovementFormProps) {
     event.preventDefault();
 
     if (!asset) {
-      setError("ค้นหาและตรวจสอบทรัพย์สินก่อนทำรายการ");
+      setError("ค้นหาและตรวจสอบเครื่องก่อนทำรายการ");
       return;
     }
 
@@ -196,16 +196,20 @@ export function MovementForm({ action }: MovementFormProps) {
   }
 
   async function loadBulkAssets() {
-    const codes = bulkCodes
-      .split(/[\n,]/)
-      .map((c) => c.trim())
-      .filter((c) => c.length > 0);
+    const codes = [
+      ...new Set(
+        bulkCodes
+          .split(/[\n,]/)
+          .map((c) => c.trim())
+          .filter((c) => c.length > 0),
+      ),
+    ];
 
     if (codes.length === 0) {
       setError(
         locale === "th"
-          ? "กรุณาระบุรหัสทรัพย์สินอย่างน้อย 1 รายการ"
-          : "Enter at least one asset code",
+          ? "กรุณาระบุรหัสเครื่องอย่างน้อย 1 รายการ"
+          : "Enter at least one machine code",
       );
       return;
     }
@@ -254,8 +258,8 @@ export function MovementForm({ action }: MovementFormProps) {
     if (bulkAssets.length === 0) {
       setError(
         locale === "th"
-          ? "ไม่มีทรัพย์สินที่จะย้าย กรุณาโหลดรายการก่อน"
-          : "No assets loaded. Load items first.",
+          ? "ไม่มีเครื่องที่จะย้าย กรุณาโหลดรายการก่อน"
+          : "No machines loaded. Load items first.",
       );
       return;
     }
@@ -283,13 +287,46 @@ export function MovementForm({ action }: MovementFormProps) {
         notes: (formData.get("notes") as string) ?? "",
       });
 
+      if (result.failed.length > 0) {
+        const failedCodes = new Set(result.failed.map((item) => item.assetCode));
+        const failedList = result.failed
+          .map((item) => `${item.assetCode}: ${item.error}`)
+          .join("\n");
+        const successLine =
+          result.succeeded.length > 0
+            ? locale === "th"
+              ? `ย้ายสำเร็จ ${result.succeeded.length} รายการ`
+              : `${result.succeeded.length} machines moved`
+            : "";
+
+        setBulkAssets((current) =>
+          current.filter((item) => failedCodes.has(item.assetCode)),
+        );
+        setError(
+          [
+            successLine,
+            locale === "th"
+              ? `บางรายการไม่สำเร็จ:\n${failedList}`
+              : `Some items failed:\n${failedList}`,
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
+        );
+        return;
+      }
+
       const succeededMsg =
         result.succeeded.length > 0
           ? `${result.succeeded[0]?.movementNumber ?? ""}`
           : "";
       const params = new URLSearchParams();
       if (succeededMsg) {
-        params.set("success", `${succeededMsg} +${result.succeeded.length - 1}`);
+        params.set(
+          "success",
+          result.succeeded.length > 1
+            ? `${succeededMsg} +${result.succeeded.length - 1}`
+            : succeededMsg,
+        );
       }
 
       router.replace(`/warehouse/movements?${params}`);
@@ -315,8 +352,8 @@ export function MovementForm({ action }: MovementFormProps) {
           <div className="space-y-2">
             <Label htmlFor="assetCode">
               {locale === "th"
-                ? "Serial Number / Asset ID / รหัสทรัพย์สิน"
-                : "Serial number / Asset ID / Asset code"}{" "}
+                ? "Serial Number / Asset ID / รหัสเครื่อง"
+                : "Serial number / Asset ID / Machine code"}{" "}
               *
             </Label>
             <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
@@ -383,8 +420,8 @@ export function MovementForm({ action }: MovementFormProps) {
           <div className="space-y-2">
             <Label htmlFor="bulkCodes">
               {locale === "th"
-                ? "รหัสทรัพย์สิน / Serial Number (หลายรายการ คั่นด้วย Enter หรือ ,)"
-                : "Asset code / Serial number (multiple, separated by Enter or ,)"} *
+                ? "รหัสเครื่อง / Serial Number (หลายรายการ คั่นด้วย Enter หรือ ,)"
+                : "Machine code / Serial number (multiple, separated by Enter or ,)"} *
             </Label>
             <textarea
               className="border-input bg-background min-h-24 w-full rounded-md border px-3 py-2 text-sm font-mono"
@@ -394,7 +431,7 @@ export function MovementForm({ action }: MovementFormProps) {
               placeholder={
                 locale === "th"
                   ? "ระบุ Serial Number หรือรหัสทีละบรรทัด\nHK-CM-001\nHK-GR-015\n20250601-001"
-                  : "Serial number or asset code, one per line\nHK-CM-001\nHK-GR-015\n20250601-001"
+                  : "Serial number or machine code, one per line\nHK-CM-001\nHK-GR-015\n20250601-001"
               }
               value={bulkCodes}
             />
@@ -405,7 +442,7 @@ export function MovementForm({ action }: MovementFormProps) {
             type="button"
           >
             <Layers aria-hidden="true" className="size-4" />
-            {loadingBulk ? t("status.loading") : locale === "th" ? "โหลดรายการทรัพย์สิน" : "Load Assets"}
+            {loadingBulk ? t("status.loading") : locale === "th" ? "โหลดรายการเครื่อง" : "Load machines"}
           </Button>
           {bulkNotFound.length > 0 ? (
             <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
@@ -420,7 +457,7 @@ export function MovementForm({ action }: MovementFormProps) {
           {bulkAssets.length > 0 ? (
             <div className="space-y-3">
               <p className="text-sm font-medium">
-                {locale === "th" ? `พบ ${bulkAssets.length} รายการ` : `${bulkAssets.length} assets found`}
+                {locale === "th" ? `พบ ${bulkAssets.length} รายการ` : `${bulkAssets.length} machines found`}
               </p>
               <div className="max-h-80 space-y-2 overflow-y-auto">
                 {bulkAssets.map((a) => (
@@ -478,9 +515,8 @@ export function MovementForm({ action }: MovementFormProps) {
                 <option
                   disabled={
                     action === "transfer" &&
-                    (bulkMode
-                      ? bulkAssets.some((a) => a.warehouseId === warehouse.id)
-                      : asset?.warehouseId === warehouse.id)
+                    !bulkMode &&
+                    asset?.warehouseId === warehouse.id
                   }
                   key={warehouse.id}
                   value={warehouse.id}
@@ -551,7 +587,7 @@ export function MovementForm({ action }: MovementFormProps) {
       </div>
 
       {error ? (
-        <p className="text-destructive text-sm" role="alert">
+        <p className="text-destructive whitespace-pre-line text-sm" role="alert">
           {error}
         </p>
       ) : null}
