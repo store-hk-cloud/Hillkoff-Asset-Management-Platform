@@ -176,7 +176,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
 
         <div className="space-y-2">
           <Label htmlFor="name">
-            {locale === "th" ? "ชื่อทรัพย์สิน" : "Asset name"} *
+            {locale === "th" ? "ชื่อเครื่อง" : "Machine name"} *
           </Label>
           <Input
             id="name"

@@ -15,7 +15,7 @@ const technicianService = new TechnicianWorkspaceService();
 type PublicAssetPageProps = { params: Promise<{ publicId: string }> };
 
 export const metadata = {
-  title: "Asset Verification",
+  title: "ตรวจสอบเครื่อง Hillkoff",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";
@@ -60,7 +60,7 @@ export default async function PublicAssetPage({
           <CardTitle className="text-2xl">
             {locale === "th"
               ? "ตรวจสอบเครื่อง Hillkoff"
-              : "Hillkoff Asset Verification"}
+              : "Hillkoff Machine Verification"}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 text-sm sm:grid-cols-2">

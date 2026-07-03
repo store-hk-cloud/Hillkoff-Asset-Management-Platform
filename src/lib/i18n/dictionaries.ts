@@ -2,12 +2,12 @@ import type { Locale } from "@/lib/i18n/config";
 
 const translations = {
   "app.name": {
-    th: "ระบบจัดการทรัพย์สิน Hillkoff",
-    en: "Hillkoff Asset Management",
+    th: "ระบบจัดการเครื่อง Hillkoff",
+    en: "Hillkoff Machine Management",
   },
   "nav.dashboard": { th: "ภาพรวม", en: "Dashboard" },
   "nav.technician": { th: "งานของช่าง", en: "Technician Work" },
-  "nav.assets": { th: "ทรัพย์สิน", en: "Assets" },
+  "nav.assets": { th: "เครื่อง", en: "Machines" },
   "nav.warehouse": { th: "คลังสินค้า", en: "Warehouse" },
   "nav.installations": { th: "งานติดตั้ง", en: "Installations" },
   "nav.repairs": { th: "งานซ่อม", en: "Repairs" },
@@ -62,14 +62,14 @@ const translations = {
     th: "ส่งคำเชิญตั้งรหัสผ่าน",
     en: "Send password invitation",
   },
-  "assets.title": { th: "ทรัพย์สิน", en: "Assets" },
-  "assets.management": { th: "จัดการทรัพย์สิน", en: "Asset Management" },
-  "assets.add": { th: "เพิ่มทรัพย์สิน", en: "Add asset" },
+  "assets.title": { th: "เครื่อง", en: "Machines" },
+  "assets.management": { th: "จัดการเครื่อง", en: "Machine Management" },
+  "assets.add": { th: "เพิ่มเครื่อง", en: "Add machine" },
   "assets.empty": {
-    th: "ไม่พบทรัพย์สินตามเงื่อนไข",
-    en: "No assets match the selected filters",
+    th: "ไม่พบเครื่องตามเงื่อนไข",
+    en: "No machines match the selected filters",
   },
-  "assets.back": { th: "← ทรัพย์สินทั้งหมด", en: "← All assets" },
+  "assets.back": { th: "← เครื่องทั้งหมด", en: "← All machines" },
   "warehouse.title": { th: "คลังสินค้า", en: "Warehouse" },
   "warehouse.description": {
     th: "ย้ายคลัง ขายลูกค้า และตรวจสอบประวัติการเคลื่อนไหว",
@@ -104,12 +104,12 @@ const translations = {
     en: "No internet connection",
   },
   "offline.description": {
-    th: "การดูและบันทึกข้อมูลทรัพย์สินต้องเชื่อมต่ออินเทอร์เน็ต เพื่อป้องกันข้อมูลซ้ำและความขัดแย้งของรายการธุรกรรม",
-    en: "Viewing and changing asset data requires an internet connection to prevent duplicate or conflicting transactions.",
+    th: "การดูและบันทึกข้อมูลเครื่องต้องเชื่อมต่ออินเทอร์เน็ต เพื่อป้องกันข้อมูลซ้ำและความขัดแย้งของรายการธุรกรรม",
+    en: "Viewing and changing machine data requires an internet connection to prevent duplicate or conflicting transactions.",
   },
   "public.verification": {
     th: "ตรวจสอบเครื่อง Hillkoff",
-    en: "Hillkoff Asset Verification",
+    en: "Hillkoff Machine Verification",
   },
 } as const satisfies Record<string, Record<Locale, string>>;
 
