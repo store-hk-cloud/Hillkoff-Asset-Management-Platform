@@ -33,8 +33,8 @@ export default async function NewAssetPage() {
           <CardTitle>{t("assets.add")}</CardTitle>
           <CardDescription>
             {locale === "th"
-              ? "การสร้างรายการจะบันทึก Asset Event และ Audit Log โดยอัตโนมัติ"
-              : "Creating an asset automatically records an Asset Event and Audit Log."}
+              ? "การสร้างรายการจะบันทึก Machine Event และ Audit Log โดยอัตโนมัติ"
+              : "Creating a machine automatically records a Machine Event and Audit Log."}
           </CardDescription>
         </CardHeader>
         <CardContent>

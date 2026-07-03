@@ -352,8 +352,8 @@ export function MovementForm({ action }: MovementFormProps) {
           <div className="space-y-2">
             <Label htmlFor="assetCode">
               {locale === "th"
-                ? "Serial Number / Asset ID / รหัสเครื่อง"
-                : "Serial number / Asset ID / Machine code"}{" "}
+                ? "Serial Number / Machine ID / รหัสเครื่อง"
+                : "Serial number / Machine ID / Machine code"}{" "}
               *
             </Label>
             <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">

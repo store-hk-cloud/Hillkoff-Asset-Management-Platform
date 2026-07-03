@@ -73,7 +73,7 @@ const translations = {
   "warehouse.title": { th: "คลังสินค้า", en: "Warehouse" },
   "warehouse.description": {
     th: "ย้ายคลัง ขายลูกค้า และตรวจสอบประวัติการเคลื่อนไหว",
-    en: "Move warehouse stock, sell assets, and review movement history.",
+    en: "Move warehouse stock, sell machines, and review movement history.",
   },
   "warehouse.receive": { th: "รับเข้า", en: "Receive" },
   "warehouse.transfer": { th: "ย้ายคลัง", en: "Move warehouse" },

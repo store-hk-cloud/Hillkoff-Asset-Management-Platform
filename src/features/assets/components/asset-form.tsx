@@ -105,7 +105,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
       setError(
         catalogError instanceof Error
           ? catalogError.message
-          : "Unable to load asset master data.",
+          : "Unable to load machine master data.",
       );
     } finally {
       setLoadingCatalog(false);
@@ -180,7 +180,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="assetCode">
-            {locale === "th" ? "รหัสเครื่อง" : "Asset code"} *
+            {locale === "th" ? "รหัสเครื่อง" : "Machine code"} *
           </Label>
           <Input
             defaultValue={initialValues?.assetCode}
@@ -197,7 +197,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
               {loadingCatalog
                 ? locale === "th"
                   ? "กำลังดึงข้อมูลเครื่อง…"
-                  : "Loading asset master data…"
+                  : "Loading machine master data…"
                 : locale === "th"
                   ? "หากมีรหัสนี้แล้ว ระบบจะเติมข้อมูลถัดไปให้อัตโนมัติ"
                   : "Existing master data will fill the following fields automatically."}

@@ -132,7 +132,7 @@ export default async function PublicAssetPage({
               <p className="text-muted-foreground text-xs">
                 {locale === "th"
                   ? "งานที่ได้รับมอบหมายสำหรับเครื่องนี้"
-                  : "Your assigned work for this asset"}
+                  : "Your assigned work for this machine"}
               </p>
               {assignedWork.length ? (
                 <div className="grid gap-2">
@@ -148,7 +148,7 @@ export default async function PublicAssetPage({
                 <p className="text-sm">
                   {locale === "th"
                     ? "ยังไม่มีใบงานที่มอบหมายให้คุณสำหรับเครื่องนี้"
-                    : "No work is currently assigned to you for this asset."}
+                    : "No work is currently assigned to you for this machine."}
                 </p>
               )}
             </div>

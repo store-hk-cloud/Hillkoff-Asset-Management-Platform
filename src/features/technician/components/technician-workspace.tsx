@@ -81,7 +81,7 @@ export function TechnicianWorkspace({
         setError(
           locale === "th"
             ? "ไม่พบงานของคุณสำหรับเครื่องนี้"
-            : "No assigned work found for this asset.",
+            : "No assigned work found for this machine.",
         );
       } else {
         setError(
