@@ -235,8 +235,8 @@ export function MovementForm({ action }: MovementFormProps) {
     const seen = new Set<string>();
     const deduped: Asset[] = [];
     for (const a of result.found) {
-      if (!seen.has(a.assetCode)) {
-        seen.add(a.assetCode);
+      if (!seen.has(a.id)) {
+        seen.add(a.id);
         deduped.push(a);
       }
     }
