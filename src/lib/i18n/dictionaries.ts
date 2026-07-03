@@ -108,7 +108,7 @@ const translations = {
     en: "Viewing and changing asset data requires an internet connection to prevent duplicate or conflicting transactions.",
   },
   "public.verification": {
-    th: "ตรวจสอบทรัพย์สิน Hillkoff",
+    th: "ตรวจสอบเครื่อง Hillkoff",
     en: "Hillkoff Asset Verification",
   },
 } as const satisfies Record<string, Record<Locale, string>>;

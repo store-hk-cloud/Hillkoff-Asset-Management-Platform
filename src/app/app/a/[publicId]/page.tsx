@@ -58,12 +58,14 @@ export default async function PublicAssetPage({
             {t("public.verification")}
           </p>
           <CardTitle className="text-2xl">
-            Hillkoff Asset Verification
+            {locale === "th"
+              ? "ตรวจสอบเครื่อง Hillkoff"
+              : "Hillkoff Asset Verification"}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 text-sm sm:grid-cols-2">
           <Detail
-            label={locale === "th" ? "ชื่อทรัพย์สิน" : "Asset Name"}
+            label={locale === "th" ? "ชื่อเครื่อง" : "Asset Name"}
             value={asset.name}
           />
           <Detail label="Serial Number" value={asset.serialNumber || "—"} />
@@ -72,7 +74,7 @@ export default async function PublicAssetPage({
             value={asset.color || "—"}
           />
           <Detail
-            label={locale === "th" ? "สถานะทรัพย์สิน" : "Asset Status"}
+            label={locale === "th" ? "สถานะเครื่อง" : "Asset Status"}
             value={operationalStatusLabel(asset.operationalStatus, locale)}
           />
           <Detail
@@ -90,7 +92,7 @@ export default async function PublicAssetPage({
           {asset.details ? (
             <>
               <Detail
-                label={locale === "th" ? "รหัสทรัพย์สิน" : "Asset Code"}
+                label={locale === "th" ? "รหัสเครื่อง" : "Asset Code"}
                 value={asset.details.assetCode}
               />
               <Detail
