@@ -14,6 +14,16 @@ export function createExcelExport(snapshot: ExecutiveDashboardSnapshot) {
     ["Repair Cost", snapshot.repairCost.toFixed(2)],
     ["MTBF Hours", snapshot.mtbfHours?.toFixed(2) ?? "N/A"],
     ["PM Completion Rate", snapshot.pmCompletionRate.toFixed(2) + "%"],
+    ["Warranty Expiring in 30 Days", String(snapshot.warrantyExpiring30)],
+    ["Warranty Expiring in 90 Days", String(snapshot.warrantyExpiring90)],
+    ...Object.entries(snapshot.warrantiesByStatus).map(([status, value]) => [
+      `Warranty: ${status}`,
+      String(value),
+    ]),
+    ...snapshot.expiringWarranties.map((item) => [
+      `Warranty expires: ${item.assetCode} ${item.assetName}`,
+      `${item.daysRemaining} days (${item.expiresAt.toISOString().slice(0, 10)})`,
+    ]),
     ...Object.entries(snapshot.assetsByStatus).map(([status, value]) => [
       `Assets: ${status}`,
       String(value),
@@ -45,8 +55,19 @@ export function createPdfExport(snapshot: ExecutiveDashboardSnapshot): Buffer {
     `Repair Cost: ${snapshot.repairCost.toFixed(2)} THB`,
     `MTBF: ${snapshot.mtbfHours?.toFixed(2) ?? "N/A"} hours`,
     `PM Completion Rate: ${snapshot.pmCompletionRate.toFixed(2)}%`,
+    `Warranty Expiring in 30 Days: ${snapshot.warrantyExpiring30}`,
+    `Warranty Expiring in 90 Days: ${snapshot.warrantyExpiring90}`,
+    ...Object.entries(snapshot.warrantiesByStatus).map(
+      ([status, value]) => `Warranty ${status}: ${value}`,
+    ),
     ...Object.entries(snapshot.assetsByStatus).map(
       ([status, value]) => `Assets ${status}: ${value}`,
+    ),
+    "",
+    "Expiring Warranties",
+    ...snapshot.expiringWarranties.map(
+      (item) =>
+        `${item.assetCode} ${item.assetName}: ${item.daysRemaining} days`,
     ),
     "",
     "Top Failure Assets",

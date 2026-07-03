@@ -39,6 +39,16 @@ export interface AssetFormInitialValues {
   readonly customerId: string | null;
   readonly locationName: string;
   readonly installedAt: string | null;
+  readonly warranty: {
+    readonly status: "inactive" | "active" | "expired" | "void";
+    readonly startedAt: string | null;
+    readonly expiresAt: string | null;
+    readonly providerName: string;
+    readonly providerContact: string;
+    readonly coverageType: "parts" | "parts_and_labor" | "full";
+    readonly documents: readonly string[];
+    readonly voidReason: string | null;
+  };
   readonly version: number;
 }
 
@@ -108,6 +118,12 @@ export function AssetForm({ initialValues }: AssetFormProps) {
     setSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
+    const warrantyDocuments = String(
+      formData.get("warrantyDocuments") ?? "",
+    )
+      .split(/\r?\n/)
+      .map((item) => item.trim())
+      .filter(Boolean);
     const payload = {
       assetCode: formData.get("assetCode"),
       name: formData.get("name"),
@@ -119,7 +135,22 @@ export function AssetForm({ initialValues }: AssetFormProps) {
       condition: formData.get("condition"),
       installedAt: formData.get("installedAt") || null,
       ...(initialValues
-        ? { expectedVersion: initialValues.version }
+        ? {
+            expectedVersion: initialValues.version,
+            warranty: {
+              status: formData.get("warrantyStatus"),
+              startedAt: formData.get("warrantyStartedAt") || null,
+              expiresAt: formData.get("warrantyExpiresAt") || null,
+              providerName: formData.get("warrantyProviderName") ?? "",
+              providerContact: formData.get("warrantyProviderContact") ?? "",
+              coverageType: formData.get("warrantyCoverageType"),
+              documents: warrantyDocuments,
+              voidReason: formData.get("warrantyVoidReason") || null,
+              extensionMonths: formData.get("warrantyExtensionMonths")
+                ? Number(formData.get("warrantyExtensionMonths"))
+                : null,
+            },
+          }
         : {
             warehouseId: formData.get("warehouseId"),
             customerId: formData.get("customerId") || null,
@@ -341,6 +372,149 @@ export function AssetForm({ initialValues }: AssetFormProps) {
           />
         </div>
       </div>
+
+      {initialValues ? (
+        <section className="space-y-4 rounded-lg border p-4">
+          <div>
+            <h2 className="font-semibold">
+              {locale === "th" ? "ข้อมูลประกันเครื่อง" : "Machine warranty"}
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              {locale === "th"
+                ? "ใช้สำหรับต่ออายุ ยกเลิก และเก็บเอกสารอ้างอิงของประกัน"
+                : "Use this to extend, void, and track warranty references."}
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="warrantyStatus">
+                {locale === "th" ? "สถานะประกัน" : "Warranty status"}
+              </Label>
+              <select
+                className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
+                defaultValue={initialValues.warranty.status}
+                id="warrantyStatus"
+                name="warrantyStatus"
+              >
+                <option value="inactive">
+                  {locale === "th" ? "ยังไม่เริ่ม" : "Inactive"}
+                </option>
+                <option value="active">
+                  {locale === "th" ? "อยู่ในประกัน" : "Active"}
+                </option>
+                <option value="expired">
+                  {locale === "th" ? "หมดประกัน" : "Expired"}
+                </option>
+                <option value="void">
+                  {locale === "th" ? "ยกเลิกประกัน" : "Void"}
+                </option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="warrantyCoverageType">
+                {locale === "th" ? "ความคุ้มครอง" : "Coverage"}
+              </Label>
+              <select
+                className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
+                defaultValue={initialValues.warranty.coverageType}
+                id="warrantyCoverageType"
+                name="warrantyCoverageType"
+              >
+                <option value="full">
+                  {locale === "th" ? "ครบทั้งหมด" : "Full"}
+                </option>
+                <option value="parts_and_labor">
+                  {locale === "th" ? "อะไหล่และค่าแรง" : "Parts and labor"}
+                </option>
+                <option value="parts">
+                  {locale === "th" ? "เฉพาะอะไหล่" : "Parts only"}
+                </option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="warrantyStartedAt">
+                {locale === "th" ? "วันเริ่มประกัน" : "Warranty start"}
+              </Label>
+              <Input
+                defaultValue={initialValues.warranty.startedAt ?? ""}
+                id="warrantyStartedAt"
+                name="warrantyStartedAt"
+                type="date"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="warrantyExpiresAt">
+                {locale === "th" ? "วันหมดประกัน" : "Warranty expiry"}
+              </Label>
+              <Input
+                defaultValue={initialValues.warranty.expiresAt ?? ""}
+                id="warrantyExpiresAt"
+                name="warrantyExpiresAt"
+                type="date"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="warrantyExtensionMonths">
+                {locale === "th" ? "ต่ออายุเพิ่ม (เดือน)" : "Extend by months"}
+              </Label>
+              <Input
+                id="warrantyExtensionMonths"
+                max="120"
+                min="1"
+                name="warrantyExtensionMonths"
+                placeholder="0"
+                type="number"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="warrantyProviderName">
+                {locale === "th" ? "ผู้ให้ประกัน" : "Warranty provider"}
+              </Label>
+              <Input
+                defaultValue={initialValues.warranty.providerName}
+                id="warrantyProviderName"
+                maxLength={200}
+                name="warrantyProviderName"
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="warrantyProviderContact">
+                {locale === "th" ? "ช่องทางติดต่อผู้ให้ประกัน" : "Provider contact"}
+              </Label>
+              <Input
+                defaultValue={initialValues.warranty.providerContact}
+                id="warrantyProviderContact"
+                maxLength={200}
+                name="warrantyProviderContact"
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="warrantyDocuments">
+                {locale === "th" ? "ลิงก์เอกสารประกัน" : "Warranty document links"}
+              </Label>
+              <textarea
+                className="border-input bg-background focus-visible:ring-ring min-h-24 w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+                defaultValue={initialValues.warranty.documents.join("\n")}
+                id="warrantyDocuments"
+                name="warrantyDocuments"
+                placeholder="https://..."
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="warrantyVoidReason">
+                {locale === "th" ? "เหตุผลยกเลิกประกัน" : "Void reason"}
+              </Label>
+              <textarea
+                className="border-input bg-background focus-visible:ring-ring min-h-20 w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+                defaultValue={initialValues.warranty.voidReason ?? ""}
+                id="warrantyVoidReason"
+                maxLength={500}
+                name="warrantyVoidReason"
+              />
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {error ? (
         <p className="text-destructive text-sm" role="alert">

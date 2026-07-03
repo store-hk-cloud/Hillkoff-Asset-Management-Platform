@@ -39,6 +39,7 @@ export const updateRepairSchema = z.object({
   expectedVersion: z.number().int().nonnegative(),
   targetStatus: z.enum(REPAIR_STATUSES).nullable(),
   photos: z.array(photoSchema).max(30),
+  warrantyClaim: z.boolean().default(false),
   rootCause: z.string().trim().max(3000),
   solution: z.string().trim().max(5000),
   laborCost: z.number().nonnegative().max(100000000),

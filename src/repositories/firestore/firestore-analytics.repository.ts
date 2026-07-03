@@ -3,6 +3,7 @@ import "server-only";
 import { Timestamp } from "firebase-admin/firestore";
 
 import type {
+  AnalyticsExpiringWarranty,
   AnalyticsRankedAsset,
   ExecutiveDashboardSnapshot,
 } from "@/domain/entities/analytics";
@@ -20,6 +21,11 @@ export class FirestoreAnalyticsRepository implements AnalyticsRepository {
     ]);
 
     const assetsByStatus: Record<string, number> = {};
+    const warrantiesByStatus: Record<string, number> = {};
+    const expiringWarranties: AnalyticsExpiringWarranty[] = [];
+    const now = new Date();
+    let warrantyExpiring30 = 0;
+    let warrantyExpiring90 = 0;
     const assetNames = new Map<string, { code: string; name: string }>();
     assets.docs.forEach((document) => {
       const data = document.data();
@@ -29,6 +35,37 @@ export class FirestoreAnalyticsRepository implements AnalyticsRepository {
         code: String(data.assetCode ?? document.id),
         name: String(data.name ?? "Unknown"),
       });
+
+      const warranty = data.warranty ?? {};
+      const warrantyStatus =
+        warranty.status === "active" ||
+        warranty.status === "expired" ||
+        warranty.status === "void"
+          ? warranty.status
+          : "inactive";
+      warrantiesByStatus[warrantyStatus] =
+        (warrantiesByStatus[warrantyStatus] ?? 0) + 1;
+
+      if (warrantyStatus === "active" && warranty.expiresAt instanceof Timestamp) {
+        const expiresAt = warranty.expiresAt.toDate();
+        const daysRemaining = Math.ceil(
+          (expiresAt.getTime() - now.getTime()) / 86_400_000,
+        );
+        if (daysRemaining >= 0 && daysRemaining <= 30) {
+          warrantyExpiring30 += 1;
+        }
+        if (daysRemaining >= 0 && daysRemaining <= 90) {
+          warrantyExpiring90 += 1;
+          expiringWarranties.push({
+            assetCode: String(data.assetCode ?? document.id),
+            assetName: String(data.name ?? "Unknown"),
+            customerId:
+              typeof data.customerId === "string" ? data.customerId : null,
+            expiresAt,
+            daysRemaining,
+          });
+        }
+      }
     });
 
     let repairCost = 0;
@@ -105,6 +142,12 @@ export class FirestoreAnalyticsRepository implements AnalyticsRepository {
             intervals.length /
             3_600_000,
       pmCompletionRate: totalPm === 0 ? 0 : (completedPm / totalPm) * 100,
+      warrantyExpiring30,
+      warrantyExpiring90,
+      warrantiesByStatus,
+      expiringWarranties: expiringWarranties
+        .sort((left, right) => left.daysRemaining - right.daysRemaining)
+        .slice(0, 20),
       topFailureAssets: rank(failureCount),
       topRepairCost: rank(repairCostByAsset),
       lowStockParts: parts.docs

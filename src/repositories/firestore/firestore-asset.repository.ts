@@ -215,25 +215,63 @@ function mapAsset(data: DocumentData): Asset {
       data.nfcVerifiedAt === undefined
         ? null
         : nullableTimestamp(data, "nfcVerifiedAt"),
-    warranty: {
-      status:
-        data.warranty?.status === "active" ||
-        data.warranty?.status === "expired"
-          ? data.warranty.status
-          : "inactive",
-      startedAt:
-        data.warranty?.startedAt instanceof Timestamp
-          ? data.warranty.startedAt.toDate()
-          : null,
-      expiresAt:
-        data.warranty?.expiresAt instanceof Timestamp
-          ? data.warranty.expiresAt.toDate()
-          : null,
-      installationId:
-        typeof data.warranty?.installationId === "string"
-          ? data.warranty.installationId
-          : null,
-    },
+    warranty: (() => {
+      const warranty = data.warranty ?? {};
+      return {
+        status:
+          warranty.status === "active" ||
+          warranty.status === "expired" ||
+          warranty.status === "void"
+            ? warranty.status
+            : "inactive",
+        startedAt:
+          warranty.startedAt instanceof Timestamp
+            ? warranty.startedAt.toDate()
+            : null,
+        expiresAt:
+          warranty.expiresAt instanceof Timestamp
+            ? warranty.expiresAt.toDate()
+            : null,
+        installationId:
+          typeof warranty.installationId === "string"
+            ? warranty.installationId
+            : null,
+        providerName:
+          typeof warranty.providerName === "string"
+            ? warranty.providerName
+            : "",
+        providerContact:
+          typeof warranty.providerContact === "string"
+            ? warranty.providerContact
+            : "",
+        coverageType:
+          warranty.coverageType === "parts" ||
+          warranty.coverageType === "parts_and_labor" ||
+          warranty.coverageType === "full"
+            ? warranty.coverageType
+            : "full",
+        documents: Array.isArray(warranty.documents)
+          ? warranty.documents.filter(
+              (document: unknown): document is string =>
+                typeof document === "string",
+            )
+          : [],
+        voidReason:
+          typeof warranty.voidReason === "string"
+            ? warranty.voidReason
+            : null,
+        extendedFrom:
+          warranty.extendedFrom?.previousExpiresAt instanceof Timestamp
+            ? {
+                previousExpiresAt:
+                  warranty.extendedFrom.previousExpiresAt.toDate(),
+                extensionMonths: Number(
+                  warranty.extendedFrom.extensionMonths ?? 0,
+                ),
+              }
+            : null,
+      };
+    })(),
     documents: Array.isArray(data.documents)
       ? data.documents.map((document) => mapDocumentMetadata(document))
       : [],
@@ -312,6 +350,14 @@ function serializeAsset(asset: Asset): DocumentData {
         : null,
       expiresAt: asset.warranty.expiresAt
         ? Timestamp.fromDate(asset.warranty.expiresAt)
+        : null,
+      extendedFrom: asset.warranty.extendedFrom
+        ? {
+            previousExpiresAt: Timestamp.fromDate(
+              asset.warranty.extendedFrom.previousExpiresAt,
+            ),
+            extensionMonths: asset.warranty.extendedFrom.extensionMonths,
+          }
         : null,
     },
     documents: asset.documents.map((document) => ({

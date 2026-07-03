@@ -55,6 +55,8 @@ export class RepairDomainService {
       assignmentRespondedAt: null,
       assignmentRejectionReason: null,
       photos: [],
+      warrantyClaim: false,
+      warrantyClaimApproved: null,
       rootCause: "",
       solution: "",
       laborCost: 0,
@@ -150,6 +152,9 @@ export class RepairDomainService {
       ...ticket,
       status: targetStatus,
       photos: input.photos,
+      warrantyClaim: input.warrantyClaim === true,
+      warrantyClaimApproved:
+        input.warrantyClaim === true ? ticket.warrantyClaimApproved : null,
       rootCause,
       solution,
       laborCost: input.laborCost,

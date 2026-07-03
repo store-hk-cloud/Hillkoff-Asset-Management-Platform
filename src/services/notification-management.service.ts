@@ -24,6 +24,9 @@ export class NotificationManagementService {
         "You do not have access to the notification queue.",
       );
     }
+    if (profile.role === "admin" || profile.role === "executive") {
+      await this.repository.enqueueExpiringWarrantyNotifications();
+    }
     return this.repository.list(
       profile.role === "technician" ? profile.uid : null,
     );

@@ -238,12 +238,27 @@ export class RepairManagementService {
       ),
     };
     const now = new Date();
-    const ticket = this.domainService.update(
+    let ticket = this.domainService.update(
       current,
       normalizedInput,
       context.actor.uid,
       now,
     );
+    if (
+      ticket.warrantyClaim &&
+      ticket.status === "completed" &&
+      current.status !== "completed"
+    ) {
+      const asset = await this.assetRepository.findById(ticket.assetId);
+      const warrantyActive =
+        asset?.warranty.status === "active" &&
+        asset.warranty.expiresAt !== null &&
+        asset.warranty.expiresAt.getTime() >= now.getTime();
+      ticket = {
+        ...ticket,
+        warrantyClaimApproved: warrantyActive,
+      };
+    }
     const statusChanged = ticket.status !== current.status;
     const inventoryIssues =
       ticket.status === "completed" && current.status !== "completed"
@@ -311,6 +326,8 @@ export class RepairManagementService {
         laborCost: ticket.laborCost,
         partsCount: ticket.partsUsed.length,
         photosCount: ticket.photos.length,
+        warrantyClaim: ticket.warrantyClaim,
+        warrantyClaimApproved: ticket.warrantyClaimApproved,
       },
       occurredAt,
       correlationId: context.correlationId,

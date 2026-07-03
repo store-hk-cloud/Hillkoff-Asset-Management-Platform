@@ -97,6 +97,14 @@ export default async function DashboardPage() {
           }
           value={`${snapshot.pmCompletionRate.toFixed(1)}%`}
         />
+        <Metric
+          title={locale === "th" ? "ประกันใกล้หมด 30 วัน" : "Warranty Expiring 30d"}
+          value={snapshot.warrantyExpiring30.toString()}
+        />
+        <Metric
+          title={locale === "th" ? "ประกันใกล้หมด 90 วัน" : "Warranty Expiring 90d"}
+          value={snapshot.warrantyExpiring90.toString()}
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -112,6 +120,22 @@ export default async function DashboardPage() {
             value: `${part.quantityOnHand}/${part.reorderPoint}`,
           }))}
           title={locale === "th" ? "อะไหล่ใกล้หมด" : "Low Stock Parts"}
+        />
+        <ListCard
+          items={Object.entries(snapshot.warrantiesByStatus).map(
+            ([label, value]) => ({ label, value: value.toString() }),
+          )}
+          title={locale === "th" ? "ประกันตามสถานะ" : "Warranty By Status"}
+        />
+        <ListCard
+          items={snapshot.expiringWarranties.map((item) => ({
+            label: `${item.assetCode} ยท ${item.assetName}`,
+            value:
+              locale === "th"
+                ? `${item.daysRemaining} วัน`
+                : `${item.daysRemaining} days`,
+          }))}
+          title={locale === "th" ? "เครื่องใกล้หมดประกัน" : "Expiring Warranties"}
         />
         <ListCard
           items={snapshot.topFailureAssets.map((asset) => ({

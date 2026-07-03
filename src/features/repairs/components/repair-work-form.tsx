@@ -53,6 +53,7 @@ type RepairWorkFormProps = Readonly<{
   initialSolution: string;
   initialLaborCost: number;
   initialParts: readonly RepairPartUsed[];
+  initialWarrantyClaim: boolean;
 }>;
 
 export function RepairWorkForm({
@@ -64,6 +65,7 @@ export function RepairWorkForm({
   initialSolution,
   initialLaborCost,
   initialParts,
+  initialWarrantyClaim,
 }: RepairWorkFormProps) {
   const { locale, t } = useLanguage();
   const router = useRouter();
@@ -180,6 +182,7 @@ export function RepairWorkForm({
         expectedVersion: version,
         targetStatus: targetStatus || null,
         photos,
+        warrantyClaim: data.get("warrantyClaim") === "on",
         rootCause: data.get("rootCause"),
         solution: data.get("solution"),
         laborCost: Number(data.get("laborCost")),
@@ -270,6 +273,24 @@ export function RepairWorkForm({
             type="number"
           />
         </div>
+        <label className="flex items-start gap-3 rounded-md border p-3 text-sm">
+          <input
+            className="mt-1"
+            defaultChecked={initialWarrantyClaim}
+            name="warrantyClaim"
+            type="checkbox"
+          />
+          <span>
+            <span className="block font-medium">
+              {locale === "th" ? "ขอเคลมประกัน" : "Warranty claim"}
+            </span>
+            <span className="text-muted-foreground block">
+              {locale === "th"
+                ? "ระบบจะตรวจสถานะประกันเมื่อปิดงานซ่อม"
+                : "The system checks warranty status when the repair is completed."}
+            </span>
+          </span>
+        </label>
       </section>
 
       <section className="space-y-4">

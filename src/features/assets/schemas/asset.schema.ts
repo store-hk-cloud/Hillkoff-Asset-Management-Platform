@@ -33,6 +33,45 @@ const installedAtSchema = z
     return date;
   });
 
+const nullableDateSchema = z
+  .string()
+  .trim()
+  .nullable()
+  .transform((value, context) => {
+    if (!value) {
+      return null;
+    }
+
+    const date = new Date(`${value}T00:00:00.000Z`);
+
+    if (Number.isNaN(date.getTime())) {
+      context.addIssue({
+        code: "custom",
+        message: "Invalid date.",
+      });
+      return z.NEVER;
+    }
+
+    return date;
+  });
+
+const warrantySchema = z.object({
+  status: z.enum(["inactive", "active", "expired", "void"]),
+  providerName: z.string().trim().max(200).default(""),
+  providerContact: z.string().trim().max(200).default(""),
+  coverageType: z.enum(["parts", "parts_and_labor", "full"]).default("full"),
+  documents: z.array(z.string().trim().url().max(1000)).max(20).default([]),
+  voidReason: z
+    .string()
+    .trim()
+    .max(500)
+    .nullable()
+    .transform((value) => value || null),
+  extensionMonths: z.number().int().min(1).max(120).nullable().default(null),
+  startedAt: nullableDateSchema,
+  expiresAt: nullableDateSchema,
+});
+
 export const assetCreateSchema = z.object({
   assetCode: z.string().trim().min(1).max(60),
   name: z.string().trim().min(1).max(160),
@@ -56,6 +95,7 @@ export const assetUpdateSchema = assetCreateSchema
   })
   .extend({
     expectedVersion: z.number().int().nonnegative(),
+    warranty: warrantySchema.optional(),
   });
 
 export const assetSearchSchema = z.object({
