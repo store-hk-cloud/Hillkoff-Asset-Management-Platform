@@ -38,6 +38,7 @@ export async function POST(request: Request) {
         data: {
           total: input.assetCodes.length,
           succeeded: result.succeeded.map((m) => ({
+            assetId: m.assetId,
             assetCode: m.assetCode,
             movementNumber: m.movementNumber,
           })),

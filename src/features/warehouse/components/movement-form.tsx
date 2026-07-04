@@ -246,10 +246,8 @@ export function MovementForm({ action }: MovementFormProps) {
     setLoadingBulk(false);
   }
 
-  function removeBulkAsset(assetCode: string) {
-    setBulkAssets((prev) =>
-      prev.filter((a) => a.assetCode !== assetCode),
-    );
+  function removeBulkAsset(assetId: string) {
+    setBulkAssets((prev) => prev.filter((a) => a.id !== assetId));
   }
 
   async function handleBulkSubmit(event: FormEvent<HTMLFormElement>) {
@@ -280,7 +278,7 @@ export function MovementForm({ action }: MovementFormProps) {
 
     try {
       const result = await submitBulkTransfer({
-        assetCodes: bulkAssets.map((a) => a.assetCode),
+        assetCodes: bulkAssets.map((a) => a.id),
         destinationWarehouseId,
         referenceNumber:
           (formData.get("referenceNumber") as string) || null,
@@ -288,7 +286,9 @@ export function MovementForm({ action }: MovementFormProps) {
       });
 
       if (result.failed.length > 0) {
-        const failedCodes = new Set(result.failed.map((item) => item.assetCode));
+        const failedKeys = new Set(
+          result.failed.map((item) => item.assetId ?? item.assetCode),
+        );
         const failedList = result.failed
           .map((item) => `${item.assetCode}: ${item.error}`)
           .join("\n");
@@ -300,7 +300,10 @@ export function MovementForm({ action }: MovementFormProps) {
             : "";
 
         setBulkAssets((current) =>
-          current.filter((item) => failedCodes.has(item.assetCode)),
+          current.filter(
+            (item) =>
+              failedKeys.has(item.id) || failedKeys.has(item.assetCode),
+          ),
         );
         setError(
           [
@@ -461,7 +464,7 @@ export function MovementForm({ action }: MovementFormProps) {
               </p>
               <div className="max-h-80 space-y-2 overflow-y-auto">
                 {bulkAssets.map((a) => (
-                  <div className="flex items-start gap-3 rounded-lg border p-3" key={a.assetCode}>
+                  <div className="flex items-start gap-3 rounded-lg border p-3" key={a.id}>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{a.name}</p>
                       <p className="font-mono text-xs">{a.assetCode}</p>
@@ -471,7 +474,7 @@ export function MovementForm({ action }: MovementFormProps) {
                     </div>
                     <Button
                       aria-label={locale === "th" ? "ลบ" : "Remove"}
-                      onClick={() => removeBulkAsset(a.assetCode)}
+                      onClick={() => removeBulkAsset(a.id)}
                       size="icon" type="button" variant="ghost"
                     >
                       <X aria-hidden="true" className="size-4" />

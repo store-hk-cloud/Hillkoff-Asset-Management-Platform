@@ -52,6 +52,14 @@ export function MovementList({
               {dateFormatter.format(movement.occurredAt)}
             </time>
           </div>
+          {movement.referenceNumber ? (
+            <div className="mt-3 text-sm">
+              <span className="text-muted-foreground text-xs">
+                {locale === "th" ? "เลขที่เอกสาร: " : "Document number: "}
+              </span>
+              <span className="font-medium">{movement.referenceNumber}</span>
+            </div>
+          ) : null}
           <div className="mt-4 grid gap-3 border-t pt-4 text-sm sm:grid-cols-2">
             <div>
               <p className="text-muted-foreground text-xs">
@@ -79,6 +87,14 @@ export function MovementList({
               </p>
             </div>
           </div>
+          {movement.notes ? (
+            <div className="bg-muted/50 mt-4 rounded-md p-3 text-sm">
+              <p className="text-muted-foreground text-xs">
+                {locale === "th" ? "หมายเหตุ" : "Notes"}
+              </p>
+              <p className="mt-1 whitespace-pre-wrap">{movement.notes}</p>
+            </div>
+          ) : null}
         </article>
       ))}
     </div>

@@ -98,8 +98,12 @@ export async function submitBulkTransfer(input: {
   notes: string;
 }): Promise<{
   total: number;
-  succeeded: readonly { assetCode: string; movementNumber: string }[];
-  failed: readonly { assetCode: string; error: string }[];
+  succeeded: readonly {
+    assetCode: string;
+    assetId?: string;
+    movementNumber: string;
+  }[];
+  failed: readonly { assetCode: string; assetId?: string; error: string }[];
 }> {
   const csrfToken = await getCsrfToken();
   const response = await fetch("/api/warehouse/transfer/bulk", {
@@ -114,8 +118,12 @@ export async function submitBulkTransfer(input: {
   const payload = (await response.json()) as {
     data?: {
       total: number;
-      succeeded: readonly { assetCode: string; movementNumber: string }[];
-      failed: readonly { assetCode: string; error: string }[];
+      succeeded: readonly {
+        assetCode: string;
+        assetId?: string;
+        movementNumber: string;
+      }[];
+      failed: readonly { assetCode: string; assetId?: string; error: string }[];
     };
     error?: { message?: string };
   };

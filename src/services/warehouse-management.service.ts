@@ -162,23 +162,24 @@ export class WarehouseManagementService {
   }
 
   async transferBulk(
-    assetCodes: readonly string[],
+    assetReferences: readonly string[],
     destinationWarehouseId: string,
     context: WarehouseRequestContext,
     referenceNumber: string | null = null,
     notes = "",
   ): Promise<{
     succeeded: readonly MovementLog[];
-    failed: readonly { assetCode: string; error: string }[];
+    failed: readonly { assetCode: string; assetId?: string; error: string }[];
   }> {
     this.requirePermission(this.canTransfer(context.actor));
     const succeeded: MovementLog[] = [];
-    const failed: { assetCode: string; error: string }[] = [];
+    const failed: { assetCode: string; assetId?: string; error: string }[] = [];
 
-    for (const assetCode of assetCodes) {
+    for (const assetReference of assetReferences) {
+      let current: Asset | null = null;
       try {
-        const current = await this.findAssetByReference(
-          assetCode.trim(),
+        current = await this.findAssetByReference(
+          assetReference.trim(),
           context.actor,
         );
         const now = new Date();
@@ -209,7 +210,8 @@ export class WarehouseManagementService {
         succeeded.push(movement);
       } catch (error) {
         failed.push({
-          assetCode,
+          assetCode: current?.assetCode ?? assetReference,
+          ...(current ? { assetId: current.id } : {}),
           error:
             error instanceof Error ? error.message : "Transfer failed",
         });
