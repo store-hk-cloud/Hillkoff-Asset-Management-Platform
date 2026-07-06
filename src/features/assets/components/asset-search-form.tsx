@@ -64,6 +64,7 @@ export function AssetSearchForm({
       if (warehouseId) {
         params.set("warehouseId", warehouseId);
       }
+
       try {
         const response = await fetch(`/api/assets?${params}`, {
           cache: "no-store",
@@ -145,11 +146,11 @@ export function AssetSearchForm({
         name="warehouseId"
       >
         <option value="all">
-          {locale === "th" ? "เธ—เธธเธเธเธฅเธฑเธ" : "All warehouses"}
+          {locale === "th" ? "ทุกคลัง" : "All warehouses"}
         </option>
         {WAREHOUSES.map((warehouse) => (
           <option key={warehouse.id} value={warehouse.id}>
-            {locale === "th" ? warehouse.nameTh : warehouse.nameEn}
+            {warehouse.id} - {warehouse.nameEn}
             {warehouseCountMap.has(warehouse.id)
               ? ` (${warehouseCountMap.get(warehouse.id)})`
               : ""}
@@ -166,7 +167,9 @@ export function AssetSearchForm({
         </option>
         {ASSET_CATEGORIES.map((category) => (
           <option key={category.key} value={category.key}>
-            {locale === "th" ? category.nameTh : category.nameEn}
+            {locale === "th"
+              ? THAI_CATEGORY_LABELS[category.key]
+              : category.nameEn}
           </option>
         ))}
       </select>
@@ -174,3 +177,12 @@ export function AssetSearchForm({
     </form>
   );
 }
+
+const THAI_CATEGORY_LABELS: Readonly<Record<AssetCategoryKey, string>> = {
+  coffee_machine: "เครื่องชง",
+  grinder: "เครื่องบด",
+  blender: "เครื่องปั่น",
+  milling_machine: "เครื่องสี",
+  roaster: "เครื่องคั่ว",
+  other: "อื่นๆ",
+};
