@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import sharp from "sharp";
 import { NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/dal";
@@ -22,7 +23,32 @@ export async function GET(request: Request, context: RouteContext) {
   }
 
   const format = new URL(request.url).searchParams.get("format");
-  const filename = `${asset.assetCode}-qr.${format === "png" ? "png" : "svg"}`;
+  const filename =
+    format === "print"
+      ? `${asset.assetCode}-qr-print.png`
+      : `${asset.assetCode}-qr.${format === "png" ? "png" : "svg"}`;
+
+  if (format === "print") {
+    const qrPng = await QRCode.toBuffer(asset.qrUrl, {
+      errorCorrectionLevel: "M",
+      margin: 1,
+      width: 520,
+    });
+    const labelPng = await createPrintableQrLabel(
+      qrPng,
+      asset.assetCode,
+      asset.serialNumber ?? "",
+    );
+
+    return new Response(Uint8Array.from(labelPng).buffer, {
+      headers: {
+        "Content-Type": "image/png",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Cache-Control": "private, max-age=3600",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  }
 
   if (format === "png") {
     const png = await QRCode.toBuffer(asset.qrUrl, {
@@ -35,6 +61,7 @@ export async function GET(request: Request, context: RouteContext) {
         "Content-Type": "image/png",
         "Content-Disposition": `attachment; filename="${filename}"`,
         "Cache-Control": "private, max-age=3600",
+        "X-Content-Type-Options": "nosniff",
       },
     });
   }
@@ -51,5 +78,71 @@ export async function GET(request: Request, context: RouteContext) {
       "Cache-Control": "private, max-age=3600",
       "X-Content-Type-Options": "nosniff",
     },
+  });
+}
+
+async function createPrintableQrLabel(
+  qrPng: Buffer,
+  assetCode: string,
+  serialNumber: string,
+): Promise<Buffer> {
+  const width = 900;
+  const height = 420;
+  const qrSize = 330;
+  const labelTextSvg = `
+    <svg width="${width - 390}" height="${height}" viewBox="0 0 ${width - 390} ${height}" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        text {
+          fill: #111827;
+          font-family: Consolas, "Liberation Mono", Menlo, monospace;
+          font-size: 46px;
+          font-weight: 600;
+          letter-spacing: 0;
+        }
+      </style>
+      <text x="16" y="168">${escapeXml(assetCode)}</text>
+      <text x="16" y="264">${escapeXml(serialNumber || "-")}</text>
+    </svg>`;
+
+  return sharp({
+    create: {
+      width,
+      height,
+      channels: 4,
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    },
+  })
+    .composite([
+      {
+        input: await sharp(qrPng).resize(qrSize, qrSize).png().toBuffer(),
+        left: 40,
+        top: Math.round((height - qrSize) / 2),
+      },
+      {
+        input: Buffer.from(labelTextSvg),
+        left: 390,
+        top: 0,
+      },
+    ])
+    .png()
+    .toBuffer();
+}
+
+function escapeXml(value: string): string {
+  return value.replace(/[<>&'"]/g, (character) => {
+    switch (character) {
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case "&":
+        return "&amp;";
+      case "'":
+        return "&apos;";
+      case '"':
+        return "&quot;";
+      default:
+        return character;
+    }
   });
 }

@@ -103,6 +103,11 @@ export const assetSearchSchema = z.object({
   status: z.enum([...ASSET_STATUSES, "all"]).default("active"),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   categoryKey: z.enum([...ASSET_CATEGORY_KEYS, "all"]).default("all"),
+  warehouseId: z
+    .enum([...WAREHOUSE_IDS, "all"])
+    .nullable()
+    .default(null)
+    .transform((value) => (value === "all" ? null : value)),
 });
 
 export type AssetCreateValues = z.input<typeof assetCreateSchema>;

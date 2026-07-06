@@ -89,6 +89,7 @@ export default async function AssetDetailPage({
   );
   const warrantyDaysRemaining = asset.warranty.expiresAt
     ? Math.ceil(
+        // eslint-disable-next-line react-hooks/purity -- Server-rendered freshness for warranty display.
         (asset.warranty.expiresAt.getTime() - Date.now()) /
           (24 * 60 * 60 * 1000),
       )

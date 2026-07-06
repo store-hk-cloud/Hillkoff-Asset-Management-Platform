@@ -87,7 +87,11 @@ export default async function PublicAssetPage({
                 ? "จำนวนคงเหลือในสต็อกของรหัสนี้"
                 : "In-stock quantity for this code"
             }
-            value={String(asset.inStockQuantity)}
+            value={
+              asset.inStockQuantity === null
+                ? null
+                : String(asset.inStockQuantity)
+            }
           />
           {asset.details ? (
             <>
@@ -214,7 +218,9 @@ function repairStatusLabel(
   return labels[locale][status];
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function Detail({ label, value }: { label: string; value: string | null }) {
+  if (value === null) return null;
+
   return (
     <div>
       <p className="text-muted-foreground text-xs">{label}</p>

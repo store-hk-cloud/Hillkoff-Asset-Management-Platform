@@ -14,6 +14,8 @@ import type {
   AssetCondition,
   AssetCustodyType,
   AssetDocument,
+  AssetWarehouseCount,
+  AssetWarehouseCountCriteria,
   AssetSearchCriteria,
   AssetStatus,
 } from "@/domain/entities/asset";
@@ -39,6 +41,7 @@ import {
   type PublicId,
 } from "@/domain/value-objects/public-id";
 import { isUserRole } from "@/domain/value-objects/user-role";
+import { WAREHOUSE_IDS } from "@/domain/master-data/warehouses";
 import { getFirebaseAdminFirestore } from "@/firebase/admin-firestore";
 
 function requireString(data: DocumentData, field: string): string {
@@ -257,9 +260,7 @@ function mapAsset(data: DocumentData): Asset {
             )
           : [],
         voidReason:
-          typeof warranty.voidReason === "string"
-            ? warranty.voidReason
-            : null,
+          typeof warranty.voidReason === "string" ? warranty.voidReason : null,
         extendedFrom:
           warranty.extendedFrom?.previousExpiresAt instanceof Timestamp
             ? {
@@ -580,6 +581,60 @@ export class FirestoreAssetRepository implements AssetRepository {
     );
 
     return Object.fromEntries(entries) as AssetCategoryCounts;
+  }
+
+  async countByWarehouse(
+    criteria: AssetWarehouseCountCriteria,
+  ): Promise<readonly AssetWarehouseCount[]> {
+    const warehouseIds = criteria.warehouseId
+      ? [criteria.warehouseId]
+      : WAREHOUSE_IDS;
+    const queryKeywords = criteria.query
+      .trim()
+      .toLocaleLowerCase("th-TH")
+      .split(/\s+/)
+      .filter(Boolean);
+    const firstKeyword = queryKeywords[0];
+
+    return Promise.all(
+      warehouseIds.map(async (warehouseId) => {
+        let query: Query = this.firestore
+          .collection("assets")
+          .where("warehouseId", "==", warehouseId);
+
+        if (criteria.status !== "all") {
+          query = query.where("status", "==", criteria.status);
+        }
+        if (criteria.customerId) {
+          query = query.where("customerId", "==", criteria.customerId);
+        }
+        if (criteria.categoryKey !== "all") {
+          query = query.where("categoryKey", "==", criteria.categoryKey);
+        }
+
+        if (!firstKeyword) {
+          const snapshot = await query.count().get();
+          return { warehouseId, count: snapshot.data().count };
+        }
+
+        const snapshot = await query
+          .where(
+            firstKeyword.length >= 2 ? "searchPrefixes" : "searchKeywords",
+            "array-contains",
+            firstKeyword,
+          )
+          .get();
+        const count = snapshot.docs
+          .map((document) => mapAsset(document.data()))
+          .filter((asset) =>
+            queryKeywords.every((keyword) =>
+              asset.searchPrefixes.includes(keyword),
+            ),
+          ).length;
+
+        return { warehouseId, count };
+      }),
+    );
   }
 
   async search(criteria: AssetSearchCriteria): Promise<readonly Asset[]> {

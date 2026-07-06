@@ -123,17 +123,19 @@ export interface AssetUpdateInput extends Omit<
   "custodyType" | "warehouseId" | "customerId" | "locationName"
 > {
   readonly expectedVersion: number;
-  readonly warranty?: {
-    readonly status: AssetWarranty["status"];
-    readonly providerName: string;
-    readonly providerContact: string;
-    readonly coverageType: NonNullable<AssetWarranty["coverageType"]>;
-    readonly documents: readonly string[];
-    readonly voidReason: string | null;
-    readonly extensionMonths: number | null;
-    readonly startedAt: Date | null;
-    readonly expiresAt: Date | null;
-  } | undefined;
+  readonly warranty?:
+    | {
+        readonly status: AssetWarranty["status"];
+        readonly providerName: string;
+        readonly providerContact: string;
+        readonly coverageType: NonNullable<AssetWarranty["coverageType"]>;
+        readonly documents: readonly string[];
+        readonly voidReason: string | null;
+        readonly extensionMonths: number | null;
+        readonly startedAt: Date | null;
+        readonly expiresAt: Date | null;
+      }
+    | undefined;
 }
 
 export interface AssetSearchCriteria {
@@ -146,3 +148,10 @@ export interface AssetSearchCriteria {
 }
 
 export type AssetCategoryCounts = Readonly<Record<AssetCategoryKey, number>>;
+
+export interface AssetWarehouseCount {
+  readonly warehouseId: string;
+  readonly count: number;
+}
+
+export type AssetWarehouseCountCriteria = Omit<AssetSearchCriteria, "limit">;

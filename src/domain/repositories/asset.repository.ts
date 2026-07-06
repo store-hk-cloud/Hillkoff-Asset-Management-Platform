@@ -2,6 +2,8 @@ import type {
   Asset,
   AssetCatalog,
   AssetCategoryCounts,
+  AssetWarehouseCount,
+  AssetWarehouseCountCriteria,
   AssetSearchCriteria,
 } from "@/domain/entities/asset";
 import type { AssetEvent, AssetEventType } from "@/domain/entities/asset-event";
@@ -30,6 +32,9 @@ export interface AssetRepository {
       "status" | "warehouseId" | "customerId"
     >,
   ): Promise<AssetCategoryCounts>;
+  countByWarehouse(
+    criteria: AssetWarehouseCountCriteria,
+  ): Promise<readonly AssetWarehouseCount[]>;
   search(criteria: AssetSearchCriteria): Promise<readonly Asset[]>;
   listEvents(
     assetId: AssetId,

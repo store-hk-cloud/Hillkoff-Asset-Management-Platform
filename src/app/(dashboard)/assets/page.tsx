@@ -11,6 +11,7 @@ import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { AssetManagementService } from "@/services/asset-management.service";
 import { ASSET_CATEGORIES } from "@/domain/master-data/asset-categories";
+import { findWarehouse } from "@/domain/master-data/warehouses";
 
 const assetService = new AssetManagementService();
 const accessService = new AssetAccessService();
@@ -20,6 +21,7 @@ type AssetsPageProps = {
     query?: string;
     status?: string;
     categoryKey?: string;
+    warehouseId?: string;
   }>;
 };
 
@@ -36,10 +38,23 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
     status: params.status ?? "active",
     limit: 50,
     categoryKey: params.categoryKey ?? "all",
+    warehouseId: params.warehouseId ?? null,
   });
-  const [assets, categoryCounts] = await Promise.all([
+  const [assets, categoryCounts, warehouseCounts] = await Promise.all([
     assetService.list(criteria, profile),
-    assetService.getCategoryCounts({ status: criteria.status }, profile),
+    assetService.getCategoryCounts(
+      { status: criteria.status, warehouseId: criteria.warehouseId },
+      profile,
+    ),
+    assetService.getWarehouseCounts(
+      {
+        query: criteria.query,
+        status: criteria.status,
+        categoryKey: criteria.categoryKey,
+        warehouseId: criteria.warehouseId,
+      },
+      profile,
+    ),
   ]);
   const canWrite = accessService.canWrite(profile);
 
@@ -68,7 +83,31 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
         categoryKey={criteria.categoryKey}
         query={criteria.query}
         status={criteria.status}
+        warehouseCounts={warehouseCounts}
+        warehouseId={criteria.warehouseId}
       />
+
+      {warehouseCounts.length ? (
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {warehouseCounts
+            .filter((item) => item.count > 0)
+            .map((item) => {
+              const warehouse = findWarehouse(item.warehouseId);
+              return (
+                <Card className="py-0" key={item.warehouseId}>
+                  <CardContent className="p-3">
+                    <p className="text-muted-foreground truncate text-xs">
+                      {locale === "th"
+                        ? (warehouse?.nameTh ?? item.warehouseId)
+                        : (warehouse?.nameEn ?? item.warehouseId)}
+                    </p>
+                    <p className="text-xl font-semibold">{item.count}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {ASSET_CATEGORIES.map((category) => {
@@ -77,6 +116,9 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
             status: criteria.status,
             categoryKey: category.key,
             ...(criteria.query ? { query: criteria.query } : {}),
+            ...(criteria.warehouseId
+              ? { warehouseId: criteria.warehouseId }
+              : {}),
           });
           return (
             <Link href={`/assets?${href}`} key={category.key}>

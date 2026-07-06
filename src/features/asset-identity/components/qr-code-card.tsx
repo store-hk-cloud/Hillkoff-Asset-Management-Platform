@@ -42,7 +42,13 @@ export function QrCodeCard({ assetId, qrUrl }: QrCodeCardProps) {
           src={`/api/assets/${assetId}/qr?format=svg`}
         />
         <p className="text-muted-foreground text-xs break-all">{qrUrl}</p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button asChild>
+            <a download href={`/api/assets/${assetId}/qr?format=print`}>
+              <Download aria-hidden="true" className="size-4" />
+              Print PNG
+            </a>
+          </Button>
           <Button asChild variant="outline">
             <a download href={`/api/assets/${assetId}/qr?format=png`}>
               <Download aria-hidden="true" className="size-4" />
