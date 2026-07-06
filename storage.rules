@@ -38,8 +38,8 @@ service firebase.storage {
         ]
         || (
           request.auth.token.role == 'branch'
-          && currentUser().branchId != null
-          && asset.branchId == currentUser().branchId
+          && currentUser().warehouseId != null
+          && asset.warehouseId == currentUser().warehouseId
         )
         || (
           request.auth.token.role == 'customer'
@@ -101,8 +101,8 @@ service firebase.storage {
         )
         || (
           request.auth.token.role == 'branch'
-          && currentUser().branchId != null
-          && item.branchId == currentUser().branchId
+          && currentUser().warehouseId != null
+          && item.warehouseId == currentUser().warehouseId
         )
         || (
           request.auth.token.role == 'customer'

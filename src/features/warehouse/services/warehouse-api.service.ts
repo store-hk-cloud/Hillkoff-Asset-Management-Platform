@@ -26,10 +26,43 @@ export async function findWarehouseAsset(reference: string): Promise<Asset> {
   };
 
   if (!response.ok || !payload.data) {
-    throw new Error(payload.error?.message ?? "ไม่พบทรัพย์สิน");
+    throw new Error(payload.error?.message ?? "ไม่พบเครื่อง");
   }
 
   return payload.data;
+}
+
+export async function bulkFindWarehouseAssets(
+  codes: readonly string[],
+): Promise<{
+  found: Asset[];
+  notFound: string[];
+  errors: string[];
+}> {
+  const results = await Promise.allSettled(
+    codes.map((code) => findWarehouseAsset(code.trim())),
+  );
+  const found: Asset[] = [];
+  const notFound: string[] = [];
+  const errors: string[] = [];
+
+  results.forEach((result, index) => {
+    if (result.status === "fulfilled") {
+      found.push(result.value);
+    } else {
+      const code = codes[index]?.trim() ?? "unknown";
+      const msg = result.reason instanceof Error
+        ? result.reason.message
+        : "Not found";
+      if (msg.includes("not found") || msg.includes("ไม่พบ")) {
+        notFound.push(code);
+      } else {
+        errors.push(`${code}: ${msg}`);
+      }
+    }
+  });
+
+  return { found, notFound, errors };
 }
 
 export async function submitMovement(
@@ -48,6 +81,50 @@ export async function submitMovement(
   });
   const payload = (await response.json()) as {
     data?: { id: string; movementNumber: string };
+    error?: { message?: string };
+  };
+
+  if (!response.ok || !payload.data) {
+    throw new Error(payload.error?.message ?? "ไม่สามารถทำรายการได้");
+  }
+
+  return payload.data;
+}
+
+export async function submitBulkTransfer(input: {
+  assetCodes: readonly string[];
+  destinationWarehouseId: string;
+  referenceNumber: string | null;
+  notes: string;
+}): Promise<{
+  total: number;
+  succeeded: readonly {
+    assetCode: string;
+    assetId?: string;
+    movementNumber: string;
+  }[];
+  failed: readonly { assetCode: string; assetId?: string; error: string }[];
+}> {
+  const csrfToken = await getCsrfToken();
+  const response = await fetch("/api/warehouse/transfer/bulk", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": csrfToken,
+    },
+    credentials: "same-origin",
+    body: JSON.stringify(input),
+  });
+  const payload = (await response.json()) as {
+    data?: {
+      total: number;
+      succeeded: readonly {
+        assetCode: string;
+        assetId?: string;
+        movementNumber: string;
+      }[];
+      failed: readonly { assetCode: string; assetId?: string; error: string }[];
+    };
     error?: { message?: string };
   };
 

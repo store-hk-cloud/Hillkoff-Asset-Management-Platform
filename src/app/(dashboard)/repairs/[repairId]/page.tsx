@@ -73,12 +73,32 @@ export default async function RepairDetailPage({ params }: Props) {
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <Detail
-              label={locale === "th" ? "ทรัพย์สิน" : "Asset"}
+              label={locale === "th" ? "เครื่อง" : "Asset"}
               value={`${ticket.assetCode} · ${ticket.assetName}`}
             />
             <Detail
               label={locale === "th" ? "อาการ" : "Symptoms"}
               value={ticket.description}
+            />
+            <Detail
+              label={locale === "th" ? "เคลมประกัน" : "Warranty claim"}
+              value={
+                ticket.warrantyClaim
+                  ? ticket.warrantyClaimApproved === null
+                    ? locale === "th"
+                      ? "รอตรวจสอบ"
+                      : "Pending check"
+                    : ticket.warrantyClaimApproved
+                      ? locale === "th"
+                        ? "อนุมัติ"
+                        : "Approved"
+                      : locale === "th"
+                        ? "ไม่เข้าเงื่อนไข"
+                        : "Not covered"
+                  : locale === "th"
+                    ? "ไม่เคลม"
+                    : "No claim"
+              }
             />
             <Detail
               label={locale === "th" ? "สร้างเมื่อ" : "Created"}
@@ -168,6 +188,7 @@ export default async function RepairDetailPage({ params }: Props) {
               initialSolution={ticket.solution}
               initialStatus={ticket.status}
               initialVersion={ticket.version}
+              initialWarrantyClaim={ticket.warrantyClaim}
               repairId={ticket.id}
             />
           </CardContent>

@@ -35,7 +35,7 @@ export interface PublicAssetProjection {
   readonly color: string;
   readonly operationalStatus: AssetOperationalStatus;
   readonly repairStatus: RepairStatus | null;
-  readonly inStockQuantity: number;
+  readonly inStockQuantity: number | null;
   readonly details: {
     readonly assetCode: string;
     readonly name: string;
@@ -106,7 +106,9 @@ export class AssetIdentityManagementService {
     }
 
     const [inStockQuantity, openRepair] = await Promise.all([
-      this.assetRepository.countInStockByCode(asset.assetCode),
+      includeInternalDetails
+        ? this.assetRepository.countInStockByCode(asset.assetCode)
+        : Promise.resolve(null),
       this.repairRepository.findLatestOpenByAsset(asset.id),
     ]);
     const operationalStatus =

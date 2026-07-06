@@ -37,7 +37,7 @@ async function mutateAsset(
   };
 
   if (!response.ok || !payload.data) {
-    throw new Error(payload.error?.message ?? "Unable to save the asset.");
+    throw new Error(payload.error?.message ?? "Unable to save the machine.");
   }
 
   return payload.data;
@@ -69,7 +69,7 @@ export async function findAssetCatalog(
 
   if (!response.ok) {
     throw new Error(
-      payload.error?.message ?? "Unable to load asset master data.",
+      payload.error?.message ?? "Unable to load machine master data.",
     );
   }
 

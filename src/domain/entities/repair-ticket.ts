@@ -48,6 +48,8 @@ export interface RepairTicket {
   readonly assignmentRespondedAt: Date | null;
   readonly assignmentRejectionReason: string | null;
   readonly photos: readonly RepairPhoto[];
+  readonly warrantyClaim: boolean;
+  readonly warrantyClaimApproved: boolean | null;
   readonly rootCause: string;
   readonly solution: string;
   readonly laborCost: number;
@@ -77,6 +79,7 @@ export interface UpdateRepairTicketInput {
   readonly expectedVersion: number;
   readonly targetStatus: RepairStatus | null;
   readonly photos: readonly RepairPhoto[];
+  readonly warrantyClaim?: boolean;
   readonly rootCause: string;
   readonly solution: string;
   readonly laborCost: number;

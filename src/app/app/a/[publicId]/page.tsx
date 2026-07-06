@@ -15,7 +15,7 @@ const technicianService = new TechnicianWorkspaceService();
 type PublicAssetPageProps = { params: Promise<{ publicId: string }> };
 
 export const metadata = {
-  title: "Asset Verification",
+  title: "ตรวจสอบเครื่อง Hillkoff",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";
@@ -58,12 +58,14 @@ export default async function PublicAssetPage({
             {t("public.verification")}
           </p>
           <CardTitle className="text-2xl">
-            Hillkoff Asset Verification
+            {locale === "th"
+              ? "ตรวจสอบเครื่อง Hillkoff"
+              : "Hillkoff Machine Verification"}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 text-sm sm:grid-cols-2">
           <Detail
-            label={locale === "th" ? "ชื่อทรัพย์สิน" : "Asset Name"}
+            label={locale === "th" ? "ชื่อเครื่อง" : "Asset Name"}
             value={asset.name}
           />
           <Detail label="Serial Number" value={asset.serialNumber || "—"} />
@@ -72,7 +74,7 @@ export default async function PublicAssetPage({
             value={asset.color || "—"}
           />
           <Detail
-            label={locale === "th" ? "สถานะทรัพย์สิน" : "Asset Status"}
+            label={locale === "th" ? "สถานะเครื่อง" : "Asset Status"}
             value={operationalStatusLabel(asset.operationalStatus, locale)}
           />
           <Detail
@@ -85,12 +87,16 @@ export default async function PublicAssetPage({
                 ? "จำนวนคงเหลือในสต็อกของรหัสนี้"
                 : "In-stock quantity for this code"
             }
-            value={String(asset.inStockQuantity)}
+            value={
+              asset.inStockQuantity === null
+                ? null
+                : String(asset.inStockQuantity)
+            }
           />
           {asset.details ? (
             <>
               <Detail
-                label={locale === "th" ? "รหัสทรัพย์สิน" : "Asset Code"}
+                label={locale === "th" ? "รหัสเครื่อง" : "Asset Code"}
                 value={asset.details.assetCode}
               />
               <Detail
@@ -129,8 +135,8 @@ export default async function PublicAssetPage({
             <div className="space-y-2 sm:col-span-2">
               <p className="text-muted-foreground text-xs">
                 {locale === "th"
-                  ? "งานที่ได้รับมอบหมายสำหรับทรัพย์สินนี้"
-                  : "Your assigned work for this asset"}
+                  ? "งานที่ได้รับมอบหมายสำหรับเครื่องนี้"
+                  : "Your assigned work for this machine"}
               </p>
               {assignedWork.length ? (
                 <div className="grid gap-2">
@@ -146,7 +152,7 @@ export default async function PublicAssetPage({
                 <p className="text-sm">
                   {locale === "th"
                     ? "ยังไม่มีใบงานที่มอบหมายให้คุณสำหรับเครื่องนี้"
-                    : "No work is currently assigned to you for this asset."}
+                    : "No work is currently assigned to you for this machine."}
                 </p>
               )}
             </div>
@@ -212,7 +218,9 @@ function repairStatusLabel(
   return labels[locale][status];
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function Detail({ label, value }: { label: string; value: string | null }) {
+  if (value === null) return null;
+
   return (
     <div>
       <p className="text-muted-foreground text-xs">{label}</p>

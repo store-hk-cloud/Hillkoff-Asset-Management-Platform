@@ -161,6 +161,66 @@ export class WarehouseManagementService {
     );
   }
 
+  async transferBulk(
+    assetReferences: readonly string[],
+    destinationWarehouseId: string,
+    context: WarehouseRequestContext,
+    referenceNumber: string | null = null,
+    notes = "",
+  ): Promise<{
+    succeeded: readonly MovementLog[];
+    failed: readonly { assetCode: string; assetId?: string; error: string }[];
+  }> {
+    this.requirePermission(this.canTransfer(context.actor));
+    const succeeded: MovementLog[] = [];
+    const failed: { assetCode: string; assetId?: string; error: string }[] = [];
+
+    for (const assetReference of assetReferences) {
+      let current: Asset | null = null;
+      try {
+        current = await this.findAssetByReference(
+          assetReference.trim(),
+          context.actor,
+        );
+        const now = new Date();
+        const transition = this.movementService.transfer(
+          current,
+          {
+            assetCode: current.assetCode,
+            destinationWarehouseId,
+            destinationLocationName: "",
+            referenceNumber,
+            notes,
+            expectedVersion: current.version,
+          },
+          context.actor.uid,
+          now,
+        );
+        const movement = await this.commit(
+          "warehouse_movement",
+          "warehouse_moved",
+          "Asset moved between warehouses",
+          current,
+          transition,
+          referenceNumber,
+          notes,
+          context,
+          now,
+        );
+        succeeded.push(movement);
+      } catch (error) {
+        failed.push({
+          assetCode: current?.assetCode ?? assetReference,
+          ...(current ? { assetId: current.id } : {}),
+          error:
+            error instanceof Error ? error.message : "Transfer failed",
+        });
+      }
+    }
+
+    return { succeeded, failed };
+  }
+
   async listMovements(
     profile: UserProfile,
     type: MovementType | "all",

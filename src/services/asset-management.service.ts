@@ -7,6 +7,8 @@ import type {
   AssetCreateInput,
   AssetSearchCriteria,
   AssetUpdateInput,
+  AssetWarehouseCount,
+  AssetWarehouseCountCriteria,
 } from "@/domain/entities/asset";
 import type { AssetEvent, AssetEventType } from "@/domain/entities/asset-event";
 import type { AuditLog } from "@/domain/entities/audit-log";
@@ -36,12 +38,13 @@ export class AssetManagementService {
   ) {}
 
   async list(
-    criteria: Omit<AssetSearchCriteria, "warehouseId" | "customerId">,
+    criteria: Omit<AssetSearchCriteria, "customerId">,
     profile: UserProfile,
   ): Promise<readonly Asset[]> {
     const scopedCriteria: AssetSearchCriteria = {
       ...criteria,
-      warehouseId: profile.role === "branch" ? profile.warehouseId : null,
+      warehouseId:
+        profile.role === "branch" ? profile.warehouseId : criteria.warehouseId,
       customerId: profile.role === "customer" ? profile.customerId : null,
     };
 
@@ -56,7 +59,7 @@ export class AssetManagementService {
   }
 
   async getCategoryCounts(
-    criteria: Pick<AssetSearchCriteria, "status">,
+    criteria: Pick<AssetSearchCriteria, "status" | "warehouseId">,
     profile: UserProfile,
   ): Promise<AssetCategoryCounts> {
     if (
@@ -75,8 +78,28 @@ export class AssetManagementService {
 
     return this.repository.countByCategory({
       status: criteria.status,
-      warehouseId: profile.role === "branch" ? profile.warehouseId : null,
+      warehouseId:
+        profile.role === "branch" ? profile.warehouseId : criteria.warehouseId,
       customerId: profile.role === "customer" ? profile.customerId : null,
+    });
+  }
+
+  async getWarehouseCounts(
+    criteria: Omit<AssetWarehouseCountCriteria, "customerId">,
+    profile: UserProfile,
+  ): Promise<readonly AssetWarehouseCount[]> {
+    if (
+      (profile.role === "branch" && !profile.warehouseId) ||
+      profile.role === "customer"
+    ) {
+      return [];
+    }
+
+    return this.repository.countByWarehouse({
+      ...criteria,
+      warehouseId:
+        profile.role === "branch" ? profile.warehouseId : criteria.warehouseId,
+      customerId: null,
     });
   }
 

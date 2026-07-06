@@ -1,4 +1,4 @@
-export const NOTIFICATION_TYPES = ["system", "repair", "pm"] as const;
+export const NOTIFICATION_TYPES = ["system", "repair", "pm", "warranty"] as const;
 export const NOTIFICATION_STATUSES = [
   "pending",
   "sent",
@@ -16,7 +16,7 @@ export interface NotificationQueueItem {
   readonly recipientUserIds: readonly string[];
   readonly title: string;
   readonly body: string;
-  readonly entityType: "system" | "repair" | "pm" | "inventory";
+  readonly entityType: "system" | "repair" | "pm" | "inventory" | "warranty";
   readonly entityId: string | null;
   readonly attempts: number;
   readonly maxAttempts: number;

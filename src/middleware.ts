@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { applyAuthenticationBoundary } from "@/middleware/auth.middleware";
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   return applyAuthenticationBoundary(request);
 }
 

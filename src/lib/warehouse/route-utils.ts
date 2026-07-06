@@ -35,9 +35,8 @@ export function warehouseErrorResponse(error: unknown) {
         : error.code === "ASSET_NOT_FOUND"
           ? 404
           : error.code === "ASSET_VERSION_CONFLICT" ||
-              error.code === "TRANSFER_VERSION_CONFLICT" ||
-              error.code === "TRANSFER_STATE_CONFLICT" ||
-              error.code === "ASSET_TRANSFER_ACTIVE"
+              error.code === "SAME_BRANCH_TRANSFER" ||
+              error.code === "ASSET_ALREADY_SOLD"
             ? 409
             : 400;
 

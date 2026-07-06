@@ -118,6 +118,11 @@ function mapTicket(data: DocumentData): RepairTicket {
       "assignmentRejectionReason",
     ),
     photos: Array.isArray(data.photos) ? data.photos.map(mapPhoto) : [],
+    warrantyClaim: data.warrantyClaim === true,
+    warrantyClaimApproved:
+      typeof data.warrantyClaimApproved === "boolean"
+        ? data.warrantyClaimApproved
+        : null,
     rootCause: requireString(data, "rootCause"),
     solution: requireString(data, "solution"),
     laborCost: Number(data.laborCost),

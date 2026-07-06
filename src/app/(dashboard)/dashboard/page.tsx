@@ -76,7 +76,7 @@ export default async function DashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Metric
-          title={locale === "th" ? "ทรัพย์สินทั้งหมด" : "Total Assets"}
+          title={locale === "th" ? "เครื่องทั้งหมด" : "Total Assets"}
           value={snapshot.totalAssets.toString()}
         />
         <Metric
@@ -97,6 +97,14 @@ export default async function DashboardPage() {
           }
           value={`${snapshot.pmCompletionRate.toFixed(1)}%`}
         />
+        <Metric
+          title={locale === "th" ? "ประกันใกล้หมด 30 วัน" : "Warranty Expiring 30d"}
+          value={snapshot.warrantyExpiring30.toString()}
+        />
+        <Metric
+          title={locale === "th" ? "ประกันใกล้หมด 90 วัน" : "Warranty Expiring 90d"}
+          value={snapshot.warrantyExpiring90.toString()}
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -104,7 +112,7 @@ export default async function DashboardPage() {
           items={Object.entries(snapshot.assetsByStatus).map(
             ([label, value]) => ({ label, value: value.toString() }),
           )}
-          title={locale === "th" ? "ทรัพย์สินตามสถานะ" : "Assets By Status"}
+          title={locale === "th" ? "เครื่องตามสถานะ" : "Assets By Status"}
         />
         <ListCard
           items={snapshot.lowStockParts.map((part) => ({
@@ -114,12 +122,28 @@ export default async function DashboardPage() {
           title={locale === "th" ? "อะไหล่ใกล้หมด" : "Low Stock Parts"}
         />
         <ListCard
+          items={Object.entries(snapshot.warrantiesByStatus).map(
+            ([label, value]) => ({ label, value: value.toString() }),
+          )}
+          title={locale === "th" ? "ประกันตามสถานะ" : "Warranty By Status"}
+        />
+        <ListCard
+          items={snapshot.expiringWarranties.map((item) => ({
+            label: `${item.assetCode} ยท ${item.assetName}`,
+            value:
+              locale === "th"
+                ? `${item.daysRemaining} วัน`
+                : `${item.daysRemaining} days`,
+          }))}
+          title={locale === "th" ? "เครื่องใกล้หมดประกัน" : "Expiring Warranties"}
+        />
+        <ListCard
           items={snapshot.topFailureAssets.map((asset) => ({
             label: `${asset.assetCode} · ${asset.assetName}`,
             value: asset.value.toString(),
           }))}
           title={
-            locale === "th" ? "ทรัพย์สินที่เสียบ่อย" : "Top Failure Assets"
+            locale === "th" ? "เครื่องที่เสียบ่อย" : "Top Failure Assets"
           }
         />
         <ListCard
@@ -127,7 +151,7 @@ export default async function DashboardPage() {
             label: `${asset.assetCode} · ${asset.assetName}`,
             value: `${asset.value.toLocaleString("th-TH")} THB`,
           }))}
-          title={locale === "th" ? "ทรัพย์สินค่าซ่อมสูง" : "Top Repair Cost"}
+          title={locale === "th" ? "เครื่องค่าซ่อมสูง" : "Top Repair Cost"}
         />
       </div>
     </section>

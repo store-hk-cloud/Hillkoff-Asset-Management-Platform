@@ -40,9 +40,9 @@ export class GoogleWorkspaceEmailService implements EmailProvider {
       },
       replyTo: environment.SMTP_REPLY_TO ?? environment.SMTP_FROM_EMAIL,
       to: input.to,
-      subject: "เชิญเข้าใช้งานระบบ Hillkoff Asset Management",
-      text: `สวัสดี ${input.displayName}\n\nกรุณาตั้งรหัสผ่านสำหรับระบบ Hillkoff Asset Management:\n${input.invitationUrl}\n\nลิงก์ใช้ได้ถึง ${expiry} และใช้ได้ครั้งเดียว`,
-      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#173b2a"><h2>Hillkoff Asset Management</h2><p>สวัสดี ${escapeHtml(input.displayName)}</p><p>บัญชีของคุณพร้อมแล้ว กรุณากดปุ่มด้านล่างเพื่อตั้งรหัสผ่าน</p><p><a href="${escapeHtml(input.invitationUrl)}" style="display:inline-block;background:#176b45;color:white;padding:12px 20px;border-radius:8px;text-decoration:none">ตั้งรหัสผ่าน</a></p><p>ลิงก์ใช้ได้ถึง ${escapeHtml(expiry)} และใช้ได้ครั้งเดียว</p><hr><p style="color:#667085;font-size:13px">หากคุณไม่ได้รับคำเชิญนี้ โปรดติดต่อผู้ดูแลระบบ Hillkoff</p></div>`,
+      subject: "เชิญเข้าใช้งานระบบ Hillkoff Machine Management",
+      text: `สวัสดี ${input.displayName}\n\nกรุณาตั้งรหัสผ่านสำหรับระบบ Hillkoff Machine Management:\n${input.invitationUrl}\n\nลิงก์ใช้ได้ถึง ${expiry} และใช้ได้ครั้งเดียว`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#173b2a"><h2>Hillkoff Machine Management</h2><p>สวัสดี ${escapeHtml(input.displayName)}</p><p>บัญชีของคุณพร้อมแล้ว กรุณากดปุ่มด้านล่างเพื่อตั้งรหัสผ่าน</p><p><a href="${escapeHtml(input.invitationUrl)}" style="display:inline-block;background:#176b45;color:white;padding:12px 20px;border-radius:8px;text-decoration:none">ตั้งรหัสผ่าน</a></p><p>ลิงก์ใช้ได้ถึง ${escapeHtml(expiry)} และใช้ได้ครั้งเดียว</p><hr><p style="color:#667085;font-size:13px">หากคุณไม่ได้รับคำเชิญนี้ โปรดติดต่อผู้ดูแลระบบ Hillkoff</p></div>`,
     });
   }
 }

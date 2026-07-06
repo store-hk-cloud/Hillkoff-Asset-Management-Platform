@@ -87,6 +87,42 @@ export default async function AssetDetailPage({
       timeZone: "Asia/Bangkok",
     },
   );
+  const warrantyDaysRemaining = asset.warranty.expiresAt
+    ? Math.ceil(
+        // eslint-disable-next-line react-hooks/purity -- Server-rendered freshness for warranty display.
+        (asset.warranty.expiresAt.getTime() - Date.now()) /
+          (24 * 60 * 60 * 1000),
+      )
+    : null;
+  const warrantyStatusLabels: Record<Asset["warranty"]["status"], string> =
+    locale === "th"
+      ? {
+          inactive: "ยังไม่เริ่ม",
+          active: "อยู่ในประกัน",
+          expired: "หมดประกัน",
+          void: "ยกเลิกประกัน",
+        }
+      : {
+          inactive: "Inactive",
+          active: "Active",
+          expired: "Expired",
+          void: "Void",
+        };
+  const coverageLabels: Record<
+    NonNullable<Asset["warranty"]["coverageType"]>,
+    string
+  > =
+    locale === "th"
+      ? {
+          full: "ครบทั้งหมด",
+          parts_and_labor: "อะไหล่และค่าแรง",
+          parts: "เฉพาะอะไหล่",
+        }
+      : {
+          full: "Full",
+          parts_and_labor: "Parts and labor",
+          parts: "Parts only",
+        };
   const tabLabels: Record<AssetTab, string> =
     locale === "th"
       ? {
@@ -160,7 +196,7 @@ export default async function AssetDetailPage({
       ) : null}
 
       <nav
-        aria-label={locale === "th" ? "รายละเอียดทรัพย์สิน" : "Asset detail"}
+        aria-label={locale === "th" ? "รายละเอียดเครื่อง" : "Machine detail"}
         className="flex gap-1 overflow-x-auto border-b"
       >
         {tabs.map(([tab, label]) => (
@@ -279,6 +315,91 @@ export default async function AssetDetailPage({
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {locale === "th" ? "ประกันเครื่อง" : "Machine Warranty"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="bg-muted rounded-full px-2 py-1 text-xs font-medium">
+                  {warrantyStatusLabels[asset.warranty.status]}
+                </span>
+                {warrantyDaysRemaining !== null &&
+                asset.warranty.status === "active" ? (
+                  <span className="text-muted-foreground text-xs">
+                    {warrantyDaysRemaining >= 0
+                      ? locale === "th"
+                        ? `เหลือ ${warrantyDaysRemaining} วัน`
+                        : `${warrantyDaysRemaining} days remaining`
+                      : locale === "th"
+                        ? `เกินกำหนด ${Math.abs(warrantyDaysRemaining)} วัน`
+                        : `${Math.abs(warrantyDaysRemaining)} days overdue`}
+                  </span>
+                ) : null}
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Detail
+                  label={locale === "th" ? "วันเริ่มประกัน" : "Start date"}
+                  value={
+                    asset.warranty.startedAt
+                      ? dateFormatter.format(asset.warranty.startedAt)
+                      : "—"
+                  }
+                />
+                <Detail
+                  label={locale === "th" ? "วันหมดประกัน" : "Expiry date"}
+                  value={
+                    asset.warranty.expiresAt
+                      ? dateFormatter.format(asset.warranty.expiresAt)
+                      : "—"
+                  }
+                />
+                <Detail
+                  label={locale === "th" ? "ความคุ้มครอง" : "Coverage"}
+                  value={coverageLabels[asset.warranty.coverageType ?? "full"]}
+                />
+                <Detail
+                  label={locale === "th" ? "ผู้ให้ประกัน" : "Provider"}
+                  value={asset.warranty.providerName || "—"}
+                />
+                <Detail
+                  label={locale === "th" ? "ติดต่อ" : "Contact"}
+                  value={asset.warranty.providerContact || "—"}
+                />
+                <Detail
+                  label={locale === "th" ? "งานติดตั้ง" : "Installation"}
+                  value={asset.warranty.installationId ?? "—"}
+                />
+              </div>
+              {asset.warranty.voidReason ? (
+                <Detail
+                  label={locale === "th" ? "เหตุผลยกเลิก" : "Void reason"}
+                  value={asset.warranty.voidReason}
+                />
+              ) : null}
+              {(asset.warranty.documents ?? []).length > 0 ? (
+                <div className="space-y-2 border-t pt-4">
+                  <p className="text-muted-foreground text-xs">
+                    {locale === "th" ? "เอกสารประกัน" : "Warranty documents"}
+                  </p>
+                  {(asset.warranty.documents ?? []).map((document) => (
+                    <a
+                      className="text-primary block break-all hover:underline"
+                      href={document}
+                      key={document}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      {document}
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
         </div>
       ) : null}
 
@@ -331,8 +452,8 @@ export default async function AssetDetailPage({
             />
             <p className="text-muted-foreground text-sm">
               {locale === "th"
-                ? "ยังไม่มีเอกสารสำหรับทรัพย์สินนี้"
-                : "No documents for this asset"}
+                ? "ยังไม่มีเอกสารสำหรับเครื่องนี้"
+                : "No documents for this machine"}
             </p>
           </div>
         ) : (

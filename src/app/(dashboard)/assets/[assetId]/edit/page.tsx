@@ -21,7 +21,7 @@ type EditAssetPageProps = {
 };
 
 export const metadata = {
-  title: "แก้ไขทรัพย์สิน",
+  title: "แก้ไขเครื่อง",
 };
 
 export default async function EditAssetPage({ params }: EditAssetPageProps) {
@@ -70,6 +70,20 @@ export default async function EditAssetPage({ params }: EditAssetPageProps) {
               installedAt: asset.installedAt
                 ? asset.installedAt.toISOString().slice(0, 10)
                 : null,
+              warranty: {
+                status: asset.warranty.status,
+                startedAt: asset.warranty.startedAt
+                  ? asset.warranty.startedAt.toISOString().slice(0, 10)
+                  : null,
+                expiresAt: asset.warranty.expiresAt
+                  ? asset.warranty.expiresAt.toISOString().slice(0, 10)
+                  : null,
+                providerName: asset.warranty.providerName ?? "",
+                providerContact: asset.warranty.providerContact ?? "",
+                coverageType: asset.warranty.coverageType ?? "full",
+                documents: asset.warranty.documents ?? [],
+                voidReason: asset.warranty.voidReason ?? null,
+              },
               version: asset.version,
             }}
           />

@@ -10,7 +10,11 @@ import { assetSearchSchema } from "@/features/assets/schemas/asset.schema";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { AssetManagementService } from "@/services/asset-management.service";
-import { ASSET_CATEGORIES } from "@/domain/master-data/asset-categories";
+import {
+  ASSET_CATEGORIES,
+  type AssetCategoryKey,
+} from "@/domain/master-data/asset-categories";
+import { findWarehouse } from "@/domain/master-data/warehouses";
 
 const assetService = new AssetManagementService();
 const accessService = new AssetAccessService();
@@ -20,6 +24,7 @@ type AssetsPageProps = {
     query?: string;
     status?: string;
     categoryKey?: string;
+    warehouseId?: string;
   }>;
 };
 
@@ -36,12 +41,38 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
     status: params.status ?? "active",
     limit: 50,
     categoryKey: params.categoryKey ?? "all",
+    warehouseId: params.warehouseId ?? null,
   });
-  const [assets, categoryCounts] = await Promise.all([
+  const [assets, categoryCounts, warehouseCounts] = await Promise.all([
     assetService.list(criteria, profile),
-    assetService.getCategoryCounts({ status: criteria.status }, profile),
+    assetService.getCategoryCounts(
+      { status: criteria.status, warehouseId: criteria.warehouseId },
+      profile,
+    ),
+    assetService.getWarehouseCounts(
+      {
+        query: criteria.query,
+        status: criteria.status,
+        categoryKey: criteria.categoryKey,
+        warehouseId: criteria.warehouseId,
+      },
+      profile,
+    ),
   ]);
   const canWrite = accessService.canWrite(profile);
+  const visibleWarehouseCounts = warehouseCounts
+    .filter((item) => item.count > 0)
+    .sort((first, second) => second.count - first.count);
+  const totalMatchedAssets = warehouseCounts.reduce(
+    (total, item) => total + item.count,
+    0,
+  );
+  const selectedWarehouse = findWarehouse(criteria.warehouseId);
+  const selectedWarehouseLabel = criteria.warehouseId
+    ? `${criteria.warehouseId} - ${selectedWarehouse?.nameEn ?? criteria.warehouseId}`
+    : locale === "th"
+      ? "ทุกคลัง"
+      : "All warehouses";
 
   return (
     <section className="space-y-6">
@@ -68,7 +99,72 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
         categoryKey={criteria.categoryKey}
         query={criteria.query}
         status={criteria.status}
+        warehouseCounts={warehouseCounts}
+        warehouseId={criteria.warehouseId}
       />
+
+      {warehouseCounts.length ? (
+        <Card className="py-0">
+          <CardContent className="space-y-4 p-4">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <p className="text-muted-foreground text-xs">
+                  {locale === "th" ? "จำนวนตามตัวกรอง" : "Filtered total"}
+                </p>
+                <p className="text-2xl font-semibold">{totalMatchedAssets}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs">
+                  {locale === "th" ? "คลังที่เลือก" : "Selected warehouse"}
+                </p>
+                <p className="font-medium">{selectedWarehouseLabel}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs">
+                  {locale === "th"
+                    ? "คลังที่มีเครื่อง"
+                    : "Warehouses with assets"}
+                </p>
+                <p className="text-2xl font-semibold">
+                  {visibleWarehouseCounts.length}
+                </p>
+              </div>
+            </div>
+
+            {visibleWarehouseCounts.length ? (
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                {visibleWarehouseCounts.map((item) => {
+                  const warehouse = findWarehouse(item.warehouseId);
+                  const href = new URLSearchParams({
+                    status: criteria.status,
+                    categoryKey: criteria.categoryKey,
+                    warehouseId: item.warehouseId,
+                    ...(criteria.query ? { query: criteria.query } : {}),
+                  });
+
+                  return (
+                    <Link href={`/assets?${href}`} key={item.warehouseId}>
+                      <div className="hover:bg-accent/40 rounded-md border p-3 transition-colors">
+                        <p className="text-muted-foreground truncate text-xs">
+                          {item.warehouseId} -{" "}
+                          {warehouse?.nameEn ?? item.warehouseId}
+                        </p>
+                        <p className="text-xl font-semibold">{item.count}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                {locale === "th"
+                  ? "ไม่พบเครื่องในตัวกรองนี้"
+                  : "No assets match this warehouse filter."}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {ASSET_CATEGORIES.map((category) => {
@@ -77,6 +173,9 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
             status: criteria.status,
             categoryKey: category.key,
             ...(criteria.query ? { query: criteria.query } : {}),
+            ...(criteria.warehouseId
+              ? { warehouseId: criteria.warehouseId }
+              : {}),
           });
           return (
             <Link href={`/assets?${href}`} key={category.key}>
@@ -89,7 +188,9 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
               >
                 <CardContent className="p-3">
                   <p className="text-muted-foreground text-xs">
-                    {locale === "th" ? category.nameTh : category.nameEn}
+                    {locale === "th"
+                      ? THAI_CATEGORY_LABELS[category.key]
+                      : category.nameEn}
                   </p>
                   <p className="text-xl font-semibold">
                     {categoryCounts[category.key]}
@@ -141,3 +242,12 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
     </section>
   );
 }
+
+const THAI_CATEGORY_LABELS: Readonly<Record<AssetCategoryKey, string>> = {
+  coffee_machine: "เครื่องชง",
+  grinder: "เครื่องบด",
+  blender: "เครื่องปั่น",
+  milling_machine: "เครื่องสี",
+  roaster: "เครื่องคั่ว",
+  other: "อื่นๆ",
+};

@@ -37,8 +37,8 @@ export default async function WarehousePage() {
           <WarehouseActionCard
             description={
               locale === "th"
-                ? "ย้ายทรัพย์สินจากคลังปัจจุบันไปคลังปลายทางทันที"
-                : "Move an asset directly between warehouses"
+                ? "ย้ายเครื่องจากคลังปัจจุบันไปคลังปลายทางทันที"
+                : "Move a machine directly between warehouses"
             }
             href="/warehouse/transfer"
             icon={<ArrowRightLeft aria-hidden="true" className="size-6" />}
@@ -49,8 +49,8 @@ export default async function WarehousePage() {
           <WarehouseActionCard
             description={
               locale === "th"
-                ? "ขายและส่งมอบทรัพย์สินให้ลูกค้า"
-                : "Sell and deliver an asset to a customer"
+                ? "ขายและส่งมอบเครื่องให้ลูกค้า"
+                : "Sell and deliver a machine to a customer"
             }
             href="/warehouse/sale"
             icon={<ShoppingCart aria-hidden="true" className="size-6" />}
@@ -62,7 +62,7 @@ export default async function WarehousePage() {
             description={
               locale === "th"
                 ? "ตรวจสอบประวัติการเคลื่อนไหวทั้งหมด"
-                : "Review the complete asset movement history"
+                : "Review the complete machine movement history"
             }
             href="/warehouse/movements"
             icon={<History aria-hidden="true" className="size-6" />}

@@ -11,11 +11,17 @@ import {
   ASSET_CATEGORIES,
   type AssetCategoryKey,
 } from "@/domain/master-data/asset-categories";
+import { WAREHOUSES } from "@/domain/master-data/warehouses";
 
 type AssetSearchFormProps = Readonly<{
   query: string;
   status: string;
   categoryKey: AssetCategoryKey | "all";
+  warehouseId: string | null;
+  warehouseCounts: readonly {
+    readonly warehouseId: string;
+    readonly count: number;
+  }[];
 }>;
 
 type AssetSuggestion = {
@@ -29,11 +35,16 @@ export function AssetSearchForm({
   query,
   status,
   categoryKey,
+  warehouseId,
+  warehouseCounts,
 }: AssetSearchFormProps) {
   const { locale, t } = useLanguage();
   const [searchValue, setSearchValue] = useState(query);
   const [suggestions, setSuggestions] = useState<readonly AssetSuggestion[]>(
     [],
+  );
+  const warehouseCountMap = new Map(
+    warehouseCounts.map((item) => [item.warehouseId, item.count]),
   );
 
   useEffect(() => {
@@ -50,6 +61,10 @@ export function AssetSearchForm({
         categoryKey,
         limit: "10",
       });
+      if (warehouseId) {
+        params.set("warehouseId", warehouseId);
+      }
+
       try {
         const response = await fetch(`/api/assets?${params}`, {
           cache: "no-store",
@@ -71,12 +86,12 @@ export function AssetSearchForm({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [categoryKey, searchValue, status]);
+  }, [categoryKey, searchValue, status, warehouseId]);
 
   return (
     <form
       action="/assets"
-      className="bg-card grid gap-3 rounded-xl border p-4 sm:grid-cols-[1fr_180px_180px_auto]"
+      className="bg-card grid gap-3 rounded-xl border p-4 sm:grid-cols-[1fr_160px_180px_180px_auto]"
       method="get"
     >
       <div className="relative">
@@ -127,6 +142,23 @@ export function AssetSearchForm({
       </select>
       <select
         className="border-input bg-background h-10 rounded-md border px-3 text-sm"
+        defaultValue={warehouseId ?? "all"}
+        name="warehouseId"
+      >
+        <option value="all">
+          {locale === "th" ? "ทุกคลัง" : "All warehouses"}
+        </option>
+        {WAREHOUSES.map((warehouse) => (
+          <option key={warehouse.id} value={warehouse.id}>
+            {warehouse.id} - {warehouse.nameEn}
+            {warehouseCountMap.has(warehouse.id)
+              ? ` (${warehouseCountMap.get(warehouse.id)})`
+              : ""}
+          </option>
+        ))}
+      </select>
+      <select
+        className="border-input bg-background h-10 rounded-md border px-3 text-sm"
         defaultValue={categoryKey}
         name="categoryKey"
       >
@@ -135,7 +167,9 @@ export function AssetSearchForm({
         </option>
         {ASSET_CATEGORIES.map((category) => (
           <option key={category.key} value={category.key}>
-            {locale === "th" ? category.nameTh : category.nameEn}
+            {locale === "th"
+              ? THAI_CATEGORY_LABELS[category.key]
+              : category.nameEn}
           </option>
         ))}
       </select>
@@ -143,3 +177,12 @@ export function AssetSearchForm({
     </form>
   );
 }
+
+const THAI_CATEGORY_LABELS: Readonly<Record<AssetCategoryKey, string>> = {
+  coffee_machine: "เครื่องชง",
+  grinder: "เครื่องบด",
+  blender: "เครื่องปั่น",
+  milling_machine: "เครื่องสี",
+  roaster: "เครื่องคั่ว",
+  other: "อื่นๆ",
+};

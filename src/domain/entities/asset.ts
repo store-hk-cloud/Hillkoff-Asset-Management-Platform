@@ -40,10 +40,19 @@ export interface AssetCatalog {
 }
 
 export interface AssetWarranty {
-  readonly status: "inactive" | "active" | "expired";
+  readonly status: "inactive" | "active" | "expired" | "void";
   readonly startedAt: Date | null;
   readonly expiresAt: Date | null;
   readonly installationId: string | null;
+  readonly providerName?: string;
+  readonly providerContact?: string;
+  readonly coverageType?: "parts" | "parts_and_labor" | "full";
+  readonly documents?: readonly string[];
+  readonly voidReason?: string | null;
+  readonly extendedFrom?: Readonly<{
+    readonly previousExpiresAt: Date;
+    readonly extensionMonths: number;
+  }> | null;
 }
 
 export interface AssetDocument {
@@ -114,6 +123,19 @@ export interface AssetUpdateInput extends Omit<
   "custodyType" | "warehouseId" | "customerId" | "locationName"
 > {
   readonly expectedVersion: number;
+  readonly warranty?:
+    | {
+        readonly status: AssetWarranty["status"];
+        readonly providerName: string;
+        readonly providerContact: string;
+        readonly coverageType: NonNullable<AssetWarranty["coverageType"]>;
+        readonly documents: readonly string[];
+        readonly voidReason: string | null;
+        readonly extensionMonths: number | null;
+        readonly startedAt: Date | null;
+        readonly expiresAt: Date | null;
+      }
+    | undefined;
 }
 
 export interface AssetSearchCriteria {
@@ -126,3 +148,10 @@ export interface AssetSearchCriteria {
 }
 
 export type AssetCategoryCounts = Readonly<Record<AssetCategoryKey, number>>;
+
+export interface AssetWarehouseCount {
+  readonly warehouseId: string;
+  readonly count: number;
+}
+
+export type AssetWarehouseCountCriteria = Omit<AssetSearchCriteria, "limit">;

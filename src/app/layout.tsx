@@ -8,17 +8,17 @@ import { getServerLocale } from "@/lib/i18n/server";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  applicationName: "Hillkoff Asset Management",
+  applicationName: "Hillkoff Machine Management",
   title: {
-    default: "Hillkoff Asset Management",
-    template: "%s | Hillkoff Asset Management",
+    default: "Hillkoff Machine Management",
+    template: "%s | Hillkoff Machine Management",
   },
-  description: "Hillkoff enterprise asset lifecycle platform",
+  description: "Hillkoff enterprise machine lifecycle platform",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Hillkoff Assets",
+    title: "Hillkoff Machines",
   },
   icons: {
     icon: [
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#163b2a",
+  themeColor: "#007aff",
 };
 
 type RootLayoutProps = Readonly<{

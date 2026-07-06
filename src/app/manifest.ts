@@ -2,15 +2,15 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Hillkoff Asset Management",
-    short_name: "Hillkoff Assets",
-    description: "Hillkoff enterprise asset lifecycle platform",
+    name: "Hillkoff Machine Management",
+    short_name: "Hillkoff Machines",
+    description: "Hillkoff enterprise machine lifecycle platform",
     start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait-primary",
-    background_color: "#f7f4ea",
-    theme_color: "#163b2a",
+    background_color: "#f2f2f7",
+    theme_color: "#007aff",
     categories: ["business", "productivity", "utilities"],
     icons: [
       {

@@ -59,6 +59,7 @@ function createChanges(
     "customerId",
     "locationName",
     "installedAt",
+    "warranty",
     "archivedAt",
   ] as const;
   const changes: Record<string, AssetFieldChange> = {};
@@ -66,8 +67,18 @@ function createChanges(
   for (const field of fields) {
     const before = previous[field];
     const after = current[field];
-    const beforeValue = before instanceof Date ? before.toISOString() : before;
-    const afterValue = after instanceof Date ? after.toISOString() : after;
+    const beforeValue =
+      before instanceof Date
+        ? before.toISOString()
+        : field === "warranty"
+          ? JSON.stringify(before)
+          : before;
+    const afterValue =
+      after instanceof Date
+        ? after.toISOString()
+        : field === "warranty"
+          ? JSON.stringify(after)
+          : after;
 
     if (beforeValue !== afterValue) {
       changes[field] = { before: beforeValue, after: afterValue };
@@ -75,6 +86,12 @@ function createChanges(
   }
 
   return changes;
+}
+
+function addUtcMonths(date: Date, months: number): Date {
+  const next = new Date(date);
+  next.setUTCMonth(next.getUTCMonth() + months);
+  return next;
 }
 
 export class AssetLifecycleService implements DomainService {
@@ -143,6 +160,12 @@ export class AssetLifecycleService implements DomainService {
         startedAt: null,
         expiresAt: null,
         installationId: null,
+        providerName: "",
+        providerContact: "",
+        coverageType: "full",
+        documents: [],
+        voidReason: null,
+        extendedFrom: null,
       },
       nfcStatus: "unregistered",
       nfcTagType: null,
@@ -203,9 +226,40 @@ export class AssetLifecycleService implements DomainService {
       condition: input.condition,
       installedAt: input.installedAt,
     };
+    const currentExpiresAt = current.warranty.expiresAt;
+    const warranty =
+      input.warranty === undefined
+        ? current.warranty
+        : {
+            ...current.warranty,
+            status: input.warranty.status,
+            providerName: input.warranty.providerName.trim(),
+            providerContact: input.warranty.providerContact.trim(),
+            coverageType: input.warranty.coverageType,
+            documents: input.warranty.documents.map((document) =>
+              document.trim(),
+            ),
+            voidReason:
+              input.warranty.status === "void"
+                ? input.warranty.voidReason?.trim() || "Voided by admin"
+                : null,
+            startedAt: input.warranty.startedAt,
+            expiresAt:
+              input.warranty.extensionMonths && currentExpiresAt
+                ? addUtcMonths(currentExpiresAt, input.warranty.extensionMonths)
+                : input.warranty.expiresAt,
+            extendedFrom:
+              input.warranty.extensionMonths && currentExpiresAt
+                ? {
+                    previousExpiresAt: currentExpiresAt,
+                    extensionMonths: input.warranty.extensionMonths,
+                  }
+                : current.warranty.extendedFrom ?? null,
+          };
     const updated: Asset = {
       ...current,
       ...normalizedInput,
+      warranty,
       searchKeywords: buildAssetSearchKeywords(
         searchableValues({
           ...normalizedInput,

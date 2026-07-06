@@ -45,7 +45,11 @@ export const serverEnvironmentSchema = z.object({
   SMTP_USER: z.string().trim().min(1).optional(),
   SMTP_PASSWORD: z.string().min(1).optional(),
   SMTP_FROM_EMAIL: z.email().optional(),
-  SMTP_FROM_NAME: z.string().trim().min(1).default("Hillkoff Asset Management"),
+  SMTP_FROM_NAME: z
+    .string()
+    .trim()
+    .min(1)
+    .default("Hillkoff Machine Management"),
   SMTP_REPLY_TO: z.email().optional(),
 });
 
