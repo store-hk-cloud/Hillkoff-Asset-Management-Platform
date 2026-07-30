@@ -52,13 +52,13 @@ export class FirestoreUserInvitationRepository implements UserInvitationReposito
       .collection("user_invitations")
       .doc(invitation.id);
     const auditRef = this.firestore.collection("audit_logs").doc(auditLog.id);
-    const pending = await this.firestore
+    const pendingQuery = this.firestore
       .collection("user_invitations")
       .where("userId", "==", invitation.userId)
-      .where("status", "==", "pending")
-      .get();
+      .where("status", "==", "pending");
 
     await this.firestore.runTransaction(async (transaction) => {
+      const pending = await transaction.get(pendingQuery);
       for (const document of pending.docs) {
         transaction.update(document.ref, { status: "revoked" });
       }

@@ -103,6 +103,7 @@ export function MovementForm({ action }: MovementFormProps) {
 
     setLoadingAsset(true);
     setError(null);
+    setDestinationWarehouseId("");
 
     try {
       setAsset(await findWarehouseAsset(assetReference));
@@ -371,7 +372,10 @@ export function MovementForm({ action }: MovementFormProps) {
                   className="pl-9"
                   id="assetCode"
                   name="assetCode"
-                  onChange={() => setAsset(null)}
+                  onChange={() => {
+                    setAsset(null);
+                    setDestinationWarehouseId("");
+                  }}
                   placeholder={
                     locale === "th"
                       ? "แนะนำให้ใช้ Serial Number หรือสแกน QR"
@@ -618,6 +622,7 @@ export function MovementForm({ action }: MovementFormProps) {
             onClick={() => {
               setBulkMode(!bulkMode);
               setError(null);
+              setDestinationWarehouseId("");
               if (bulkMode) {
                 setAsset(null);
                 setBulkAssets([]);

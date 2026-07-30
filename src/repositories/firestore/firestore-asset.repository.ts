@@ -5,6 +5,7 @@ import {
   type DocumentData,
   type Firestore,
   type Query,
+  type QueryDocumentSnapshot,
 } from "firebase-admin/firestore";
 
 import type {
@@ -668,23 +669,43 @@ export class FirestoreAssetRepository implements AssetRepository {
       );
     }
 
-    const snapshot = await query
-      .orderBy("updatedAt", "desc")
-      .limit(criteria.limit)
-      .get();
     const queryKeywords = criteria.query
       .trim()
       .toLocaleLowerCase("th-TH")
       .split(/\s+/)
       .filter(Boolean);
 
-    return snapshot.docs
-      .map((document) => mapAsset(document.data()))
-      .filter((asset) =>
-        queryKeywords.every((keyword) =>
-          asset.searchPrefixes.includes(keyword),
-        ),
-      );
+    const orderedQuery = query.orderBy("updatedAt", "desc");
+    const remainingKeywords = queryKeywords.slice(1);
+    const results: Asset[] = [];
+    const batchSize = criteria.limit;
+    let cursor: QueryDocumentSnapshot | undefined;
+
+    while (results.length < criteria.limit) {
+      let batchQuery = orderedQuery.limit(batchSize);
+      if (cursor) {
+        batchQuery = batchQuery.startAfter(cursor);
+      }
+      const snapshot = await batchQuery.get();
+      if (snapshot.empty) break;
+
+      for (const document of snapshot.docs) {
+        const asset = mapAsset(document.data());
+        if (
+          remainingKeywords.every((keyword) =>
+            asset.searchPrefixes.includes(keyword),
+          )
+        ) {
+          results.push(asset);
+          if (results.length >= criteria.limit) break;
+        }
+      }
+
+      cursor = snapshot.docs[snapshot.docs.length - 1];
+      if (snapshot.docs.length < batchSize) break;
+    }
+
+    return results;
   }
 
   async listEvents(

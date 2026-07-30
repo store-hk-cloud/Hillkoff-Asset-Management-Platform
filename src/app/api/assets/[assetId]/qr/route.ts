@@ -2,18 +2,50 @@ import QRCode from "qrcode";
 import sharp from "sharp";
 import { NextResponse } from "next/server";
 
+import { AssetError } from "@/domain/errors/asset.error";
 import { getCurrentSession } from "@/lib/auth/dal";
 import { AssetIdentityManagementService } from "@/services/asset-identity-management.service";
 
 const service = new AssetIdentityManagementService();
 type RouteContext = { params: Promise<{ assetId: string }> };
 
+function errorResponse(error: unknown) {
+  if (error instanceof AssetError) {
+    const status =
+      error.code === "ASSET_ACCESS_DENIED"
+        ? 403
+        : error.code === "ASSET_NOT_FOUND"
+          ? 404
+          : error.code.includes("CONFLICT")
+            ? 409
+            : 400;
+
+    return NextResponse.json(
+      { success: false, error: { code: error.code, message: error.message } },
+      { status },
+    );
+  }
+
+  return NextResponse.json(
+    {
+      success: false,
+      error: { code: "INVALID_ASSET", message: "Invalid asset request." },
+    },
+    { status: 400 },
+  );
+}
+
 export async function GET(request: Request, context: RouteContext) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
 
   const { assetId } = await context.params;
-  const { asset } = await service.get(assetId, session.profile);
+  let asset;
+  try {
+    ({ asset } = await service.get(assetId, session.profile));
+  } catch (error) {
+    return errorResponse(error);
+  }
 
   if (!asset.qrUrl) {
     return NextResponse.json(

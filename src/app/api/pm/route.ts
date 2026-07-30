@@ -8,6 +8,15 @@ import { PmManagementService } from "@/services/pm-management.service";
 
 const service = new PmManagementService();
 
+function parseDateParam(value: string | null): Date | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error("Invalid date query parameter.");
+  }
+  return parsed;
+}
+
 export async function GET(request: Request) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
@@ -19,14 +28,14 @@ export async function GET(request: Request) {
         : params.get("status") === "all"
           ? "all"
           : "scheduled";
-    const from = params.get("from");
-    const to = params.get("to");
+    const from = parseDateParam(params.get("from"));
+    const to = parseDateParam(params.get("to"));
     return NextResponse.json({
       success: true,
       data: await service.list(session.profile, {
         status,
-        from: from ? new Date(from) : null,
-        to: to ? new Date(to) : null,
+        from,
+        to,
       }),
     });
   } catch (error) {

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { AI_COMMAND_NAMES } from "@/application/commands/asset-commands";
 import { AiCommandDispatcher } from "@/application/commands/ai-command-dispatcher";
+import { DomainError } from "@/domain/errors/domain-error";
 import { getCurrentSession } from "@/lib/auth/dal";
 import { isTrustedMutationRequest } from "@/lib/auth/mutation-security";
 
@@ -31,8 +32,9 @@ export async function POST(request: Request) {
       {
         success: false,
         error: {
-          code: "COMMAND_FAILED",
-          message: error instanceof Error ? error.message : "Command failed.",
+          code: error instanceof DomainError ? error.code : "COMMAND_FAILED",
+          message:
+            error instanceof DomainError ? error.message : "Command failed.",
         },
       },
       { status: 400 },

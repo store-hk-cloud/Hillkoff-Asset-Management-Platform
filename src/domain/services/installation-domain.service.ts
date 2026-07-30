@@ -15,6 +15,26 @@ const DEFAULT_CHECKLIST = [
   "ทำความสะอาดพื้นที่ติดตั้ง",
 ] as const;
 
+function addUtcMonths(date: Date, months: number): Date {
+  const targetMonth = date.getUTCMonth() + months;
+  const targetYear = date.getUTCFullYear() + Math.floor(targetMonth / 12);
+  const normalizedMonth = ((targetMonth % 12) + 12) % 12;
+  const lastDay = new Date(
+    Date.UTC(targetYear, normalizedMonth + 1, 0),
+  ).getUTCDate();
+  return new Date(
+    Date.UTC(
+      targetYear,
+      normalizedMonth,
+      Math.min(date.getUTCDate(), lastDay),
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+      date.getUTCMilliseconds(),
+    ),
+  );
+}
+
 export class InstallationDomainService {
   schedule(
     id: string,
@@ -195,10 +215,7 @@ export class InstallationDomainService {
       );
     }
 
-    const expiresAt = new Date(now);
-    expiresAt.setUTCMonth(
-      expiresAt.getUTCMonth() + installation.warrantyMonths,
-    );
+    const expiresAt = addUtcMonths(now, installation.warrantyMonths);
 
     return {
       installation: {
