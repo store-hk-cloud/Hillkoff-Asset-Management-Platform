@@ -111,6 +111,22 @@ const translations = {
     th: "ตรวจสอบเครื่อง Hillkoff",
     en: "Hillkoff Machine Verification",
   },
+  "brand.tagline": {
+    th: "กลิ่นหอมพาเปลี่ยนแปลง รสชาติถึงซึ่งความรับผิดชอบ ดื่มด่ำย้ำเตือนความยั่งยืน",
+    en: "Where aroma sparks change, where taste meets responsibility, where every sip is a reminder of sustainability",
+  },
+  "brand.pillar.highland": {
+    th: "H: เกษตรพื้นที่สูง",
+    en: "H: Highland Agricultural",
+  },
+  "brand.pillar.innovation": {
+    th: "I: นวัตกรรม",
+    en: "I: Innovation",
+  },
+  "brand.pillar.lives": {
+    th: "L: ชีวิต",
+    en: "L: Lives",
+  },
 } as const satisfies Record<string, Record<Locale, string>>;
 
 export type TranslationKey = keyof typeof translations;

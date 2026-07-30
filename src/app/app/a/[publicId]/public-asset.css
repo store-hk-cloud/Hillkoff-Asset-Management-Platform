@@ -1,20 +1,24 @@
 .hk-public-asset {
-  --hk-bg: #efe8d4;
-  --hk-grain: rgba(27, 46, 34, 0.035);
-  --hk-surface: #fffdf6;
-  --hk-ink: #1c2b21;
-  --hk-ink-soft: #46543c;
-  --hk-muted: #6d7a63;
-  --hk-green: #17392a;
-  --hk-green-deep: #0b2018;
-  --hk-green-mid: #24523c;
-  --hk-gold: #9c7a2e;
-  --hk-gold-soft: #c7a95f;
-  --hk-border: rgba(23, 57, 42, 0.14);
+  /* Fixed brand tokens — the hero band is a committed brand zone and does
+     not follow the viewer's light/dark theme, matching hillkoff.com's teal
+     header. */
+  --hk-hero-from: #0aa39d;
+  --hk-hero-via: #058581;
+  --hk-hero-to: #033f3d;
+  --hk-accent: #00bac6;
+  --hk-accent-soft: #7be8e0;
+
+  /* Themed tokens — follow the app's light/dark mode. */
+  --hk-bg: #f5f8f8;
+  --hk-grain: rgba(5, 133, 129, 0.035);
+  --hk-surface: #ffffff;
+  --hk-ink: #1c2422;
+  --hk-ink-soft: #3d4a48;
+  --hk-muted: #5c6b69;
+  --hk-border: rgba(5, 133, 129, 0.16);
   --hk-shadow:
-    0 30px 60px -30px rgba(11, 32, 24, 0.35),
-    0 4px 10px rgba(11, 32, 24, 0.06);
-  --hk-focus: #2f6b4f;
+    0 30px 60px -30px rgba(3, 30, 29, 0.35),
+    0 4px 10px rgba(3, 30, 29, 0.06);
   --hk-footer-logo-filter: brightness(0) saturate(100%);
 
   background: var(--hk-bg);
@@ -26,22 +30,16 @@
 }
 
 .dark .hk-public-asset {
-  --hk-bg: #0a1712;
-  --hk-grain: rgba(237, 234, 223, 0.03);
-  --hk-surface: #142720;
-  --hk-ink: #eeeadd;
-  --hk-ink-soft: #c7d0c1;
-  --hk-muted: #93a389;
-  --hk-green: #2f6b4f;
-  --hk-green-deep: #061007;
-  --hk-green-mid: #1f4a37;
-  --hk-gold: #d8b665;
-  --hk-gold-soft: #e9d190;
-  --hk-border: rgba(237, 234, 223, 0.14);
+  --hk-bg: #06120f;
+  --hk-grain: rgba(238, 245, 244, 0.03);
+  --hk-surface: #0f2b28;
+  --hk-ink: #eef5f4;
+  --hk-ink-soft: #c3d6d4;
+  --hk-muted: #8fb0ac;
+  --hk-border: rgba(238, 245, 244, 0.16);
   --hk-shadow:
     0 30px 60px -30px rgba(0, 0, 0, 0.6),
     0 4px 10px rgba(0, 0, 0, 0.3);
-  --hk-focus: #8fd9b4;
   --hk-footer-logo-filter: none;
 }
 
@@ -59,11 +57,11 @@
   background:
     linear-gradient(
       160deg,
-      var(--hk-green-mid),
-      var(--hk-green) 55%,
-      var(--hk-green-deep)
+      var(--hk-hero-from),
+      var(--hk-hero-via) 55%,
+      var(--hk-hero-to)
     ),
-    var(--hk-green);
+    var(--hk-hero-via);
   padding: 2.6rem 1.75rem 5.5rem;
   text-align: center;
   overflow: hidden;
@@ -76,10 +74,10 @@
   background-image:
     radial-gradient(
       circle at 12% 20%,
-      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0.08),
       transparent 40%
     ),
-    radial-gradient(circle at 88% 15%, rgba(255, 255, 255, 0.05), transparent 35%);
+    radial-gradient(circle at 88% 15%, rgba(255, 255, 255, 0.06), transparent 35%);
   pointer-events: none;
 }
 
@@ -95,7 +93,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--hk-gold-soft);
+  color: var(--hk-accent-soft);
   margin: 0 0 0.35rem;
   position: relative;
 }
@@ -103,7 +101,7 @@
 .hk-hero-title {
   font-family: Georgia, "Noto Serif Thai", "Iowan Old Style", serif;
   font-size: 1.65rem;
-  color: #fbf6e6;
+  color: #f4fffe;
   margin: 0;
   text-wrap: balance;
   position: relative;
@@ -122,7 +120,7 @@
 }
 
 .hk-steam-line {
-  stroke: var(--hk-gold-soft);
+  stroke: var(--hk-accent-soft);
   stroke-width: 2.2;
   stroke-linecap: round;
   fill: none;
@@ -219,8 +217,12 @@
   font-size: 0.78rem;
   font-weight: 600;
   white-space: nowrap;
-  background: color-mix(in srgb, var(--hk-green) 14%, transparent);
-  color: var(--hk-green-mid);
+  background: color-mix(in srgb, var(--hk-accent) 16%, transparent);
+  color: var(--hk-hero-via);
+}
+
+.dark .hk-pill {
+  color: var(--hk-accent-soft);
 }
 
 .hk-pill::before {
@@ -262,7 +264,7 @@
   margin-top: 1.5rem;
   padding: 1.1rem 1.15rem;
   border-radius: 14px;
-  background: color-mix(in srgb, var(--hk-green) 7%, var(--hk-surface));
+  background: color-mix(in srgb, var(--hk-accent) 7%, var(--hk-surface));
   border: 1px solid var(--hk-border);
   display: flex;
   gap: 0.85rem;
@@ -273,8 +275,12 @@
   flex: none;
   width: 22px;
   height: 22px;
-  color: var(--hk-green-mid);
+  color: var(--hk-hero-via);
   margin-top: 0.1rem;
+}
+
+.dark .hk-care-note svg {
+  color: var(--hk-accent-soft);
 }
 
 .hk-care-note p {
@@ -290,10 +296,10 @@
 
 .hk-staff-drawer {
   margin-top: 1.5rem;
-  border: 1px dashed var(--hk-gold);
+  border: 1px dashed var(--hk-accent);
   border-radius: 14px;
   padding: 1.1rem 1.15rem;
-  background: color-mix(in srgb, var(--hk-gold) 8%, transparent);
+  background: color-mix(in srgb, var(--hk-accent) 8%, transparent);
 }
 
 .hk-staff-drawer-title {
@@ -303,7 +309,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--hk-gold);
+  color: var(--hk-accent);
   margin: 0 0 0.9rem;
   font-weight: 700;
 }
@@ -340,12 +346,12 @@
 }
 
 .hk-work-link:hover {
-  border-color: var(--hk-green-mid);
-  background: color-mix(in srgb, var(--hk-green) 6%, var(--hk-surface));
+  border-color: var(--hk-accent);
+  background: color-mix(in srgb, var(--hk-accent) 6%, var(--hk-surface));
 }
 
 .hk-work-link:focus-visible {
-  outline: 2px solid var(--hk-focus);
+  outline: 2px solid var(--hk-accent);
   outline-offset: 2px;
 }
 
@@ -375,11 +381,11 @@
 }
 
 .hk-footer a {
-  color: var(--hk-green-mid);
+  color: var(--hk-hero-via);
   text-decoration: none;
   font-weight: 600;
 }
 
 .dark .hk-footer a {
-  color: var(--hk-gold-soft);
+  color: var(--hk-accent-soft);
 }

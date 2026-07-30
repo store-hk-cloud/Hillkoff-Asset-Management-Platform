@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { useLanguage } from "@/components/providers/language-provider";
@@ -120,8 +121,19 @@ export function DashboardLayout({
       <header className="bg-background/95 sticky top-0 z-20 border-b backdrop-blur">
         <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex items-center gap-5">
-            <Link className="text-sm font-semibold" href="/dashboard">
-              {t("app.name")}
+            <Link
+              className="flex items-center gap-2 text-sm font-semibold"
+              href="/dashboard"
+            >
+              <Image
+                alt={t("app.name")}
+                className="hk-logo-mark"
+                height={22}
+                priority
+                src="/brand/hillkoff-logo.png"
+                width={123}
+              />
+              <span className="sr-only sm:not-sr-only">{t("app.name")}</span>
             </Link>
             <nav className="hidden items-center gap-4 text-sm sm:flex">
               {visibleNavigation
