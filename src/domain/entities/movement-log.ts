@@ -24,6 +24,7 @@ export interface MovementLog {
   readonly assetName: string;
   readonly source: MovementEndpoint;
   readonly destination: MovementEndpoint;
+  readonly involvedWarehouseIds: string[];
   readonly referenceNumber: string | null;
   readonly notes: string;
   readonly occurredAt: Date;

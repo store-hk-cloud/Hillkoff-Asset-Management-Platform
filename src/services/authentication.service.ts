@@ -38,7 +38,11 @@ export class AuthenticationService {
       );
     }
 
-    if (profile.role !== identity.role || profile.email !== identity.email) {
+    if (
+      !identity.role ||
+      profile.role !== identity.role ||
+      profile.email !== identity.email
+    ) {
       throw new AuthenticationError(
         "ROLE_MISMATCH",
         "Authentication claims do not match the user profile.",

@@ -91,43 +91,6 @@ export const enqueueInstallationUpdateNotification = onDocumentUpdated(
   },
 );
 
-export const enqueuePmAssignmentNotification = onDocumentCreated(
-  "pm_jobs/{pmId}",
-  async (event) => {
-    const job = event.data?.data();
-    if (!job || typeof job.assignedTechnicianId !== "string") return;
-    await enqueueNotification({
-      type: "pm",
-      recipientUserIds: [job.assignedTechnicianId],
-      title: `New PM assignment: ${job.jobNumber}`,
-      body: `${job.assetCode} is scheduled for preventive maintenance.`,
-      entityType: "pm",
-      entityId: event.params.pmId,
-    });
-  },
-);
-
-export const enqueueInstallationAssignmentNotification = onDocumentCreated(
-  "installations/{installationId}",
-  async (event) => {
-    const installation = event.data?.data();
-    if (
-      !installation ||
-      typeof installation.assignedTechnicianId !== "string"
-    ) {
-      return;
-    }
-    await enqueueNotification({
-      type: "system",
-      recipientUserIds: [installation.assignedTechnicianId],
-      title: `New installation: ${installation.installationNumber}`,
-      body: `${installation.assetCode} installation was assigned to you.`,
-      entityType: "system",
-      entityId: event.params.installationId,
-    });
-  },
-);
-
 export const enqueueLowStockNotification = onDocumentUpdated(
   "inventory_parts/{partId}",
   async (event) => {
@@ -136,12 +99,17 @@ export const enqueueLowStockNotification = onDocumentUpdated(
     if (!before || !after) return;
     const wasLow = before.quantityOnHand <= before.reorderPoint;
     const isLow = after.quantityOnHand <= after.reorderPoint;
-    if (wasLow || !isLow) return;
+    // Only notify when stock newly drops below threshold, or decreases further while already low
+    const droppedBelow = !wasLow && isLow;
+    const decreasedFurther =
+      wasLow && after.quantityOnHand < before.quantityOnHand;
+    if (!droppedBelow && !decreasedFurther) return;
     await enqueueNotification({
       type: "system",
+      // Empty recipients — visible to admin/executive via unfiltered queue view
       recipientUserIds: [],
       title: `Low stock: ${after.partNumber}`,
-      body: `${after.name} has ${after.quantityOnHand} ${after.unit} remaining.`,
+      body: `${after.name} has ${after.quantityOnHand} ${after.unit} remaining (reorder point: ${after.reorderPoint}).`,
       entityType: "inventory",
       entityId: event.params.partId,
     });

@@ -278,7 +278,7 @@ export function MovementForm({ action }: MovementFormProps) {
 
     try {
       const result = await submitBulkTransfer({
-        assetCodes: bulkAssets.map((a) => a.id),
+        assetCodes: bulkAssets.map((a) => a.assetCode),
         destinationWarehouseId,
         referenceNumber:
           (formData.get("referenceNumber") as string) || null,

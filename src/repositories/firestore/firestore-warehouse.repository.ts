@@ -78,6 +78,11 @@ function mapMovement(data: DocumentData): MovementLog {
     assetName: requireString(data, "assetName"),
     source: mapEndpoint(data.source ?? {}),
     destination: mapEndpoint(data.destination ?? {}),
+    involvedWarehouseIds: Array.isArray(data.involvedWarehouseIds)
+      ? data.involvedWarehouseIds.filter(
+          (id: unknown): id is string => typeof id === "string",
+        )
+      : [],
     referenceNumber: nullableString(data, "referenceNumber"),
     notes: requireString(data, "notes"),
     occurredAt: data.occurredAt.toDate(),

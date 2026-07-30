@@ -182,6 +182,15 @@ export class WarehouseManagementService {
           assetReference.trim(),
           context.actor,
         );
+        // Skip assets already in the destination warehouse
+        if (current.warehouseId === destinationWarehouseId) {
+          failed.push({
+            assetCode: current.assetCode,
+            assetId: current.id,
+            error: "Asset is already in the destination warehouse.",
+          });
+          continue;
+        }
         const now = new Date();
         const transition = this.movementService.transfer(
           current,
@@ -259,6 +268,15 @@ export class WarehouseManagementService {
     occurredAt: Date,
   ): Promise<MovementLog> {
     const movementId = crypto.randomUUID();
+    const involvedWarehouseIds = [
+      ...new Set(
+        [
+          transition.source.warehouseId,
+          transition.destination.warehouseId,
+        ].filter((id): id is string => Boolean(id)),
+      ),
+    ];
+
     const movement: MovementLog = {
       id: movementId,
       movementNumber: `MOV-${occurredAt
@@ -271,6 +289,7 @@ export class WarehouseManagementService {
       assetName: transition.asset.name,
       source: transition.source,
       destination: transition.destination,
+      involvedWarehouseIds,
       referenceNumber: referenceNumber?.trim() || null,
       notes: notes.trim(),
       occurredAt,
