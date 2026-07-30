@@ -9,16 +9,16 @@
   --hk-accent-soft: #7be8e0;
 
   /* Themed tokens — follow the app's light/dark mode. */
-  --hk-bg: #f5f8f8;
-  --hk-grain: rgba(5, 133, 129, 0.035);
+  --hk-bg: #f8f8f8;
+  --hk-grain: rgba(0, 0, 0, 0.03);
   --hk-surface: #ffffff;
-  --hk-ink: #1c2422;
-  --hk-ink-soft: #3d4a48;
-  --hk-muted: #5c6b69;
-  --hk-border: rgba(5, 133, 129, 0.16);
+  --hk-ink: #333333;
+  --hk-ink-soft: #4a4a4a;
+  --hk-muted: #6b6b6b;
+  --hk-border: rgba(0, 0, 0, 0.1);
   --hk-shadow:
-    0 30px 60px -30px rgba(3, 30, 29, 0.35),
-    0 4px 10px rgba(3, 30, 29, 0.06);
+    0 30px 60px -30px rgba(0, 0, 0, 0.22),
+    0 4px 10px rgba(0, 0, 0, 0.05);
   --hk-footer-logo-filter: brightness(0) saturate(100%);
 
   background: var(--hk-bg);
