@@ -1,8 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AssetIdentityError } from "@/domain/errors/asset-identity.error";
 import { AssetStatusBadge } from "@/features/assets/components/asset-status-badge";
 import { getServerTranslator } from "@/lib/i18n/server";
@@ -10,12 +9,14 @@ import { getCurrentSession } from "@/lib/auth/dal";
 import { AssetIdentityManagementService } from "@/services/asset-identity-management.service";
 import { TechnicianWorkspaceService } from "@/services/technician-workspace.service";
 
+import "./public-asset.css";
+
 const service = new AssetIdentityManagementService();
 const technicianService = new TechnicianWorkspaceService();
 type PublicAssetPageProps = { params: Promise<{ publicId: string }> };
 
 export const metadata = {
-  title: "ตรวจสอบเครื่อง Hillkoff",
+  title: "ใบดูแลเครื่อง Hillkoff",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";
@@ -26,6 +27,7 @@ export default async function PublicAssetPage({
   const { locale, t } = await getServerTranslator();
   const session = await getCurrentSession();
   const { publicId } = await params;
+  const isStaff = Boolean(session) && session?.profile.role !== "customer";
   let asset;
   let assignedWork: readonly {
     id: string;
@@ -35,10 +37,7 @@ export default async function PublicAssetPage({
   }[] = [];
 
   try {
-    asset = await service.lookupPublic(
-      publicId,
-      Boolean(session) && session?.profile.role !== "customer",
-    );
+    asset = await service.lookupPublic(publicId, isStaff);
     if (session?.profile.role === "technician") {
       assignedWork = (await technicianService.lookup(publicId, session.profile))
         .work;
@@ -54,115 +53,228 @@ export default async function PublicAssetPage({
   }
 
   return (
-    <main className="bg-muted/40 grid min-h-dvh place-items-center px-4 py-8">
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          <p className="text-muted-foreground text-sm">
-            {t("public.verification")}
+    <div className="hk-public-asset">
+      <p className="sr-only">{t("public.verification")}</p>
+      <div className="hk-page">
+        <header className="hk-hero">
+          <Image
+            alt="Hillkoff"
+            className="hk-hero-logo"
+            height={34}
+            priority
+            src="/brand/hillkoff-logo.png"
+            width={190}
+          />
+          <p className="hk-hero-eyebrow">
+            {locale === "th" ? "ใบดูแลเครื่อง · Care Record" : "Care Record"}
           </p>
-          <CardTitle className="text-2xl">
-            {locale === "th"
-              ? "ตรวจสอบเครื่อง Hillkoff"
-              : "Hillkoff Machine Verification"}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 text-sm sm:grid-cols-2">
-          <Detail
-            label={locale === "th" ? "ชื่อเครื่อง" : "Asset Name"}
-            value={asset.name}
-          />
-          <Detail label="Serial Number" value={asset.serialNumber || "—"} />
-          <Detail
-            label={locale === "th" ? "สี" : "Color"}
-            value={asset.color || "—"}
-          />
-          <Detail
-            label={locale === "th" ? "สถานะเครื่อง" : "Asset Status"}
-            value={operationalStatusLabel(asset.operationalStatus, locale)}
-          />
-          <Detail
-            label={locale === "th" ? "สถานะงานซ่อม" : "Repair status"}
-            value={repairStatusLabel(asset.repairStatus, locale)}
-          />
-          <Detail
-            label={
-              locale === "th"
-                ? "จำนวนคงเหลือในสต็อกของรหัสนี้"
-                : "In-stock quantity for this code"
-            }
-            value={
-              asset.inStockQuantity === null
-                ? null
-                : String(asset.inStockQuantity)
-            }
-          />
-          {asset.details ? (
-            <>
-              <Detail
-                label={locale === "th" ? "รหัสเครื่อง" : "Asset Code"}
-                value={asset.details.assetCode}
+          <h1 className="hk-hero-title">
+            {locale === "th" ? (
+              <>
+                ทุกเครื่องของ Hillkoff
+                <br />
+                อยู่ในสายตาของเรา
+              </>
+            ) : (
+              <>
+                Every Hillkoff machine,
+                <br />
+                cared for
+              </>
+            )}
+          </h1>
+          <div aria-hidden="true" className="hk-steam">
+            <svg fill="none" viewBox="0 0 60 60">
+              <path
+                className="hk-steam-line a"
+                d="M18 40 C 14 32, 22 28, 18 20"
               />
-              <Detail
-                label={locale === "th" ? "หมวดหมู่" : "Category"}
-                value={asset.details.category}
+              <path
+                className="hk-steam-line b"
+                d="M30 42 C 26 33, 34 29, 30 21"
               />
-              <Detail
-                label={locale === "th" ? "รหัสคลัง" : "Warehouse ID"}
-                value={asset.details.warehouseId ?? "—"}
+              <path
+                className="hk-steam-line c"
+                d="M42 40 C 38 32, 46 28, 42 20"
               />
-              <Detail
-                label={locale === "th" ? "สถานที่ปัจจุบัน" : "Current Location"}
-                value={asset.details.locationName || "—"}
-              />
+            </svg>
+          </div>
+        </header>
+
+        <main className="hk-card">
+          <div className="hk-status-row">
+            <div>
+              <h2 className="hk-asset-name">{asset.name}</h2>
+              {asset.serialNumber ? (
+                <p className="hk-asset-sub">Serial · {asset.serialNumber}</p>
+              ) : null}
+            </div>
+            <span className="hk-pill">
+              {operationalStatusLabel(asset.operationalStatus, locale)}
+            </span>
+          </div>
+
+          <hr className="hk-divider" />
+
+          <div className="hk-fact-grid">
+            <div>
+              <p className="hk-fact-label">
+                {locale === "th" ? "สถานะงานซ่อม" : "Repair status"}
+              </p>
+              <p className="hk-fact-value">
+                {repairStatusLabel(asset.repairStatus, locale)}
+              </p>
+            </div>
+            {asset.color ? (
               <div>
-                <p className="text-muted-foreground text-xs">
-                  {locale === "th" ? "สภาพ" : "Condition"}
+                <p className="hk-fact-label">
+                  {locale === "th" ? "สี" : "Color"}
                 </p>
-                <div className="mt-1">
+                <p className="hk-fact-value">{asset.color}</p>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="hk-care-note">
+            <svg fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
+              <path d="M12 21s-7.5-4.6-9.6-9.3C.8 8.1 2.6 4.5 6 4.1c2-.2 3.6.8 4.4 2 .8-1.2 2.4-2.2 4.4-2 3.4.4 5.2 4 3.6 7.6C19.5 16.4 12 21 12 21z" />
+            </svg>
+            <p>
+              <strong>
+                {locale === "th"
+                  ? "ทีมช่างของเราตรวจสอบและดูแลเครื่องนี้อย่างสม่ำเสมอ"
+                  : "Our technicians check and care for this machine on an ongoing basis."}
+              </strong>
+              <br />
+              {locale === "th"
+                ? "หากพบความผิดปกติในการใช้งาน สแกน QR นี้ซ้ำได้ทุกเมื่อ ทีมงานจะเห็นประวัติและติดต่อกลับโดยเร็ว"
+                : "If something seems off, scan this code again any time — our team will see the history and follow up promptly."}
+            </p>
+          </div>
+
+          {asset.details ? (
+            <section className="hk-staff-drawer">
+              <p className="hk-staff-drawer-title">
+                <svg fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path d="M12 2 4 6v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V6l-8-4Z" />
+                </svg>
+                {locale === "th"
+                  ? "มองเห็นได้เฉพาะพนักงาน"
+                  : "Visible to staff only"}
+              </p>
+              <div className="hk-staff-fact-grid">
+                <div>
+                  <p className="hk-fact-label">
+                    {locale === "th" ? "รหัสเครื่อง" : "Asset Code"}
+                  </p>
+                  <p className="hk-fact-value">{asset.details.assetCode}</p>
+                </div>
+                <div>
+                  <p className="hk-fact-label">
+                    {locale === "th" ? "หมวดหมู่" : "Category"}
+                  </p>
+                  <p className="hk-fact-value">{asset.details.category}</p>
+                </div>
+                <div>
+                  <p className="hk-fact-label">
+                    {locale === "th" ? "รหัสคลัง" : "Warehouse ID"}
+                  </p>
+                  <p className="hk-fact-value">
+                    {asset.details.warehouseId ?? "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="hk-fact-label">
+                    {locale === "th" ? "สถานที่ปัจจุบัน" : "Current Location"}
+                  </p>
+                  <p className="hk-fact-value">
+                    {asset.details.locationName || "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="hk-fact-label">
+                    {locale === "th" ? "สภาพ" : "Condition"}
+                  </p>
                   <AssetStatusBadge condition={asset.details.condition} />
                 </div>
-              </div>
-              <Detail
-                label={locale === "th" ? "การยืนยัน NFC" : "NFC Verification"}
-                value={asset.details.nfcStatus}
-              />
-            </>
-          ) : (
-            <p className="text-muted-foreground text-xs sm:col-span-2">
-              {locale === "th"
-                ? "เข้าสู่ระบบด้วยบัญชีพนักงานเพื่อดูข้อมูลคลังและจำนวนสต็อก"
-                : "Staff can sign in to view warehouse and stock information."}
-            </p>
-          )}
-          {session?.profile.role === "technician" ? (
-            <div className="space-y-2 sm:col-span-2">
-              <p className="text-muted-foreground text-xs">
-                {locale === "th"
-                  ? "งานที่ได้รับมอบหมายสำหรับเครื่องนี้"
-                  : "Your assigned work for this machine"}
-              </p>
-              {assignedWork.length ? (
-                <div className="grid gap-2">
-                  {assignedWork.map((work) => (
-                    <Button asChild key={work.id} variant="outline">
-                      <Link href={work.href}>
-                        {work.number} · {work.title}
-                      </Link>
-                    </Button>
-                  ))}
+                <div>
+                  <p className="hk-fact-label">
+                    {locale === "th" ? "การยืนยัน NFC" : "NFC Verification"}
+                  </p>
+                  <p className="hk-fact-value">{asset.details.nfcStatus}</p>
                 </div>
-              ) : (
-                <p className="text-sm">
-                  {locale === "th"
-                    ? "ยังไม่มีใบงานที่มอบหมายให้คุณสำหรับเครื่องนี้"
-                    : "No work is currently assigned to you for this machine."}
-                </p>
-              )}
-            </div>
+                {asset.inStockQuantity !== null ? (
+                  <div>
+                    <p className="hk-fact-label">
+                      {locale === "th"
+                        ? "จำนวนคงเหลือในสต็อกของรหัสนี้"
+                        : "In-stock quantity for this code"}
+                    </p>
+                    <p className="hk-fact-value">
+                      {String(asset.inStockQuantity)}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+
+              {session?.profile.role === "technician" ? (
+                <div className="hk-work-links">
+                  <p className="hk-fact-label">
+                    {locale === "th"
+                      ? "งานที่ได้รับมอบหมายสำหรับเครื่องนี้"
+                      : "Your assigned work for this machine"}
+                  </p>
+                  {assignedWork.length ? (
+                    assignedWork.map((work) => (
+                      <Link
+                        className="hk-work-link"
+                        href={work.href}
+                        key={work.id}
+                      >
+                        <span>
+                          {work.number} · {work.title}
+                        </span>
+                        <span aria-hidden="true" className="hk-chev">
+                          ›
+                        </span>
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="hk-fact-value">
+                      {locale === "th"
+                        ? "ยังไม่มีใบงานที่มอบหมายให้คุณสำหรับเครื่องนี้"
+                        : "No work is currently assigned to you for this machine."}
+                    </p>
+                  )}
+                </div>
+              ) : null}
+            </section>
           ) : null}
-        </CardContent>
-      </Card>
-    </main>
+        </main>
+
+        <footer className="hk-footer">
+          <Image
+            alt=""
+            aria-hidden="true"
+            className="hk-footer-logo"
+            height={20}
+            src="/brand/hillkoff-logo.png"
+            width={111}
+          />
+          <p>
+            {locale === "th"
+              ? "พบปัญหาการใช้งาน ติดต่อทีมดูแลลูกค้า Hillkoff"
+              : "Having an issue? Contact the Hillkoff care team."}
+          </p>
+          <p>
+            <a href="tel:+66951349968">095-134-9968</a> ·{" "}
+            <a href="https://lin.ee/CHJe3l5" rel="noreferrer" target="_blank">
+              Line @hillkoff
+            </a>
+          </p>
+        </footer>
+      </div>
+    </div>
   );
 }
 
@@ -174,13 +286,13 @@ function operationalStatusLabel(
     th: {
       in_stock: "อยู่ในสต็อก",
       sold: "ขายแล้ว",
-      in_use: "กำลังใช้งาน",
+      in_use: "กำลังใช้งานปกติ",
       archived: "เก็บถาวร",
     },
     en: {
       in_stock: "In stock",
       sold: "Sold",
-      in_use: "In use",
+      in_use: "In active use",
       archived: "Archived",
     },
   } as const;
@@ -201,8 +313,8 @@ function repairStatusLabel(
 ): string {
   if (!status || status === "completed" || status === "closed") {
     return locale === "th"
-      ? "ปกติ / ไม่มีงานซ่อมค้าง"
-      : "Normal / no open repair";
+      ? "ปกติ · ไม่มีงานซ่อมค้าง"
+      : "Normal · no open repair";
   }
   const labels = {
     th: {
@@ -219,15 +331,4 @@ function repairStatusLabel(
     },
   } as const;
   return labels[locale][status];
-}
-
-function Detail({ label, value }: { label: string; value: string | null }) {
-  if (value === null) return null;
-
-  return (
-    <div>
-      <p className="text-muted-foreground text-xs">{label}</p>
-      <p className="mt-1 font-medium">{value}</p>
-    </div>
-  );
 }
