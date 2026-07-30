@@ -86,11 +86,13 @@ export function InstallationWorkForm({
         uploaded.push(await uploadInstallationPhoto(installationId, file));
       }
       if (!active) return;
-      const nextPhotos = [...draft.payload.photos, ...uploaded];
-      setPhotos(nextPhotos);
-      await saveOfflinePayload(draftKey, {
-        checklist: draft.payload.checklist,
-        photos: nextPhotos,
+      setPhotos((current) => {
+        const nextPhotos = [...current, ...uploaded];
+        void saveOfflinePayload(draftKey, {
+          checklist: draft.payload.checklist,
+          photos: nextPhotos,
+        });
+        return nextPhotos;
       });
       await clearOfflineFiles(draftKey);
       setPendingFiles(0);
@@ -163,11 +165,13 @@ export function InstallationWorkForm({
       for (const file of files) {
         uploaded.push(await uploadInstallationPhoto(installationId, file));
       }
-      const nextPhotos = [...photos, ...uploaded];
-      setPhotos(nextPhotos);
-      await saveOfflinePayload(draftKey, {
-        checklist,
-        photos: nextPhotos,
+      setPhotos((current) => {
+        const nextPhotos = [...current, ...uploaded];
+        void saveOfflinePayload(draftKey, {
+          checklist,
+          photos: nextPhotos,
+        });
+        return nextPhotos;
       });
     } catch (uploadError) {
       setError(
@@ -186,6 +190,11 @@ export function InstallationWorkForm({
       return;
     }
     const data = new FormData(event.currentTarget);
+    const trainingCompleted = data.get("trainingCompleted") === "on";
+    if (!trainingCompleted) {
+      setError("ต้องยืนยันว่าได้ฝึกอบรมลูกค้าแล้ว");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -202,7 +211,7 @@ export function InstallationWorkForm({
         },
         photos,
         training: {
-          completed: data.get("trainingCompleted") === "on",
+          completed: trainingCompleted,
           traineeName: data.get("traineeName"),
           topics: String(data.get("trainingTopics") ?? "")
             .split(",")
@@ -330,11 +339,16 @@ export function InstallationWorkForm({
           {locale === "th" ? "การอบรมลูกค้า" : "Customer Training"}
         </h2>
         <label className="flex items-center gap-3">
-          <input className="size-5" name="trainingCompleted" type="checkbox" />
+          <input
+            className="size-5"
+            name="trainingCompleted"
+            required
+            type="checkbox"
+          />
           <span className="text-sm">
             {locale === "th"
-              ? "อบรมลูกค้าเสร็จแล้ว"
-              : "Customer training completed"}
+              ? "อบรมลูกค้าเสร็จแล้ว *"
+              : "Customer training completed *"}
           </span>
         </label>
         <Field

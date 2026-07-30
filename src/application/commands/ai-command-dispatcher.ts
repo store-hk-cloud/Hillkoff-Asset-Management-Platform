@@ -35,22 +35,43 @@ export class AiCommandDispatcher {
       throw new Error("AI command execution requires admin role.");
     }
     const firestore = getFirebaseAdminFirestore();
-    const existing = await firestore
+    const commandId = crypto.randomUUID();
+    const idempotencyRef = firestore
       .collection("command_events")
-      .where("idempotencyKey", "==", envelope.idempotencyKey)
-      .limit(1)
-      .get();
-    const previous = existing.docs[0]?.data();
-    if (previous?.status === "completed") {
-      return {
-        commandId: String(previous.id),
+      .doc(envelope.idempotencyKey);
+
+    const claim = await firestore.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(idempotencyRef);
+      const existing = snapshot.data();
+      if (existing?.status === "completed") {
+        return { completed: true as const, data: existing };
+      }
+      if (existing?.status === "pending") {
+        throw new Error(
+          "A command with this idempotency key is already in progress.",
+        );
+      }
+      transaction.set(idempotencyRef, {
+        id: commandId,
         command: envelope.command,
-        entityId: String(previous.entityId),
+        idempotencyKey: envelope.idempotencyKey,
+        entityId: null,
+        actorId: actor.uid,
+        status: "pending",
+        occurredAt: new Date(),
+        correlationId: commandId,
+      });
+      return { completed: false as const };
+    });
+
+    if (claim.completed) {
+      return {
+        commandId: String(claim.data.id),
+        command: envelope.command,
+        entityId: String(claim.data.entityId),
         status: "completed",
       };
     }
-
-    const commandId = crypto.randomUUID();
     const context = {
       actor,
       correlationId: commandId,
@@ -60,69 +81,69 @@ export class AiCommandDispatcher {
     };
     let entityId: string;
 
-    switch (envelope.command) {
-      case "CreateRepairTicket":
-        entityId = (
-          await this.repairs.create(
-            createRepairSchema.parse(envelope.payload),
-            context,
-          )
-        ).id;
-        break;
-      case "AssignTechnician": {
-        const payload = envelope.payload as { repairId?: unknown };
-        if (typeof payload.repairId !== "string") {
-          throw new Error("repairId is required.");
+    try {
+      switch (envelope.command) {
+        case "CreateRepairTicket":
+          entityId = (
+            await this.repairs.create(
+              createRepairSchema.parse(envelope.payload),
+              context,
+            )
+          ).id;
+          break;
+        case "AssignTechnician": {
+          const payload = envelope.payload as { repairId?: unknown };
+          if (typeof payload.repairId !== "string") {
+            throw new Error("repairId is required.");
+          }
+          entityId = (
+            await this.repairs.assign(
+              payload.repairId,
+              assignRepairSchema.parse(payload),
+              context,
+            )
+          ).id;
+          break;
         }
-        entityId = (
-          await this.repairs.assign(
-            payload.repairId,
-            assignRepairSchema.parse(payload),
-            context,
-          )
-        ).id;
-        break;
+        case "CompletePM": {
+          const payload = envelope.payload as { pmId?: unknown };
+          if (typeof payload.pmId !== "string")
+            throw new Error("pmId is required.");
+          entityId = (
+            await this.pm.complete(
+              payload.pmId,
+              completePmSchema.parse(payload),
+              context,
+            )
+          ).id;
+          break;
+        }
+        case "TransferAsset":
+          entityId = (
+            await this.warehouse.transfer(
+              transferAssetSchema.parse(envelope.payload),
+              context,
+            )
+          ).id;
+          break;
+        case "SellAsset":
+          entityId = (
+            await this.warehouse.sell(
+              sellAssetSchema.parse(envelope.payload),
+              context,
+            )
+          ).id;
+          break;
       }
-      case "CompletePM": {
-        const payload = envelope.payload as { pmId?: unknown };
-        if (typeof payload.pmId !== "string")
-          throw new Error("pmId is required.");
-        entityId = (
-          await this.pm.complete(
-            payload.pmId,
-            completePmSchema.parse(payload),
-            context,
-          )
-        ).id;
-        break;
-      }
-      case "TransferAsset":
-        entityId = (
-          await this.warehouse.transfer(
-            transferAssetSchema.parse(envelope.payload),
-            context,
-          )
-        ).id;
-        break;
-      case "SellAsset":
-        entityId = (
-          await this.warehouse.sell(
-            sellAssetSchema.parse(envelope.payload),
-            context,
-          )
-        ).id;
-        break;
+    } catch (error) {
+      await idempotencyRef.delete();
+      throw error;
     }
 
-    await firestore.collection("command_events").doc(commandId).set({
-      id: commandId,
-      command: envelope.command,
-      idempotencyKey: envelope.idempotencyKey,
+    await idempotencyRef.update({
       entityId,
-      actorId: actor.uid,
       status: "completed",
       occurredAt: new Date(),
-      correlationId: commandId,
     });
     return {
       commandId,

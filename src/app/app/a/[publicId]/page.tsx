@@ -35,7 +35,10 @@ export default async function PublicAssetPage({
   }[] = [];
 
   try {
-    asset = await service.lookupPublic(publicId, Boolean(session));
+    asset = await service.lookupPublic(
+      publicId,
+      Boolean(session) && session?.profile.role !== "customer",
+    );
     if (session?.profile.role === "technician") {
       assignedWork = (await technicianService.lookup(publicId, session.profile))
         .work;

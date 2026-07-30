@@ -33,41 +33,69 @@ async function stage(
 }
 
 export const stageAssetEvent = onDocumentCreated(
-  "asset_events/{eventId}",
+  { document: "asset_events/{eventId}", retry: true },
   async (event) => {
     const data = event.data?.data();
-    if (data) await stage("asset_events", event.params.eventId, data);
+    if (!data) return;
+    try {
+      await stage("asset_events", event.params.eventId, data);
+    } catch (error) {
+      console.error(`Failed to stage asset event ${event.params.eventId}:`, error);
+      throw error;
+    }
   },
 );
 
 export const stageInventoryMovement = onDocumentCreated(
-  "inventory_movements/{movementId}",
+  { document: "inventory_movements/{movementId}", retry: true },
   async (event) => {
     const data = event.data?.data();
-    if (data) {
+    if (!data) return;
+    try {
       await stage("inventory_movements", event.params.movementId, data);
+    } catch (error) {
+      console.error(
+        `Failed to stage inventory movement ${event.params.movementId}:`,
+        error,
+      );
+      throw error;
     }
   },
 );
 
 export const stageRepairHistory = onDocumentUpdated(
-  "repair_tickets/{repairId}",
+  { document: "repair_tickets/{repairId}", retry: true },
   async (event) => {
     const before = event.data?.before.data();
     const after = event.data?.after.data();
-    if (before?.status !== "completed" && after?.status === "completed") {
+    if (before?.status === "completed" || after?.status !== "completed") {
+      return;
+    }
+    try {
       await stage("repair_history", event.params.repairId, after);
+    } catch (error) {
+      console.error(
+        `Failed to stage repair history ${event.params.repairId}:`,
+        error,
+      );
+      throw error;
     }
   },
 );
 
 export const stagePmHistory = onDocumentUpdated(
-  "pm_jobs/{pmId}",
+  { document: "pm_jobs/{pmId}", retry: true },
   async (event) => {
     const before = event.data?.before.data();
     const after = event.data?.after.data();
-    if (before?.status !== "completed" && after?.status === "completed") {
+    if (before?.status === "completed" || after?.status !== "completed") {
+      return;
+    }
+    try {
       await stage("pm_history", event.params.pmId, after);
+    } catch (error) {
+      console.error(`Failed to stage PM history ${event.params.pmId}:`, error);
+      throw error;
     }
   },
 );

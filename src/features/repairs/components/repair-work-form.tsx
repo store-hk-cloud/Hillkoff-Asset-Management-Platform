@@ -94,9 +94,11 @@ export function RepairWorkForm({
         uploaded.push(await uploadRepairPhoto(repairId, file));
       }
       if (!active) return;
-      const nextPhotos = [...draft.payload.photos, ...uploaded];
-      setPhotos(nextPhotos);
-      await saveOfflinePayload(draftKey, { photos: nextPhotos });
+      setPhotos((current) => {
+        const nextPhotos = [...current, ...uploaded];
+        void saveOfflinePayload(draftKey, { photos: nextPhotos });
+        return nextPhotos;
+      });
       await clearOfflineFiles(draftKey);
       setPendingFiles(0);
     }
@@ -126,9 +128,11 @@ export function RepairWorkForm({
       for (const file of files) {
         uploaded.push(await uploadRepairPhoto(repairId, file));
       }
-      const nextPhotos = [...photos, ...uploaded];
-      setPhotos(nextPhotos);
-      await saveOfflinePayload(draftKey, { photos: nextPhotos });
+      setPhotos((current) => {
+        const nextPhotos = [...current, ...uploaded];
+        void saveOfflinePayload(draftKey, { photos: nextPhotos });
+        return nextPhotos;
+      });
     } catch (uploadError) {
       setError(
         uploadError instanceof Error ? uploadError.message : "อัปโหลดรูปไม่ได้",
