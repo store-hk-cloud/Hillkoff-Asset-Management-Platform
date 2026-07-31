@@ -23,11 +23,10 @@ export async function AuthLayout({ children }: AuthLayoutProps) {
           <div className="mb-6 flex flex-col items-center gap-3 text-center">
             <Image
               alt={t("app.name")}
-              className="hk-logo-mark"
-              height={30}
+              height={56}
               priority
-              src="/brand/hillkoff-logo.png"
-              width={168}
+              src="/icons/hillkoff-emblem.png"
+              width={56}
             />
             <p className="text-muted-foreground text-sm">
               {t("brand.tagline")}

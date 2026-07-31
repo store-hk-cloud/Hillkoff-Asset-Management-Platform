@@ -139,7 +139,7 @@ export function InventoryManager({
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <form className="space-y-4 rounded-xl border p-4" onSubmit={create}>
+      <form className="space-y-4 rounded-lg border p-4" onSubmit={create}>
         <h2 className="font-semibold">
           {locale === "th" ? "สร้างอะไหล่" : "Create Part"}
         </h2>
@@ -187,7 +187,7 @@ export function InventoryManager({
         </Button>
       </form>
 
-      <form className="space-y-4 rounded-xl border p-4" onSubmit={move}>
+      <form className="space-y-4 rounded-lg border p-4" onSubmit={move}>
         <h2 className="font-semibold">
           {locale === "th" ? "การเคลื่อนไหวสต็อก" : "Stock Movement"}
         </h2>
@@ -259,7 +259,7 @@ export function InventoryManager({
 
       {selectedPart ? (
         <form
-          className="space-y-4 rounded-xl border p-4 lg:col-span-2"
+          className="space-y-4 rounded-lg border p-4 lg:col-span-2"
           key={`${selectedPart.id}-${selectedPart.version}`}
           onSubmit={update}
         >

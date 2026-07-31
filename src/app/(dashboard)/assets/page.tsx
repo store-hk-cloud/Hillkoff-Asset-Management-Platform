@@ -203,7 +203,7 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
       </div>
 
       {assets.length === 0 ? (
-        <div className="text-muted-foreground rounded-xl border border-dashed p-10 text-center text-sm">
+        <div className="text-muted-foreground rounded-lg border border-dashed p-10 text-center text-sm">
           {t("assets.empty")}
         </div>
       ) : (

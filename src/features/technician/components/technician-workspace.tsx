@@ -249,7 +249,7 @@ function WorkSection({
         {title}
       </h2>
       {items.length === 0 ? (
-        <div className="text-muted-foreground rounded-xl border border-dashed p-6 text-center text-sm">
+        <div className="text-muted-foreground rounded-lg border border-dashed p-6 text-center text-sm">
           {empty}
         </div>
       ) : (

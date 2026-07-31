@@ -52,7 +52,7 @@ export default async function InventoryPage() {
       <InventoryManager canWrite={service.canWrite(profile)} parts={parts} />
 
       {parts.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-10 text-center">
+        <div className="rounded-lg border border-dashed p-10 text-center">
           <Package
             aria-hidden="true"
             className="text-muted-foreground mx-auto mb-3 size-8"

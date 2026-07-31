@@ -91,7 +91,7 @@ export function AssetSearchForm({
   return (
     <form
       action="/assets"
-      className="bg-card grid gap-3 rounded-xl border p-4 sm:grid-cols-[1fr_160px_180px_180px_auto]"
+      className="bg-card grid gap-3 rounded-lg border p-4 sm:grid-cols-[1fr_160px_180px_180px_auto]"
       method="get"
     >
       <div className="relative">

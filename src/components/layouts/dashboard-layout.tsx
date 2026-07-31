@@ -118,7 +118,7 @@ export function DashboardLayout({
 
   return (
     <div className="min-h-dvh">
-      <header className="bg-background/95 sticky top-0 z-20 border-b backdrop-blur">
+      <header className="bg-background sticky top-0 z-20 border-b">
         <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex items-center gap-5">
             <Link
@@ -127,11 +127,10 @@ export function DashboardLayout({
             >
               <Image
                 alt={t("app.name")}
-                className="hk-logo-mark"
-                height={22}
+                height={28}
                 priority
-                src="/brand/hillkoff-logo.png"
-                width={123}
+                src="/icons/hillkoff-emblem.png"
+                width={28}
               />
               <span className="sr-only sm:not-sr-only">{t("app.name")}</span>
             </Link>

@@ -69,7 +69,7 @@ export default async function PmPage() {
           {locale === "th" ? "งาน PM ที่กำลังจะถึง" : "Upcoming PM"}
         </h2>
         {jobs.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-10 text-center">
+          <div className="rounded-lg border border-dashed p-10 text-center">
             <ClipboardCheck
               aria-hidden="true"
               className="text-muted-foreground mx-auto mb-3 size-8"

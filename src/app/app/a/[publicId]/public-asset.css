@@ -16,9 +16,7 @@
   --hk-ink-soft: #4a4a4a;
   --hk-muted: #6b6b6b;
   --hk-border: rgba(0, 0, 0, 0.1);
-  --hk-shadow:
-    0 30px 60px -30px rgba(0, 0, 0, 0.22),
-    0 4px 10px rgba(0, 0, 0, 0.05);
+  --hk-shadow: 0 1px 2px rgba(16, 24, 32, 0.06);
   --hk-footer-logo-filter: brightness(0) saturate(100%);
 
   background: var(--hk-bg);
@@ -37,9 +35,7 @@
   --hk-ink-soft: #c3d6d4;
   --hk-muted: #8fb0ac;
   --hk-border: rgba(238, 245, 244, 0.16);
-  --hk-shadow:
-    0 30px 60px -30px rgba(0, 0, 0, 0.6),
-    0 4px 10px rgba(0, 0, 0, 0.3);
+  --hk-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   --hk-footer-logo-filter: none;
 }
 
@@ -49,7 +45,7 @@
   margin: 0 auto;
   padding-bottom: 4rem;
   font-family:
-    -apple-system, "Segoe UI", "Noto Sans Thai", Roboto, sans-serif;
+    var(--font-kanit), -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 .hk-hero {
@@ -99,91 +95,22 @@
 }
 
 .hk-hero-title {
-  font-family: Georgia, "Noto Serif Thai", "Iowan Old Style", serif;
-  font-size: 1.65rem;
+  font-size: 1.5rem;
+  font-weight: 600;
   color: #f4fffe;
   margin: 0;
   text-wrap: balance;
   position: relative;
 }
 
-.hk-steam {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.4rem;
-  position: relative;
-}
-
-.hk-steam svg {
-  width: 46px;
-  height: 46px;
-}
-
-.hk-steam-line {
-  stroke: var(--hk-accent-soft);
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  fill: none;
-  opacity: 0.85;
-  transform-origin: center;
-  animation: hk-rise 3.6s ease-in-out infinite;
-}
-
-.hk-steam-line.b {
-  animation-delay: 0.5s;
-}
-
-.hk-steam-line.c {
-  animation-delay: 1s;
-}
-
-@keyframes hk-rise {
-  0% {
-    transform: translateY(2px);
-    opacity: 0;
-  }
-  30% {
-    opacity: 0.9;
-  }
-  100% {
-    transform: translateY(-9px);
-    opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hk-steam-line {
-    animation: none;
-    opacity: 0.7;
-  }
-}
-
 .hk-card {
   position: relative;
-  margin: -3.6rem 1.1rem 0;
+  margin: -2.5rem 1.1rem 0;
   background: var(--hk-surface);
-  border-radius: 22px;
+  border-radius: var(--radius-lg, 10px);
   box-shadow: var(--hk-shadow);
   border: 1px solid var(--hk-border);
-  padding: 2.1rem 1.6rem 1.6rem;
-  animation: hk-rise-in 560ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-@keyframes hk-rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hk-card {
-    animation: none;
-  }
+  padding: 1.75rem 1.5rem 1.5rem;
 }
 
 .hk-status-row {
@@ -195,8 +122,8 @@
 }
 
 .hk-asset-name {
-  font-family: Georgia, "Noto Serif Thai", "Iowan Old Style", serif;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
   margin: 0 0 0.15rem;
   text-wrap: balance;
 }
@@ -263,7 +190,7 @@
 .hk-care-note {
   margin-top: 1.5rem;
   padding: 1.1rem 1.15rem;
-  border-radius: 14px;
+  border-radius: var(--radius-lg, 10px);
   background: color-mix(in srgb, var(--hk-accent) 7%, var(--hk-surface));
   border: 1px solid var(--hk-border);
   display: flex;
@@ -297,7 +224,7 @@
 .hk-staff-drawer {
   margin-top: 1.5rem;
   border: 1px dashed var(--hk-accent);
-  border-radius: 14px;
+  border-radius: var(--radius-lg, 10px);
   padding: 1.1rem 1.15rem;
   background: color-mix(in srgb, var(--hk-accent) 8%, transparent);
 }
@@ -334,7 +261,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.8rem 0.95rem;
-  border-radius: 12px;
+  border-radius: var(--radius-md, 8px);
   border: 1px solid var(--hk-border);
   margin-top: 0.55rem;
   text-decoration: none;

@@ -70,7 +70,7 @@ export default async function RepairsPage() {
       </div>
 
       {tickets.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-10 text-center">
+        <div className="rounded-lg border border-dashed p-10 text-center">
           <Wrench
             aria-hidden="true"
             className="text-muted-foreground mx-auto mb-3 size-8"

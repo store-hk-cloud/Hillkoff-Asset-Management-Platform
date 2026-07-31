@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Kanit } from "next/font/google";
 import type { ReactNode } from "react";
 import Script from "next/script";
 
@@ -6,6 +7,13 @@ import { AppProviders } from "@/components/providers/app-providers";
 import { getServerLocale } from "@/lib/i18n/server";
 
 import "./globals.css";
+
+const kanit = Kanit({
+  subsets: ["thai", "latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-kanit",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   applicationName: "Hillkoff Machine Management",
@@ -43,7 +51,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const locale = await getServerLocale();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      className={kanit.variable}
+      lang={locale}
+      suppressHydrationWarning
+    >
       <body>
         <Script id="hillkoff-theme" strategy="beforeInteractive">
           {`try{var t=localStorage.getItem("hillkoff_theme");var d=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);document.documentElement.style.colorScheme=d?"dark":"light"}catch(e){}`}

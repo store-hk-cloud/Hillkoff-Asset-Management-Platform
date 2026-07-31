@@ -11,7 +11,7 @@ export function UserList({ users }: { users: readonly UserProfile[] }) {
 
   if (users.length === 0) {
     return (
-      <div className="text-muted-foreground rounded-xl border border-dashed p-10 text-center text-sm">
+      <div className="text-muted-foreground rounded-lg border border-dashed p-10 text-center text-sm">
         {t("users.empty")}
       </div>
     );

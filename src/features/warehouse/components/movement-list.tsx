@@ -30,7 +30,7 @@ export function MovementList({
 
   if (movements.length === 0) {
     return (
-      <div className="text-muted-foreground rounded-xl border border-dashed p-10 text-center text-sm">
+      <div className="text-muted-foreground rounded-lg border border-dashed p-10 text-center text-sm">
         {locale === "th" ? "ยังไม่มีประวัติการเคลื่อนไหว" : "No movement logs"}
       </div>
     );
@@ -39,7 +39,7 @@ export function MovementList({
   return (
     <div className="grid gap-3">
       {movements.map((movement) => (
-        <article className="bg-card rounded-xl border p-4" key={movement.id}>
+        <article className="bg-card rounded-lg border p-4" key={movement.id}>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-muted-foreground text-xs font-medium">

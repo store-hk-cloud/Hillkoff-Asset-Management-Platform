@@ -21,7 +21,7 @@ export function AssetEventList({ events, emptyMessage }: AssetEventListProps) {
 
   if (events.length === 0) {
     return (
-      <div className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
+      <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
         {emptyMessage}
       </div>
     );

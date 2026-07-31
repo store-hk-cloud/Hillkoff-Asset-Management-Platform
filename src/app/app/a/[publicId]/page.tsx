@@ -83,22 +83,6 @@ export default async function PublicAssetPage({
               </>
             )}
           </h1>
-          <div aria-hidden="true" className="hk-steam">
-            <svg fill="none" viewBox="0 0 60 60">
-              <path
-                className="hk-steam-line a"
-                d="M18 40 C 14 32, 22 28, 18 20"
-              />
-              <path
-                className="hk-steam-line b"
-                d="M30 42 C 26 33, 34 29, 30 21"
-              />
-              <path
-                className="hk-steam-line c"
-                d="M42 40 C 38 32, 46 28, 42 20"
-              />
-            </svg>
-          </div>
         </header>
 
         <main className="hk-card">
