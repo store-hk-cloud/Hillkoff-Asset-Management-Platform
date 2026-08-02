@@ -174,6 +174,14 @@ export function DashboardLayout({
         </nav>
       </header>
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">{children}</main>
+      <footer className="border-t">
+        <div className="text-muted-foreground mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs sm:flex-row sm:px-6">
+          <span>© {new Date().getFullYear()} {t("footer.rights")}</span>
+          <Link className="hover:text-foreground" href="/terms">
+            {t("footer.terms")}
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }

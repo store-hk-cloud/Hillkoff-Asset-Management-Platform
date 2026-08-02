@@ -127,6 +127,61 @@ const translations = {
     th: "L: ชีวิต",
     en: "L: Lives",
   },
+  "footer.terms": {
+    th: "ขอบเขตและเงื่อนไขการใช้งาน",
+    en: "Scope & Terms of Use",
+  },
+  "footer.rights": {
+    th: "สงวนลิขสิทธิ์ บริษัท ฮิลล์คอฟฟ์ จำกัด",
+    en: "All rights reserved, Hillkoff Co., Ltd.",
+  },
+  "terms.title": { th: "ขอบเขตและเงื่อนไขการใช้งาน", en: "Scope & Terms of Use" },
+  "terms.subtitle": {
+    th: "สำหรับพนักงานฮิลล์คอฟฟ์ที่ใช้ระบบจัดการเครื่องนี้",
+    en: "For Hillkoff staff using this asset management system",
+  },
+  "terms.scope.heading": { th: "1. ขอบเขตการใช้งาน", en: "1. Scope of Use" },
+  "terms.scope.body": {
+    th: "ระบบนี้จัดทำขึ้นเพื่อใช้ในการติดตามเครื่องจักร งานติดตั้ง งานซ่อม งานบำรุงรักษาเชิงป้องกัน และคลังอะไหล่ของบริษัท ฮิลล์คอฟฟ์ จำกัด เท่านั้น การเข้าถึงจำกัดเฉพาะพนักงาน ช่างเทคนิค และผู้เกี่ยวข้องที่ได้รับบัญชีผู้ใช้งานจากผู้ดูแลระบบ ตามบทบาทและสิทธิ์ที่กำหนดไว้",
+    en: "This system exists solely to track machines, installations, repairs, preventive maintenance, and parts inventory for Hillkoff Co., Ltd. Access is limited to employees, technicians, and authorized parties issued an account by an administrator, scoped to their assigned role and permissions.",
+  },
+  "terms.data.heading": {
+    th: "2. ความรับผิดชอบต่อข้อมูล",
+    en: "2. Data Responsibility",
+  },
+  "terms.data.body": {
+    th: "ข้อมูลลูกค้า เครื่องจักร และประวัติการซ่อมบำรุงในระบบถือเป็นข้อมูลลับของบริษัท ห้ามคัดลอก ส่งออก หรือเปิดเผยข้อมูลแก่บุคคลภายนอกโดยไม่ได้รับอนุญาต และห้ามใช้ข้อมูลเพื่อวัตถุประสงค์อื่นนอกเหนือจากงานที่ได้รับมอบหมาย",
+    en: "Customer data, machine records, and service history in this system are confidential company information. Do not copy, export, or disclose data to third parties without authorization, and do not use data for any purpose beyond assigned duties.",
+  },
+  "terms.account.heading": {
+    th: "3. ความรับผิดชอบต่อบัญชีผู้ใช้งาน",
+    en: "3. Account Responsibility",
+  },
+  "terms.account.body": {
+    th: "ผู้ใช้งานต้องเก็บรักษารหัสผ่านเป็นความลับ ห้ามใช้บัญชีร่วมกับผู้อื่นหรือให้ผู้อื่นเข้าสู่ระบบแทนตน ทุกการกระทำภายใต้บัญชีของท่านถือเป็นความรับผิดชอบของผู้ถือบัญชีนั้น หากสงสัยว่าบัญชีถูกใช้งานโดยไม่ได้รับอนุญาต ให้แจ้งผู้ดูแลระบบทันที",
+    en: "Users must keep passwords confidential and must not share accounts or let others sign in on their behalf. All actions taken under your account are your responsibility. Report suspected unauthorized use of your account to an administrator immediately.",
+  },
+  "terms.monitoring.heading": {
+    th: "4. การบันทึกและตรวจสอบการใช้งาน",
+    en: "4. Monitoring & Logging",
+  },
+  "terms.monitoring.body": {
+    th: "ระบบมีการบันทึกกิจกรรมสำคัญ เช่น การเข้าสู่ระบบ การแก้ไขข้อมูลเครื่อง และการเปลี่ยนแปลงสถานะงาน เพื่อวัตถุประสงค์ด้านความปลอดภัยและการตรวจสอบย้อนหลัง ข้อมูลเหล่านี้อาจถูกใช้ในการสอบสวนกรณีพบการใช้งานที่ผิดปกติ",
+    en: "The system logs key activity such as sign-ins, machine record edits, and job status changes for security and audit purposes. This data may be used to investigate suspected misuse.",
+  },
+  "terms.prohibited.heading": {
+    th: "5. ข้อห้ามในการใช้งาน",
+    en: "5. Prohibited Actions",
+  },
+  "terms.prohibited.body": {
+    th: "ห้ามพยายามเข้าถึงข้อมูลหรือฟังก์ชันที่อยู่นอกเหนือสิทธิ์ของตน ห้ามป้อนข้อมูลเท็จหรือบันทึกงานที่ไม่ได้ทำจริง ห้ามใช้ช่องโหว่ของระบบเพื่อประโยชน์ส่วนตน และห้ามนำภาพหรือข้อมูลจากระบบไปเผยแพร่ต่อสาธารณะโดยไม่ได้รับอนุญาตจากผู้บริหาร",
+    en: "Do not attempt to access data or functions outside your granted permissions. Do not enter false data or log work that was not actually performed. Do not exploit system vulnerabilities for personal gain, and do not publish images or data from the system without management authorization.",
+  },
+  "terms.contact.heading": { th: "6. ติดต่อสอบถาม", en: "6. Contact" },
+  "terms.contact.body": {
+    th: "หากมีข้อสงสัยเกี่ยวกับขอบเขตการใช้งาน สิทธิ์การเข้าถึง หรือพบปัญหาด้านความปลอดภัยของระบบ กรุณาติดต่อผู้ดูแลระบบของบริษัทโดยตรง",
+    en: "For questions about scope of use, access permissions, or to report a security concern, please contact your system administrator directly.",
+  },
 } as const satisfies Record<string, Record<Locale, string>>;
 
 export type TranslationKey = keyof typeof translations;
