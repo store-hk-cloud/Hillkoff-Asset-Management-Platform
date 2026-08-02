@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
-import { Layers, QrCode, Radio, ScanLine, Search, Trash2, X } from "lucide-react";
+import { Layers, QrCode, Radio, ScanLine, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/components/providers/language-provider";
 import type { Asset } from "@/domain/entities/asset";
 import { MovementSummary } from "@/features/warehouse/components/movement-summary";
@@ -281,8 +283,7 @@ export function MovementForm({ action }: MovementFormProps) {
       const result = await submitBulkTransfer({
         assetCodes: bulkAssets.map((a) => a.assetCode),
         destinationWarehouseId,
-        referenceNumber:
-          (formData.get("referenceNumber") as string) || null,
+        referenceNumber: (formData.get("referenceNumber") as string) || null,
         notes: (formData.get("notes") as string) ?? "",
       });
 
@@ -302,8 +303,7 @@ export function MovementForm({ action }: MovementFormProps) {
 
         setBulkAssets((current) =>
           current.filter(
-            (item) =>
-              failedKeys.has(item.id) || failedKeys.has(item.assetCode),
+            (item) => failedKeys.has(item.id) || failedKeys.has(item.assetCode),
           ),
         );
         setError(
@@ -349,16 +349,18 @@ export function MovementForm({ action }: MovementFormProps) {
   }
 
   return (
-    <form className="space-y-6" onSubmit={bulkMode ? handleBulkSubmit : handleSubmit}>
+    <form
+      className="space-y-6"
+      onSubmit={bulkMode ? handleBulkSubmit : handleSubmit}
+    >
       {/* Single mode */}
       {!bulkMode ? (
         <>
           <div className="space-y-2">
-            <Label htmlFor="assetCode">
+            <Label htmlFor="assetCode" required>
               {locale === "th"
                 ? "Serial Number / Machine ID / รหัสเครื่อง"
-                : "Serial number / Machine ID / Machine code"}{" "}
-              *
+                : "Serial number / Machine ID / Machine code"}
             </Label>
             <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
               <div className="relative flex-1">
@@ -425,13 +427,13 @@ export function MovementForm({ action }: MovementFormProps) {
       {bulkMode ? (
         <>
           <div className="space-y-2">
-            <Label htmlFor="bulkCodes">
+            <Label htmlFor="bulkCodes" required>
               {locale === "th"
                 ? "รหัสเครื่อง / Serial Number (หลายรายการ คั่นด้วย Enter หรือ ,)"
-                : "Machine code / Serial number (multiple, separated by Enter or ,)"} *
+                : "Machine code / Serial number (multiple, separated by Enter or ,)"}
             </Label>
-            <textarea
-              className="border-input bg-background min-h-24 w-full rounded-md border px-3 py-2 text-sm font-mono"
+            <Textarea
+              className="border-input bg-background min-h-24 w-full rounded-md border px-3 py-2 font-mono text-sm"
               id="bulkCodes"
               maxLength={5000}
               onChange={(e) => setBulkCodes(e.currentTarget.value)}
@@ -449,14 +451,25 @@ export function MovementForm({ action }: MovementFormProps) {
             type="button"
           >
             <Layers aria-hidden="true" className="size-4" />
-            {loadingBulk ? t("status.loading") : locale === "th" ? "โหลดรายการเครื่อง" : "Load machines"}
+            {loadingBulk
+              ? t("status.loading")
+              : locale === "th"
+                ? "โหลดรายการเครื่อง"
+                : "Load machines"}
           </Button>
           {bulkNotFound.length > 0 ? (
             <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-              <p className="font-medium">{locale === "th" ? "ไม่พบรายการต่อไปนี้" : "Not found"}:</p>
+              <p className="font-medium">
+                {locale === "th" ? "ไม่พบรายการต่อไปนี้" : "Not found"}:
+              </p>
               <div className="mt-1 flex flex-wrap gap-1">
                 {bulkNotFound.map((c) => (
-                  <span className="bg-amber-100 rounded px-2 py-0.5 font-mono text-xs" key={c}>{c}</span>
+                  <span
+                    className="rounded bg-amber-100 px-2 py-0.5 font-mono text-xs"
+                    key={c}
+                  >
+                    {c}
+                  </span>
                 ))}
               </div>
             </div>
@@ -464,22 +477,30 @@ export function MovementForm({ action }: MovementFormProps) {
           {bulkAssets.length > 0 ? (
             <div className="space-y-3">
               <p className="text-sm font-medium">
-                {locale === "th" ? `พบ ${bulkAssets.length} รายการ` : `${bulkAssets.length} machines found`}
+                {locale === "th"
+                  ? `พบ ${bulkAssets.length} รายการ`
+                  : `${bulkAssets.length} machines found`}
               </p>
               <div className="max-h-80 space-y-2 overflow-y-auto">
                 {bulkAssets.map((a) => (
-                  <div className="flex items-start gap-3 rounded-lg border p-3" key={a.id}>
+                  <div
+                    className="flex items-start gap-3 rounded-lg border p-3"
+                    key={a.id}
+                  >
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{a.name}</p>
                       <p className="font-mono text-xs">{a.assetCode}</p>
                       <p className="text-muted-foreground text-xs">
-                        {a.locationName}{a.serialNumber ? ` · Serial: ${a.serialNumber}` : ""}
+                        {a.locationName}
+                        {a.serialNumber ? ` · Serial: ${a.serialNumber}` : ""}
                       </p>
                     </div>
                     <Button
                       aria-label={locale === "th" ? "ลบ" : "Remove"}
                       onClick={() => removeBulkAsset(a.id)}
-                      size="icon" type="button" variant="ghost"
+                      size="icon"
+                      type="button"
+                      variant="ghost"
                     >
                       <X aria-hidden="true" className="size-4" />
                     </Button>
@@ -493,8 +514,8 @@ export function MovementForm({ action }: MovementFormProps) {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor={config.destinationName}>
-            {config.destinationLabel} *
+          <Label htmlFor={config.destinationName} required>
+            {config.destinationLabel}
           </Label>
           {action === "sale" ? (
             <Input
@@ -504,7 +525,7 @@ export function MovementForm({ action }: MovementFormProps) {
               required
             />
           ) : (
-            <select
+            <Select
               className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm disabled:opacity-50"
               disabled={bulkMode ? loadingBulk || submitting : !asset}
               id="destinationWarehouseId"
@@ -532,12 +553,12 @@ export function MovementForm({ action }: MovementFormProps) {
                   {locale === "th" ? warehouse.nameTh : warehouse.nameEn}
                 </option>
               ))}
-            </select>
+            </Select>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="destinationLocationName">
-            {config.locationLabel} *
+          <Label htmlFor="destinationLocationName" required>
+            {config.locationLabel}
           </Label>
           {action === "sale" ? (
             <Input
@@ -584,7 +605,7 @@ export function MovementForm({ action }: MovementFormProps) {
           <Label htmlFor="notes">
             {locale === "th" ? "หมายเหตุ" : "Notes"}
           </Label>
-          <textarea
+          <Textarea
             className="border-input bg-background min-h-24 w-full rounded-md border px-3 py-2 text-sm disabled:opacity-50"
             disabled={bulkMode ? loadingBulk || submitting : !asset}
             id="notes"
@@ -594,7 +615,10 @@ export function MovementForm({ action }: MovementFormProps) {
       </div>
 
       {error ? (
-        <p className="text-destructive whitespace-pre-line text-sm" role="alert">
+        <p
+          className="text-destructive text-sm whitespace-pre-line"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}

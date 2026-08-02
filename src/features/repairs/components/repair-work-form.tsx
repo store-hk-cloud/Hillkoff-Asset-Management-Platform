@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/components/providers/language-provider";
 import type {
   RepairPartUsed,
@@ -244,7 +246,7 @@ export function RepairWorkForm({
           <Label htmlFor="rootCause">
             {locale === "th" ? "สาเหตุหลัก" : "Root Cause"}
           </Label>
-          <textarea
+          <Textarea
             className="border-input bg-background min-h-28 w-full rounded-md border px-3 py-2 text-sm"
             defaultValue={initialRootCause}
             id="rootCause"
@@ -256,7 +258,7 @@ export function RepairWorkForm({
           <Label htmlFor="solution">
             {locale === "th" ? "วิธีแก้ไข" : "Solution"}
           </Label>
-          <textarea
+          <Textarea
             className="border-input bg-background min-h-32 w-full rounded-md border px-3 py-2 text-sm"
             defaultValue={initialSolution}
             id="solution"
@@ -383,7 +385,7 @@ export function RepairWorkForm({
           <Label htmlFor="targetStatus">
             {locale === "th" ? "เปลี่ยนสถานะ" : "Change status"}
           </Label>
-          <select
+          <Select
             className="border-input bg-background h-11 w-full rounded-md border px-3 text-sm"
             id="targetStatus"
             onChange={(event) =>
@@ -401,7 +403,7 @@ export function RepairWorkForm({
                 {STATUS_LABELS[nextStatus]}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       ) : null}
 

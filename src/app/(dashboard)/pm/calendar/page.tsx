@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import type { PmJob } from "@/domain/entities/pm-job";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
@@ -87,34 +88,33 @@ export default async function PmCalendarPage({ searchParams }: Props) {
         >
           ← {t("pm.title")}
         </Link>
-        <div className="mt-3 flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {locale === "th" ? "ปฏิทิน PM" : "PM Calendar"}
-          </h1>
-          <div className="flex gap-2">
-            <Button asChild size="icon" variant="outline">
-              <Link
-                aria-label={
-                  locale === "th" ? "เดือนก่อนหน้า" : "Previous month"
-                }
-                href={`/pm/calendar?month=${monthKey(year, month - 1)}`}
-              >
-                <ChevronLeft aria-hidden="true" className="size-4" />
-              </Link>
-            </Button>
-            <Button asChild size="icon" variant="outline">
-              <Link
-                aria-label={locale === "th" ? "เดือนถัดไป" : "Next month"}
-                href={`/pm/calendar?month=${monthKey(year, month + 1)}`}
-              >
-                <ChevronRight aria-hidden="true" className="size-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-        <p className="text-muted-foreground mt-1 text-sm">
-          {monthFormatter.format(anchor)}
-        </p>
+        <PageHeader
+          action={
+            <div className="flex gap-2">
+              <Button asChild size="icon" variant="outline">
+                <Link
+                  aria-label={
+                    locale === "th" ? "เดือนก่อนหน้า" : "Previous month"
+                  }
+                  href={`/pm/calendar?month=${monthKey(year, month - 1)}`}
+                >
+                  <ChevronLeft aria-hidden="true" className="size-4" />
+                </Link>
+              </Button>
+              <Button asChild size="icon" variant="outline">
+                <Link
+                  aria-label={locale === "th" ? "เดือนถัดไป" : "Next month"}
+                  href={`/pm/calendar?month=${monthKey(year, month + 1)}`}
+                >
+                  <ChevronRight aria-hidden="true" className="size-4" />
+                </Link>
+              </Button>
+            </div>
+          }
+          description={monthFormatter.format(anchor)}
+          eyebrow={t("nav.pm")}
+          title={locale === "th" ? "ปฏิทิน PM" : "PM Calendar"}
+        />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

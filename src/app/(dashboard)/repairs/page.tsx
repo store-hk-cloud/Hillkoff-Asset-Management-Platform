@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { RepairStatus } from "@/domain/entities/repair-ticket";
 import { requireSession } from "@/lib/auth/dal";
@@ -47,38 +49,31 @@ export default async function RepairsPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-muted-foreground text-sm">{t("nav.repairs")}</p>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {t("repairs.title")}
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {locale === "th"
-              ? "ติดตามงานซ่อม สาเหตุ วิธีแก้ไข ค่าแรง และอะไหล่"
-              : "Track repairs, root causes, solutions, labor, and parts."}
-          </p>
-        </div>
-        {service.canCreate(profile) ? (
-          <Button asChild className="h-11 w-full sm:w-auto">
-            <Link href="/repairs/new">
-              <Plus aria-hidden="true" className="size-4" />
-              {t("repairs.create")}
-            </Link>
-          </Button>
-        ) : null}
-      </div>
+      <PageHeader
+        action={
+          service.canCreate(profile) ? (
+            <Button asChild className="h-11 w-full sm:w-auto">
+              <Link href="/repairs/new">
+                <Plus aria-hidden="true" className="size-4" />
+                {t("repairs.create")}
+              </Link>
+            </Button>
+          ) : null
+        }
+        description={
+          locale === "th"
+            ? "ติดตามงานซ่อม สาเหตุ วิธีแก้ไข ค่าแรง และอะไหล่"
+            : "Track repairs, root causes, solutions, labor, and parts."
+        }
+        eyebrow={t("nav.repairs")}
+        title={t("repairs.title")}
+      />
 
       {tickets.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center">
-          <Wrench
-            aria-hidden="true"
-            className="text-muted-foreground mx-auto mb-3 size-8"
-          />
-          <p className="text-muted-foreground text-sm">
-            {locale === "th" ? "ไม่มีใบงานซ่อม" : "No repair tickets"}
-          </p>
-        </div>
+        <EmptyState
+          icon={Wrench}
+          message={locale === "th" ? "ไม่มีใบงานซ่อม" : "No repair tickets"}
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {tickets.map((ticket) => (

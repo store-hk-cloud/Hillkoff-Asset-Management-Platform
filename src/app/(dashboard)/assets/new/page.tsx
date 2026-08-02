@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { AssetAccessService } from "@/domain/services/asset-access.service";
 import { AssetForm } from "@/features/assets/components/asset-form";
 import { requireSession } from "@/lib/auth/dal";
@@ -27,7 +28,16 @@ export default async function NewAssetPage() {
   }
 
   return (
-    <section className="mx-auto max-w-3xl">
+    <section className="mx-auto max-w-3xl space-y-6">
+      <PageHeader
+        description={
+          locale === "th"
+            ? "สร้างรายการเครื่องพร้อมบันทึกเหตุการณ์และ audit log อัตโนมัติ"
+            : "Create a machine and record its events and audit log automatically."
+        }
+        eyebrow={t("assets.management")}
+        title={t("assets.add")}
+      />
       <Card>
         <CardHeader>
           <CardTitle>{t("assets.add")}</CardTitle>

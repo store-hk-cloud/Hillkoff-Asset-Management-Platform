@@ -2,6 +2,8 @@ import { AlertTriangle, Package } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { InventoryManager } from "@/features/inventory/components/inventory-manager";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
@@ -22,12 +24,15 @@ export default async function InventoryPage() {
 
   return (
     <section className="space-y-6">
-      <div>
-        <p className="text-muted-foreground text-sm">{t("nav.inventory")}</p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {t("inventory.title")}
-        </h1>
-      </div>
+      <PageHeader
+        description={
+          locale === "th"
+            ? "จัดการอะไหล่ ปริมาณคงเหลือ และจุดสั่งซื้อ"
+            : "Manage spare parts, stock levels, and reorder points."
+        }
+        eyebrow={t("nav.inventory")}
+        title={t("inventory.title")}
+      />
 
       {lowStock.length > 0 ? (
         <Card className="border-amber-300 bg-amber-50">
@@ -52,15 +57,12 @@ export default async function InventoryPage() {
       <InventoryManager canWrite={service.canWrite(profile)} parts={parts} />
 
       {parts.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center">
-          <Package
-            aria-hidden="true"
-            className="text-muted-foreground mx-auto mb-3 size-8"
-          />
-          <p className="text-muted-foreground text-sm">
-            {locale === "th" ? "ยังไม่มีรายการอะไหล่" : "No inventory parts"}
-          </p>
-        </div>
+        <EmptyState
+          icon={Package}
+          message={
+            locale === "th" ? "ยังไม่มีรายการอะไหล่" : "No inventory parts"
+          }
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {parts.map((part) => (

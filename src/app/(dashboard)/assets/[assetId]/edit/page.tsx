@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { AssetAccessService } from "@/domain/services/asset-access.service";
 import { AssetForm } from "@/features/assets/components/asset-form";
 import { requireSession } from "@/lib/auth/dal";
@@ -40,7 +41,16 @@ export default async function EditAssetPage({ params }: EditAssetPageProps) {
   }
 
   return (
-    <section className="mx-auto max-w-3xl">
+    <section className="mx-auto max-w-3xl space-y-6">
+      <PageHeader
+        description={
+          locale === "th"
+            ? "ทุกฟิลด์ที่เปลี่ยนจะถูกบันทึกใน Timeline และ Audit Log"
+            : "Every changed field is recorded in the Timeline and Audit Log."
+        }
+        eyebrow={t("nav.assets")}
+        title={`${t("action.edit")} ${asset.assetCode}`}
+      />
       <Card>
         <CardHeader>
           <CardTitle>

@@ -6,14 +6,22 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { FormField } from "@/components/shared/form-field";
 import { useLanguage } from "@/components/providers/language-provider";
+import { scheduleInstallationSchema } from "@/features/installations/schemas/installation.schema";
 import { scheduleInstallation } from "@/features/installations/services/installation-api.service";
 import { TechnicianSelect } from "@/features/technician/components/technician-select";
+import {
+  getFieldErrors,
+  type FieldErrors,
+} from "@/lib/validation/field-errors";
 
 export function ScheduleInstallationForm() {
   const { locale, t } = useLanguage();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [busy, setBusy] = useState(false);
   const [technicianName, setTechnicianName] = useState("");
 
@@ -21,19 +29,33 @@ export function ScheduleInstallationForm() {
     event.preventDefault();
     setBusy(true);
     setError(null);
+    setFieldErrors({});
     const data = new FormData(event.currentTarget);
     const scheduledLocal = String(data.get("scheduledAt"));
+    const scheduledDate = new Date(scheduledLocal);
+    const payload = {
+      assetCode: data.get("assetCode"),
+      customerId: data.get("customerId"),
+      customerName: data.get("customerName"),
+      address: data.get("address"),
+      scheduledAt: Number.isNaN(scheduledDate.getTime())
+        ? scheduledLocal
+        : scheduledDate.toISOString(),
+      assignedTechnicianId: data.get("assignedTechnicianId"),
+      assignedTechnicianName: data.get("assignedTechnicianName"),
+      warrantyMonths: Number(data.get("warrantyMonths")),
+    };
+    const validation = scheduleInstallationSchema.safeParse(payload);
+    if (!validation.success) {
+      setFieldErrors(getFieldErrors(validation.error));
+      setBusy(false);
+      return;
+    }
 
     try {
       const result = await scheduleInstallation({
-        assetCode: data.get("assetCode"),
-        customerId: data.get("customerId"),
-        customerName: data.get("customerName"),
-        address: data.get("address"),
-        scheduledAt: new Date(scheduledLocal).toISOString(),
-        assignedTechnicianId: data.get("assignedTechnicianId"),
-        assignedTechnicianName: data.get("assignedTechnicianName"),
-        warrantyMonths: Number(data.get("warrantyMonths")),
+        ...validation.data,
+        scheduledAt: validation.data.scheduledAt.toISOString(),
       });
       router.replace(`/installations/${String(result.id)}`);
       router.refresh();
@@ -58,12 +80,19 @@ export function ScheduleInstallationForm() {
               : "Serial number / Machine ID / Machine code"
           }
           name="assetCode"
+          error={fieldErrors.assetCode}
           required
         />
-        <Field label={t("field.customerId")} name="customerId" required />
+        <Field
+          error={fieldErrors.customerId}
+          label={t("field.customerId")}
+          name="customerId"
+          required
+        />
         <Field
           label={locale === "th" ? "ชื่อลูกค้า" : "Customer name"}
           name="customerName"
+          error={fieldErrors.customerName}
           required
         />
         <Field
@@ -71,11 +100,12 @@ export function ScheduleInstallationForm() {
             locale === "th" ? "วันและเวลาติดตั้ง" : "Installation date and time"
           }
           name="scheduledAt"
+          error={fieldErrors.scheduledAt}
           required
           type="datetime-local"
         />
         <div className="space-y-2">
-          <Label htmlFor="assignedTechnicianId">
+          <Label htmlFor="assignedTechnicianId" required>
             {locale === "th" ? "ช่างผู้รับผิดชอบ" : "Assigned technician"}
           </Label>
           <TechnicianSelect
@@ -87,6 +117,7 @@ export function ScheduleInstallationForm() {
         <Field
           label={locale === "th" ? "ชื่อช่าง" : "Technician name"}
           name="assignedTechnicianName"
+          error={fieldErrors.assignedTechnicianName}
           readOnly
           required
           value={technicianName}
@@ -97,19 +128,19 @@ export function ScheduleInstallationForm() {
           max="120"
           min="1"
           name="warrantyMonths"
+          error={fieldErrors.warrantyMonths}
           required
           type="number"
         />
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="address">
-            {locale === "th" ? "สถานที่ติดตั้ง" : "Installation address"} *
-          </Label>
-          <textarea
-            className="border-input bg-background min-h-24 w-full rounded-md border px-3 py-2 text-sm"
-            id="address"
-            name="address"
+          <FormField
+            error={fieldErrors.address}
+            htmlFor="address"
+            label={locale === "th" ? "สถานที่ติดตั้ง" : "Installation address"}
             required
-          />
+          >
+            <Textarea id="address" name="address" required />
+          </FormField>
         </div>
       </div>
       {error ? (
@@ -131,11 +162,17 @@ function Field({
 }: {
   label: string;
   name: string;
+  error?: string | undefined;
 } & ComponentProps<typeof Input>) {
+  const { error, ...inputProps } = props;
   return (
-    <div className="space-y-2">
-      <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} {...props} />
-    </div>
+    <FormField
+      error={error}
+      htmlFor={name}
+      label={label}
+      required={Boolean(inputProps.required)}
+    >
+      <Input id={name} name={name} {...inputProps} />
+    </FormField>
   );
 }

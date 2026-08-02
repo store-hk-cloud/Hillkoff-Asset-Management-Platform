@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/components/providers/language-provider";
 import type { PmChecklistItem } from "@/domain/entities/pm-job";
 import { completePm } from "@/features/pm/services/pm-api.service";
@@ -118,7 +119,7 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
         <Label htmlFor="completionNotes">
           {locale === "th" ? "หมายเหตุการปิดงาน" : "Completion Notes"}
         </Label>
-        <textarea
+        <Textarea
           className="border-input bg-background min-h-28 w-full rounded-md border px-3 py-2 text-sm"
           id="completionNotes"
           maxLength={3000}

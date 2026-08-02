@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { PmError } from "@/domain/errors/pm.error";
 import { PmCompletionForm } from "@/features/pm/components/pm-completion-form";
 import { TechnicianAssignmentForm } from "@/features/technician/components/technician-assignment-form";
@@ -46,17 +47,18 @@ export default async function PmDetailPage({ params }: Props) {
         >
           ← {t("pm.title")}
         </Link>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {job.title}
-          </h1>
-          <span className="bg-muted rounded-full px-2 py-1 text-xs font-medium">
-            {job.status}
-          </span>
-        </div>
-        <p className="text-muted-foreground mt-1 font-mono text-sm">
-          {job.jobNumber}
-        </p>
+        <PageHeader
+          description={<span className="font-mono">{job.jobNumber}</span>}
+          eyebrow={t("nav.pm")}
+          title={
+            <span className="flex flex-wrap items-center gap-2">
+              {job.title}
+              <span className="bg-muted rounded-full px-2 py-1 text-xs font-medium">
+                {job.status}
+              </span>
+            </span>
+          }
+        />
       </div>
 
       <Card>

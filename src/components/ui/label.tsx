@@ -7,8 +7,12 @@ import { cn } from "@/lib/utils";
 
 export function Label({
   className,
+  required = false,
+  children,
   ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+}: React.ComponentProps<typeof LabelPrimitive.Root> & {
+  readonly required?: boolean;
+}) {
   return (
     <LabelPrimitive.Root
       className={cn(
@@ -16,6 +20,13 @@ export function Label({
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+      {required ? (
+        <span aria-hidden="true" className="text-destructive ml-1">
+          *
+        </span>
+      ) : null}
+    </LabelPrimitive.Root>
   );
 }

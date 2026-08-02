@@ -1,4 +1,5 @@
 import { getServerTranslator } from "@/lib/i18n/server";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const metadata = { title: "Scope & Terms of Use" };
 
@@ -12,18 +13,15 @@ const sections = [
 ] as const;
 
 export default async function TermsPage() {
-  const { t } = await getServerTranslator();
+  const { locale, t } = await getServerTranslator();
 
   return (
     <section className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {t("terms.title")}
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          {t("terms.subtitle")}
-        </p>
-      </div>
+      <PageHeader
+        description={t("terms.subtitle")}
+        eyebrow={locale === "th" ? "ข้อมูลระบบ" : "System information"}
+        title={t("terms.title")}
+      />
       <div className="side-panel space-y-6 p-6">
         {sections.map((section) => (
           <div key={section.heading}>

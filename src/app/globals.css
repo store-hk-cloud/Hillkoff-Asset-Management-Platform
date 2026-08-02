@@ -139,8 +139,9 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --shadow-sm: var(--tw-shadow-sm);
-  --font-sans: var(--font-kanit), -apple-system, "Segoe UI", Roboto,
-    "Noto Sans Thai", sans-serif;
+  --font-sans:
+    var(--font-kanit), -apple-system, "Segoe UI", Roboto, "Noto Sans Thai",
+    sans-serif;
 }
 
 * {
@@ -151,8 +152,13 @@ body {
   min-height: 100dvh;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-kanit), -apple-system, "Segoe UI", Roboto,
-    "Noto Sans Thai", sans-serif;
+  font-family:
+    var(--font-kanit),
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Noto Sans Thai",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -318,40 +324,6 @@ body {
 .segmented-control button.is-active {
   background: var(--primary-soft);
   color: var(--primary-strong);
-}
-
-/* ---------------------------------------------------------------------- */
-/* Tables                                                                  */
-/* ---------------------------------------------------------------------- */
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-}
-
-.data-table th {
-  text-align: left;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-  padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.data-table td {
-  padding: 0.65rem 0.75rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.data-table tbody tr:nth-child(even) {
-  background: var(--surface-soft);
-}
-
-.data-table tbody tr:hover {
-  background: var(--primary-soft);
 }
 
 /* ---------------------------------------------------------------------- */

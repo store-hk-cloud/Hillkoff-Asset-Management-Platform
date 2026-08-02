@@ -1,6 +1,7 @@
 import { ArrowRightLeft, History, ShoppingCart } from "lucide-react";
 import { notFound } from "next/navigation";
 
+import { PageHeader } from "@/components/shared/page-header";
 import { WarehouseActionCard } from "@/features/warehouse/components/warehouse-action-card";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
@@ -23,15 +24,11 @@ export default async function WarehousePage() {
 
   return (
     <section className="space-y-6">
-      <div>
-        <p className="text-muted-foreground text-sm">{t("nav.warehouse")}</p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {t("warehouse.title")}
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          {t("warehouse.description")}
-        </p>
-      </div>
+      <PageHeader
+        description={t("warehouse.description")}
+        eyebrow={t("nav.warehouse")}
+        title={t("warehouse.title")}
+      />
       <div className="grid gap-4 sm:grid-cols-2">
         {warehouseService.canTransfer(profile) ? (
           <WarehouseActionCard

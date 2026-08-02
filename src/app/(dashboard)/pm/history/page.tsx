@@ -3,6 +3,8 @@ import { History } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { PmManagementService } from "@/services/pm-management.service";
@@ -31,20 +33,21 @@ export default async function PmHistoryPage() {
         >
           ← {t("pm.title")}
         </Link>
-        <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-          {locale === "th" ? "ประวัติ PM" : "PM History"}
-        </h1>
+        <PageHeader
+          description={
+            locale === "th"
+              ? "ตรวจสอบประวัติการบำรุงรักษาเชิงป้องกันที่เสร็จสิ้นแล้ว"
+              : "Review completed preventive maintenance history."
+          }
+          eyebrow={t("nav.pm")}
+          title={locale === "th" ? "ประวัติ PM" : "PM History"}
+        />
       </div>
       {jobs.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center">
-          <History
-            aria-hidden="true"
-            className="text-muted-foreground mx-auto mb-3 size-8"
-          />
-          <p className="text-muted-foreground text-sm">
-            {locale === "th" ? "ยังไม่มีประวัติ PM" : "No PM history"}
-          </p>
-        </div>
+        <EmptyState
+          icon={History}
+          message={locale === "th" ? "ยังไม่มีประวัติ PM" : "No PM history"}
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {jobs.map((job) => (

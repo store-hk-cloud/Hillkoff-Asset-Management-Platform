@@ -6,9 +6,16 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { FormField } from "@/components/shared/form-field";
 import { useLanguage } from "@/components/providers/language-provider";
+import { schedulePmSchema } from "@/features/pm/schemas/pm.schema";
 import { schedulePm } from "@/features/pm/services/pm-api.service";
 import { TechnicianSelect } from "@/features/technician/components/technician-select";
+import {
+  getFieldErrors,
+  type FieldErrors,
+} from "@/lib/validation/field-errors";
 
 const DEFAULT_CHECKLIST = [
   "ตรวจสอบสภาพและทำความสะอาดเครื่อง",
@@ -22,6 +29,7 @@ export function SchedulePmForm() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [technicianName, setTechnicianName] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -30,18 +38,33 @@ export function SchedulePmForm() {
     const recurrence = String(data.get("recurrenceMonths") ?? "").trim();
     setBusy(true);
     setError(null);
+    setFieldErrors({});
+    const scheduledLocal = String(data.get("scheduledAt"));
+    const scheduledDate = new Date(scheduledLocal);
+    const payload = {
+      assetCode: data.get("assetCode"),
+      title: data.get("title"),
+      scheduledAt: Number.isNaN(scheduledDate.getTime())
+        ? scheduledLocal
+        : scheduledDate.toISOString(),
+      assignedTechnicianId: data.get("assignedTechnicianId"),
+      assignedTechnicianName: data.get("assignedTechnicianName"),
+      checklistLabels: String(data.get("checklist") ?? "")
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      recurrenceMonths: recurrence ? Number(recurrence) : null,
+    };
+    const validation = schedulePmSchema.safeParse(payload);
+    if (!validation.success) {
+      setFieldErrors(getFieldErrors(validation.error));
+      setBusy(false);
+      return;
+    }
     try {
       const result = await schedulePm({
-        assetCode: data.get("assetCode"),
-        title: data.get("title"),
-        scheduledAt: new Date(String(data.get("scheduledAt"))).toISOString(),
-        assignedTechnicianId: data.get("assignedTechnicianId"),
-        assignedTechnicianName: data.get("assignedTechnicianName"),
-        checklistLabels: String(data.get("checklist") ?? "")
-          .split("\n")
-          .map((item) => item.trim())
-          .filter(Boolean),
-        recurrenceMonths: recurrence ? Number(recurrence) : null,
+        ...validation.data,
+        scheduledAt: validation.data.scheduledAt.toISOString(),
       });
       router.replace(`/pm/${String(result.id)}`);
       router.refresh();
@@ -66,16 +89,19 @@ export function SchedulePmForm() {
               : "Serial number / Machine ID / Machine code"
           }
           name="assetCode"
+          error={fieldErrors.assetCode}
           required
         />
         <Field
           label={locale === "th" ? "หัวข้องาน PM" : "PM title"}
           name="title"
+          error={fieldErrors.title}
           required
         />
         <Field
           label={locale === "th" ? "วันที่และเวลา" : "Date and time"}
           name="scheduledAt"
+          error={fieldErrors.scheduledAt}
           required
           type="datetime-local"
         />
@@ -83,6 +109,7 @@ export function SchedulePmForm() {
           label={locale === "th" ? "รอบ PM (เดือน)" : "PM interval (months)"}
           min="1"
           name="recurrenceMonths"
+          error={fieldErrors.recurrenceMonths}
           placeholder={
             locale === "th"
               ? "เว้นว่างหากไม่มีรอบ"
@@ -91,7 +118,7 @@ export function SchedulePmForm() {
           type="number"
         />
         <div className="space-y-2">
-          <Label htmlFor="assignedTechnicianId">
+          <Label htmlFor="assignedTechnicianId" required>
             {locale === "th" ? "ช่างผู้รับผิดชอบ" : "Assigned technician"}
           </Label>
           <TechnicianSelect
@@ -103,6 +130,7 @@ export function SchedulePmForm() {
         <Field
           label={locale === "th" ? "ชื่อช่าง" : "Technician name"}
           name="assignedTechnicianName"
+          error={fieldErrors.assignedTechnicianName}
           readOnly
           required
           value={technicianName}
@@ -113,8 +141,8 @@ export function SchedulePmForm() {
               ? "รายการตรวจ PM (หนึ่งรายการต่อบรรทัด)"
               : "PM checklist (one item per line)"}
           </Label>
-          <textarea
-            className="border-input bg-background min-h-44 w-full rounded-md border px-3 py-2 text-sm"
+          <Textarea
+            className="min-h-44"
             defaultValue={DEFAULT_CHECKLIST}
             id="checklist"
             name="checklist"
@@ -145,11 +173,17 @@ function Field({
 }: {
   label: string;
   name: string;
+  error?: string | undefined;
 } & ComponentProps<typeof Input>) {
+  const { error, ...inputProps } = props;
   return (
-    <div className="space-y-2">
-      <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} {...props} />
-    </div>
+    <FormField
+      error={error}
+      htmlFor={name}
+      label={label}
+      required={Boolean(inputProps.required)}
+    >
+      <Input id={name} name={name} {...inputProps} />
+    </FormField>
   );
 }

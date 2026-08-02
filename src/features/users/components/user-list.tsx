@@ -4,18 +4,16 @@ import Link from "next/link";
 
 import { useLanguage } from "@/components/providers/language-provider";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { UserProfile } from "@/domain/entities/user-profile";
+import { Users } from "lucide-react";
 
 export function UserList({ users }: { users: readonly UserProfile[] }) {
   const { locale, t } = useLanguage();
 
   if (users.length === 0) {
-    return (
-      <div className="text-muted-foreground rounded-lg border border-dashed p-10 text-center text-sm">
-        {t("users.empty")}
-      </div>
-    );
+    return <EmptyState icon={Users} message={t("users.empty")} />;
   }
 
   return (

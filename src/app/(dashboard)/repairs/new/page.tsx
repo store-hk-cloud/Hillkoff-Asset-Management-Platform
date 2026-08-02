@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { CreateRepairForm } from "@/features/repairs/components/create-repair-form";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
@@ -25,9 +26,15 @@ export default async function NewRepairPage() {
         >
           ← {t("repairs.title")}
         </Link>
-        <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-          {t("repairs.create")}
-        </h1>
+        <PageHeader
+          description={
+            locale === "th"
+              ? "บันทึกอาการและรายละเอียดของปัญหาเครื่อง"
+              : "Record the machine problem and its supporting details."
+          }
+          eyebrow={t("nav.repairs")}
+          title={t("repairs.create")}
+        />
       </div>
       <Card>
         <CardHeader>

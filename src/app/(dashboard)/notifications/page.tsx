@@ -2,6 +2,8 @@ import { Bell } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { NotificationStatus } from "@/domain/entities/notification";
 import { requireSession } from "@/lib/auth/dal";
@@ -32,31 +34,24 @@ export default async function NotificationsPage() {
 
   return (
     <section className="space-y-6">
-      <div>
-        <p className="text-muted-foreground text-sm">
-          {t("nav.notifications")}
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {t("notifications.title")}
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          {locale === "th"
-            ? "คิวนี้เป็นแบบอ่านอย่างเดียวจากหน้าเว็บ การส่งทั้งหมดทำผ่าน Cloud Functions"
-            : "This queue is read-only in the UI. All delivery is handled by Cloud Functions."}
-        </p>
-      </div>
+      <PageHeader
+        description={
+          locale === "th"
+            ? "คิวนี้เป็นแบบอ่านอย่างเดียวและการส่งทั้งหมดทำผ่าน Cloud Functions"
+            : "This queue is read-only and delivery is handled by Cloud Functions."
+        }
+        eyebrow={t("nav.notifications")}
+        title={t("notifications.title")}
+      />
       {items.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center">
-          <Bell
-            aria-hidden="true"
-            className="text-muted-foreground mx-auto mb-3 size-8"
-          />
-          <p className="text-muted-foreground text-sm">
-            {locale === "th"
+        <EmptyState
+          icon={Bell}
+          message={
+            locale === "th"
               ? "ยังไม่มีรายการแจ้งเตือน"
-              : "Notification queue is empty"}
-          </p>
-        </div>
+              : "Notification queue is empty"
+          }
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {items.map((item) => (

@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { UserForm } from "@/features/users/components/user-form";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
@@ -19,7 +20,16 @@ export default async function NewUserPage() {
   if (profile.role !== "admin") notFound();
 
   return (
-    <section className="mx-auto max-w-3xl">
+    <section className="mx-auto max-w-3xl space-y-6">
+      <PageHeader
+        description={
+          locale === "th"
+            ? "สร้างผู้ใช้ใหม่และส่งลิงก์ตั้งรหัสผ่านอย่างปลอดภัย"
+            : "Create a user and send a secure password setup link."
+        }
+        eyebrow={t("nav.users")}
+        title={t("users.add")}
+      />
       <Card>
         <CardHeader>
           <CardTitle>{t("users.add")}</CardTitle>

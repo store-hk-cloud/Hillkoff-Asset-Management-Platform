@@ -8,6 +8,7 @@ import {
   History,
   Radio,
   ScanLine,
+  type LucideIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -15,6 +16,7 @@ import { useLanguage } from "@/components/providers/language-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type {
   TechnicianWorkItem,
@@ -170,6 +172,7 @@ export function TechnicianWorkspace({
       <WorkSection
         busyId={busyId}
         empty={locale === "th" ? "ไม่มีงานวันนี้" : "No work today"}
+        emptyIcon={ClipboardList}
         items={workspace.today}
         locale={locale}
         onRespond={respond}
@@ -179,6 +182,7 @@ export function TechnicianWorkspace({
       <WorkSection
         busyId={busyId}
         empty={locale === "th" ? "ไม่มีงานค้าง" : "No active work"}
+        emptyIcon={ScanLine}
         items={workspace.active}
         locale={locale}
         onRespond={respond}
@@ -188,6 +192,7 @@ export function TechnicianWorkspace({
       <WorkSection
         busyId={busyId}
         empty={locale === "th" ? "ยังไม่มีประวัติ" : "No history"}
+        emptyIcon={History}
         icon={<History className="size-5" />}
         items={workspace.history}
         locale={locale}
@@ -229,6 +234,7 @@ function WorkSection({
   busyId,
   onRespond,
   icon,
+  emptyIcon = ClipboardList,
   readOnly,
 }: {
   title: string;
@@ -241,6 +247,7 @@ function WorkSection({
     action: "accept" | "reject",
   ) => Promise<void>;
   icon?: React.ReactNode;
+  emptyIcon?: LucideIcon;
   readOnly: boolean;
 }) {
   return (
@@ -250,9 +257,7 @@ function WorkSection({
         {title}
       </h2>
       {items.length === 0 ? (
-        <div className="text-muted-foreground rounded-lg border border-dashed p-6 text-center text-sm">
-          {empty}
-        </div>
+        <EmptyState icon={emptyIcon} message={empty} />
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {items.map((item) => (

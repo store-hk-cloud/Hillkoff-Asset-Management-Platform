@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 
+import { PageHeader } from "@/components/shared/page-header";
+import { Select } from "@/components/ui/select";
 import { MovementList } from "@/features/warehouse/components/movement-list";
 import { movementSearchSchema } from "@/features/warehouse/schemas/movement.schema";
 import { requireSession } from "@/lib/auth/dal";
@@ -29,12 +31,15 @@ export default async function MovementsPage({
 
   return (
     <section className="space-y-6">
-      <div>
-        <p className="text-muted-foreground text-sm">{t("warehouse.title")}</p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {t("warehouse.movements")}
-        </h1>
-      </div>
+      <PageHeader
+        description={
+          locale === "th"
+            ? "ตรวจสอบประวัติการเคลื่อนไหวของเครื่องทั้งหมด"
+            : "Review the complete machine movement history."
+        }
+        eyebrow={t("nav.warehouse")}
+        title={t("warehouse.movements")}
+      />
       {params.success ? (
         <p
           className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800"
@@ -50,7 +55,7 @@ export default async function MovementsPage({
         className="flex flex-col gap-3 sm:flex-row"
         method="get"
       >
-        <select
+        <Select
           className="border-input bg-background h-10 rounded-md border px-3 text-sm"
           defaultValue={type}
           name="type"
@@ -60,7 +65,7 @@ export default async function MovementsPage({
           </option>
           <option value="warehouse_movement">{t("warehouse.transfer")}</option>
           <option value="customer_sale">{t("warehouse.sale")}</option>
-        </select>
+        </Select>
         <button
           className="bg-primary text-primary-foreground h-10 rounded-md px-4 text-sm font-medium"
           type="submit"

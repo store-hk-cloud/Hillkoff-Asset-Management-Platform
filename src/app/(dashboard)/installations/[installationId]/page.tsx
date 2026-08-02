@@ -3,6 +3,7 @@ import { CheckCircle2, MapPin, ShieldCheck, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { InstallationError } from "@/domain/errors/installation.error";
 import { InstallationWorkForm } from "@/features/installations/components/installation-work-form";
 import { TechnicianAssignmentForm } from "@/features/technician/components/technician-assignment-form";
@@ -66,17 +67,22 @@ export default async function InstallationDetailPage({
         >
           ← {t("installations.title")}
         </Link>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {installation.assetName}
-          </h1>
-          <span className="bg-muted rounded-full px-2 py-1 text-xs font-medium">
-            {installation.status.replace("_", " ")}
-          </span>
-        </div>
-        <p className="text-muted-foreground mt-1 font-mono text-sm">
-          {installation.assetCode} · {installation.installationNumber}
-        </p>
+        <PageHeader
+          description={
+            <span className="font-mono">
+              {installation.assetCode} · {installation.installationNumber}
+            </span>
+          }
+          eyebrow={t("nav.installations")}
+          title={
+            <span className="flex flex-wrap items-center gap-2">
+              {installation.assetName}
+              <span className="bg-muted rounded-full px-2 py-1 text-xs font-medium">
+                {installation.status.replace("_", " ")}
+              </span>
+            </span>
+          }
+        />
       </div>
 
       {service.canSchedule(profile) &&

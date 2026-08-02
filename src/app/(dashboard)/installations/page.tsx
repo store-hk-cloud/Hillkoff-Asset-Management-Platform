@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { InstallationStatus } from "@/domain/entities/installation";
 import { requireSession } from "@/lib/auth/dal";
@@ -44,42 +46,35 @@ export default async function InstallationsPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-muted-foreground text-sm">
-            {t("nav.installations")}
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {t("installations.title")}
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {locale === "th"
-              ? "คิวงานติดตั้งที่รอดำเนินการและกำลังทำงาน"
-              : "Installation work that is scheduled or currently in progress"}
-          </p>
-        </div>
-        {service.canSchedule(profile) ? (
-          <Button asChild className="h-11 w-full sm:w-auto">
-            <Link href="/installations/schedule">
-              <Plus aria-hidden="true" className="size-4" />
-              {t("installations.schedule")}
-            </Link>
-          </Button>
-        ) : null}
-      </div>
+      <PageHeader
+        action={
+          service.canSchedule(profile) ? (
+            <Button asChild className="h-11 w-full sm:w-auto">
+              <Link href="/installations/schedule">
+                <Plus aria-hidden="true" className="size-4" />
+                {t("installations.schedule")}
+              </Link>
+            </Button>
+          ) : null
+        }
+        description={
+          locale === "th"
+            ? "คิวงานติดตั้งที่รอดำเนินการและกำลังทำงาน"
+            : "Installation work that is scheduled or currently in progress"
+        }
+        eyebrow={t("nav.installations")}
+        title={t("installations.title")}
+      />
 
       {installations.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center">
-          <CalendarClock
-            aria-hidden="true"
-            className="text-muted-foreground mx-auto mb-3 size-8"
-          />
-          <p className="text-muted-foreground text-sm">
-            {locale === "th"
+        <EmptyState
+          icon={CalendarClock}
+          message={
+            locale === "th"
               ? "ไม่มีงานติดตั้งในคิว"
-              : "No installations in the queue"}
-          </p>
-        </div>
+              : "No installations in the queue"
+          }
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {installations.map((installation) => (

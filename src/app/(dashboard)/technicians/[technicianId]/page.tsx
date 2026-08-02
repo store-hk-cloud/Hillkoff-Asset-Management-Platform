@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 
+import { PageHeader } from "@/components/shared/page-header";
 import { TechnicianWorkspace } from "@/features/technician/components/technician-workspace";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { TechnicianWorkspaceService } from "@/services/technician-workspace.service";
 
 const service = new TechnicianWorkspaceService();
@@ -13,6 +15,7 @@ type Props = {
 export const metadata = { title: "Technician history" };
 
 export default async function TechnicianHistoryPage({ params }: Props) {
+  const { locale } = await getServerTranslator();
   const { profile } = await requireSession();
   const { technicianId } = await params;
   const result = await service
@@ -22,17 +25,15 @@ export default async function TechnicianHistoryPage({ params }: Props) {
 
   return (
     <section className="space-y-6">
-      <div>
-        <p className="text-muted-foreground text-sm">
-          Dashboard และประวัติงานรายบุคคล
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {result.technician.displayName}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {result.technician.email}
-        </p>
-      </div>
+      <PageHeader
+        description={result.technician.email}
+        eyebrow={
+          locale === "th"
+            ? "Dashboard และประวัติงานรายบุคคล"
+            : "Technician dashboard and history"
+        }
+        title={result.technician.displayName}
+      />
       <TechnicianWorkspace readOnly workspace={result.workspace} />
     </section>
   );

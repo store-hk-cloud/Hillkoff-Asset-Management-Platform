@@ -5,6 +5,7 @@ import { Radio, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { useLanguage } from "@/components/providers/language-provider";
 import {
   Card,
@@ -116,14 +117,14 @@ export function NfcRegistration({
         <p className="text-muted-foreground text-xs break-all">{nfcUrl}</p>
         {canRegister ? (
           <div className="grid gap-3 sm:grid-cols-[180px_1fr]">
-            <select
+            <Select
               className="border-input bg-background h-11 rounded-md border px-3 text-sm"
               onChange={(event) => setTagType(event.target.value)}
               value={tagType}
             >
               <option value="ntag213">NTAG213</option>
               <option value="ntag215">NTAG215</option>
-            </select>
+            </Select>
             <Button
               className="h-11"
               disabled={busy}

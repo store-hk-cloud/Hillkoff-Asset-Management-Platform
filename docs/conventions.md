@@ -30,6 +30,8 @@
 - Reuse shadcn primitives before creating new shared components.
 - Feature-specific components stay in their feature.
 - Accessibility is part of the definition of done.
+- See `docs/page-standards.md` for page-level layout contracts (headers,
+  empty states, loading/error states, list data display, forms).
 
 ## Scalability
 

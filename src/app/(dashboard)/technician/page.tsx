@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { PageHeader } from "@/components/shared/page-header";
 import { TechnicianWorkspace } from "@/features/technician/components/technician-workspace";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
@@ -16,14 +17,17 @@ export default async function TechnicianPage() {
 
   return (
     <section className="space-y-6">
-      <div>
-        <p className="text-muted-foreground text-sm">
-          {locale === "th" ? "พื้นที่ทำงานภาคสนาม" : "Field service workspace"}
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {locale === "th" ? "งานของฉัน" : "My technician work"}
-        </h1>
-      </div>
+      <PageHeader
+        description={
+          locale === "th"
+            ? "ดูงานที่ได้รับมอบหมายและอัปเดตสถานะจากหน้างาน"
+            : "Review assigned work and update status from the field."
+        }
+        eyebrow={
+          locale === "th" ? "พื้นที่ทำงานภาคสนาม" : "Field service workspace"
+        }
+        title={locale === "th" ? "งานของฉัน" : "My technician work"}
+      />
       <TechnicianWorkspace workspace={workspace} />
     </section>
   );

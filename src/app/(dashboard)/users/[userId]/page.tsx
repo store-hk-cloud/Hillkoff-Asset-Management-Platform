@@ -9,8 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { UserForm } from "@/features/users/components/user-form";
 import { requireSession } from "@/lib/auth/dal";
+import { getServerTranslator } from "@/lib/i18n/server";
 import { UserManagementService } from "@/services/user-management.service";
 
 const service = new UserManagementService();
@@ -21,6 +23,7 @@ type Props = {
 export const metadata = { title: "จัดการผู้ใช้งาน" };
 
 export default async function UserDetailPage({ params, searchParams }: Props) {
+  const { locale, t } = await getServerTranslator();
   const { profile } = await requireSession();
   if (profile.role !== "admin") notFound();
   const { userId } = await params;
@@ -29,7 +32,16 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
   const invitation = (await searchParams).invitation;
 
   return (
-    <section className="mx-auto max-w-3xl">
+    <section className="mx-auto max-w-3xl space-y-6">
+      <PageHeader
+        description={
+          locale === "th"
+            ? "แก้ไขข้อมูลผู้ใช้ บทบาท และสิทธิ์การเข้าถึง"
+            : "Edit the user profile, role, and access permissions."
+        }
+        eyebrow={t("nav.users")}
+        title={user.displayName}
+      />
       <Card>
         <CardHeader>
           <CardTitle>{user.displayName}</CardTitle>

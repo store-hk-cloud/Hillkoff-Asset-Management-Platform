@@ -5,27 +5,42 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { FormField } from "@/components/shared/form-field";
 import { useLanguage } from "@/components/providers/language-provider";
+import { createRepairSchema } from "@/features/repairs/schemas/repair.schema";
 import { createRepairTicket } from "@/features/repairs/services/repair-api.service";
+import {
+  getFieldErrors,
+  type FieldErrors,
+} from "@/lib/validation/field-errors";
 
 export function CreateRepairForm() {
   const { locale, t } = useLanguage();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    setBusy(true);
     setError(null);
+    setFieldErrors({});
+    const payload = {
+      assetCode: data.get("assetCode"),
+      title: data.get("title"),
+      description: data.get("description"),
+    };
+    const validation = createRepairSchema.safeParse(payload);
+    if (!validation.success) {
+      setFieldErrors(getFieldErrors(validation.error));
+      return;
+    }
+
+    setBusy(true);
     try {
-      const result = await createRepairTicket({
-        assetCode: data.get("assetCode"),
-        title: data.get("title"),
-        description: data.get("description"),
-      });
+      const result = await createRepairTicket(validation.data);
       router.replace(`/repairs/${String(result.id)}`);
       router.refresh();
     } catch (submitError) {
@@ -41,12 +56,16 @@ export function CreateRepairForm() {
 
   return (
     <form className="space-y-5" onSubmit={submit}>
-      <div className="space-y-2">
-        <Label htmlFor="assetCode">
-          {locale === "th"
+      <FormField
+        error={fieldErrors.assetCode}
+        htmlFor="assetCode"
+        label={
+          locale === "th"
             ? "Serial Number / Machine ID / รหัสเครื่อง"
-            : "Serial number / Machine ID / Machine code"}
-        </Label>
+            : "Serial number / Machine ID / Machine code"
+        }
+        required
+      >
         <Input
           id="assetCode"
           name="assetCode"
@@ -57,25 +76,29 @@ export function CreateRepairForm() {
           }
           required
         />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="title">
-          {locale === "th" ? "หัวข้อปัญหา" : "Issue title"}
-        </Label>
+      </FormField>
+      <FormField
+        error={fieldErrors.title}
+        htmlFor="title"
+        label={locale === "th" ? "หัวข้อปัญหา" : "Issue title"}
+        required
+      >
         <Input id="title" maxLength={200} name="title" required />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="description">
-          {locale === "th" ? "รายละเอียดอาการ" : "Problem description"}
-        </Label>
-        <textarea
-          className="border-input bg-background min-h-32 w-full rounded-md border px-3 py-2 text-sm"
+      </FormField>
+      <FormField
+        error={fieldErrors.description}
+        htmlFor="description"
+        label={locale === "th" ? "รายละเอียดอาการ" : "Problem description"}
+        required
+      >
+        <Textarea
+          className="min-h-32"
           id="description"
           maxLength={3000}
           name="description"
           required
         />
-      </div>
+      </FormField>
       {error ? (
         <p className="text-destructive text-sm" role="alert">
           {error}

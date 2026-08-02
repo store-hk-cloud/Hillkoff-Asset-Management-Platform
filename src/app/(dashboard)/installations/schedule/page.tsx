@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { ScheduleInstallationForm } from "@/features/installations/components/schedule-installation-form";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
@@ -25,14 +26,15 @@ export default async function ScheduleInstallationPage() {
         >
           ← {t("installations.title")}
         </Link>
-        <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-          {t("installations.schedule")}
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          {locale === "th"
-            ? "Asset ต้องขายและผูกกับ Customer ID นี้แล้วก่อนสร้างนัดหมาย"
-            : "The asset must be sold and linked to this Customer ID before scheduling."}
-        </p>
+        <PageHeader
+          description={
+            locale === "th"
+              ? "เครื่องต้องขายและผูกกับ Customer ID ก่อนสร้างนัดหมาย"
+              : "The asset must be sold and linked to this Customer ID before scheduling."
+          }
+          eyebrow={t("nav.installations")}
+          title={t("installations.schedule")}
+        />
       </div>
       <Card>
         <CardHeader>

@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Package, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { AssetAccessService } from "@/domain/services/asset-access.service";
 import { AssetSearchForm } from "@/features/assets/components/asset-search-form";
 import { AssetStatusBadge } from "@/features/assets/components/asset-status-badge";
@@ -76,24 +78,25 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-muted-foreground text-sm">
-            {t("assets.management")}
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {t("assets.title")}
-          </h1>
-        </div>
-        {canWrite ? (
-          <Button asChild>
-            <Link href="/assets/new">
-              <Plus aria-hidden="true" className="size-4" />
-              {t("assets.add")}
-            </Link>
-          </Button>
-        ) : null}
-      </div>
+      <PageHeader
+        action={
+          canWrite ? (
+            <Button asChild>
+              <Link href="/assets/new">
+                <Plus aria-hidden="true" className="size-4" />
+                {t("assets.add")}
+              </Link>
+            </Button>
+          ) : null
+        }
+        description={
+          locale === "th"
+            ? "จัดการเครื่องและสถานะการใช้งานในระบบ"
+            : "Manage machines and their current status."
+        }
+        eyebrow={t("assets.management")}
+        title={t("assets.title")}
+      />
 
       <AssetSearchForm
         categoryKey={criteria.categoryKey}
@@ -203,9 +206,7 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
       </div>
 
       {assets.length === 0 ? (
-        <div className="text-muted-foreground rounded-lg border border-dashed p-10 text-center text-sm">
-          {t("assets.empty")}
-        </div>
+        <EmptyState icon={Package} message={t("assets.empty")} />
       ) : (
         <div className="grid gap-3">
           {assets.map((asset) => (

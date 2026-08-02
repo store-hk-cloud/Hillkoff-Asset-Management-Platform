@@ -1,7 +1,9 @@
 "use client";
 
 import { useLanguage } from "@/components/providers/language-provider";
+import { EmptyState } from "@/components/shared/empty-state";
 import type { AssetEvent } from "@/domain/entities/asset-event";
+import { Activity } from "lucide-react";
 
 type AssetEventListProps = Readonly<{
   events: readonly AssetEvent[];
@@ -20,11 +22,7 @@ export function AssetEventList({ events, emptyMessage }: AssetEventListProps) {
   );
 
   if (events.length === 0) {
-    return (
-      <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
-        {emptyMessage}
-      </div>
-    );
+    return <EmptyState icon={Activity} message={emptyMessage} />;
   }
 
   return (

@@ -3,6 +3,7 @@ import { CircleDollarSign, Package, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { RepairError } from "@/domain/errors/repair.error";
 import { AssignRepairForm } from "@/features/repairs/components/assign-repair-form";
 import { RepairWorkForm } from "@/features/repairs/components/repair-work-form";
@@ -53,17 +54,18 @@ export default async function RepairDetailPage({ params }: Props) {
         >
           ← {t("repairs.title")}
         </Link>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {ticket.title}
-          </h1>
-          <span className="bg-muted rounded-full px-2 py-1 text-xs font-medium">
-            {ticket.status.replace("_", " ")}
-          </span>
-        </div>
-        <p className="text-muted-foreground mt-1 font-mono text-sm">
-          {ticket.ticketNumber}
-        </p>
+        <PageHeader
+          description={<span className="font-mono">{ticket.ticketNumber}</span>}
+          eyebrow={t("nav.repairs")}
+          title={
+            <span className="flex flex-wrap items-center gap-2">
+              {ticket.title}
+              <span className="bg-muted rounded-full px-2 py-1 text-xs font-medium">
+                {ticket.status.replace("_", " ")}
+              </span>
+            </span>
+          }
+        />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

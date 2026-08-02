@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { FormField } from "@/components/shared/form-field";
 import { useLanguage } from "@/components/providers/language-provider";
 import type { UserStatus } from "@/domain/entities/user-profile";
 import { USER_ROLES, type UserRole } from "@/domain/value-objects/user-role";
@@ -15,6 +17,14 @@ import {
   sendManagedUserPasswordReset,
   updateManagedUser,
 } from "@/features/users/services/user-api.service";
+import {
+  managedUserCreateSchema,
+  managedUserUpdateSchema,
+} from "@/features/users/schemas/user.schema";
+import {
+  getFieldErrors,
+  type FieldErrors,
+} from "@/lib/validation/field-errors";
 
 export interface ManagedUserFormValues {
   readonly uid: string;
@@ -42,13 +52,14 @@ export function UserForm({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const editingSelf = initialValues?.uid === currentUserId;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setBusy(true);
     setError(null);
     setMessage(null);
+    setFieldErrors({});
     const form = new FormData(event.currentTarget);
     const common = {
       displayName: form.get("displayName"),
@@ -56,14 +67,26 @@ export function UserForm({
       warehouseId: form.get("warehouseId") || null,
       customerId: form.get("customerId") || null,
     };
-
-    try {
-      if (initialValues) {
-        await updateManagedUser(initialValues.uid, {
+    const payload = initialValues
+      ? {
           ...common,
           status: form.get("status"),
           expectedVersion: initialValues.version,
-        });
+        }
+      : { ...common, email: form.get("email") };
+    const validation = initialValues
+      ? managedUserUpdateSchema.safeParse(payload)
+      : managedUserCreateSchema.safeParse(payload);
+    if (!validation.success) {
+      setFieldErrors(getFieldErrors(validation.error));
+      return;
+    }
+
+    setBusy(true);
+
+    try {
+      if (initialValues) {
+        await updateManagedUser(initialValues.uid, validation.data);
         setMessage(
           editingSelf
             ? "บันทึกแล้ว หากสิทธิ์เปลี่ยนแปลงให้เข้าสู่ระบบใหม่"
@@ -71,10 +94,7 @@ export function UserForm({
         );
         router.refresh();
       } else {
-        const result = await createManagedUser({
-          ...common,
-          email: form.get("email"),
-        });
+        const result = await createManagedUser(validation.data);
         router.replace(
           `/users/${result.id}?invitation=${
             result.invitationSent === false ? "failed" : "sent"
@@ -117,8 +137,12 @@ export function UserForm({
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="grid gap-5 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="email">{t("field.email")} *</Label>
+        <FormField
+          error={fieldErrors.email}
+          htmlFor="email"
+          label={t("field.email")}
+          required
+        >
           <Input
             defaultValue={initialValues?.email}
             disabled={Boolean(initialValues)}
@@ -127,9 +151,13 @@ export function UserForm({
             required
             type="email"
           />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="displayName">{t("field.displayName")} *</Label>
+        </FormField>
+        <FormField
+          error={fieldErrors.displayName}
+          htmlFor="displayName"
+          label={t("field.displayName")}
+          required
+        >
           <Input
             defaultValue={initialValues?.displayName}
             id="displayName"
@@ -137,10 +165,12 @@ export function UserForm({
             name="displayName"
             required
           />
-        </div>
+        </FormField>
         <div className="space-y-2">
-          <Label htmlFor="role">{t("field.role")} *</Label>
-          <select
+          <Label htmlFor="role" required>
+            {t("field.role")}
+          </Label>
+          <Select
             className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
             disabled={editingSelf}
             id="role"
@@ -153,15 +183,17 @@ export function UserForm({
                 {item}
               </option>
             ))}
-          </select>
+          </Select>
           {editingSelf ? (
             <input name="role" type="hidden" value="admin" />
           ) : null}
         </div>
         {initialValues ? (
           <div className="space-y-2">
-            <Label htmlFor="status">{t("field.status")} *</Label>
-            <select
+            <Label htmlFor="status" required>
+              {t("field.status")}
+            </Label>
+            <Select
               className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
               defaultValue={initialValues.status}
               disabled={editingSelf}
@@ -177,7 +209,7 @@ export function UserForm({
               <option value="disabled">
                 {locale === "th" ? "ปิดใช้งาน" : "Disabled"}
               </option>
-            </select>
+            </Select>
             {editingSelf ? (
               <input name="status" type="hidden" value="active" />
             ) : null}
@@ -185,10 +217,10 @@ export function UserForm({
         ) : null}
         {role === "branch" ? (
           <div className="space-y-2">
-            <Label htmlFor="warehouseId">
-              {locale === "th" ? "คลังที่รับผิดชอบ" : "Assigned warehouse"} *
+            <Label htmlFor="warehouseId" required>
+              {locale === "th" ? "คลังที่รับผิดชอบ" : "Assigned warehouse"}
             </Label>
-            <select
+            <Select
               className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
               defaultValue={initialValues?.warehouseId ?? ""}
               id="warehouseId"
@@ -204,12 +236,14 @@ export function UserForm({
                   {locale === "th" ? warehouse.nameTh : warehouse.nameEn}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         ) : null}
         {role === "customer" ? (
           <div className="space-y-2">
-            <Label htmlFor="customerId">{t("field.customerId")} *</Label>
+            <Label htmlFor="customerId" required>
+              {t("field.customerId")}
+            </Label>
             <Input
               defaultValue={initialValues?.customerId ?? ""}
               id="customerId"

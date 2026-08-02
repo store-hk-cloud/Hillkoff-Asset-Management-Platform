@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import type { Asset } from "@/domain/entities/asset";
 import type { AssetEvent } from "@/domain/entities/asset-event";
 import type { UserProfile } from "@/domain/entities/user-profile";
@@ -111,18 +113,17 @@ export default async function AssetDetailPage({
   const coverageLabels: Record<
     NonNullable<Asset["warranty"]["coverageType"]>,
     string
-  > =
-    locale === "th"
-      ? {
-          full: "ครบทั้งหมด",
-          parts_and_labor: "อะไหล่และค่าแรง",
-          parts: "เฉพาะอะไหล่",
-        }
-      : {
-          full: "Full",
-          parts_and_labor: "Parts and labor",
-          parts: "Parts only",
-        };
+  > = locale === "th"
+    ? {
+        full: "ครบทั้งหมด",
+        parts_and_labor: "อะไหล่และค่าแรง",
+        parts: "เฉพาะอะไหล่",
+      }
+    : {
+        full: "Full",
+        parts_and_labor: "Parts and labor",
+        parts: "Parts only",
+      };
   const tabLabels: Record<AssetTab, string> =
     locale === "th"
       ? {
@@ -144,47 +145,47 @@ export default async function AssetDetailPage({
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <Link
-            className="text-muted-foreground hover:text-foreground text-sm"
-            href="/assets"
-          >
-            {t("assets.back")}
-          </Link>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+      <div>
+        <Link
+          className="text-muted-foreground hover:text-foreground text-sm"
+          href="/assets"
+        >
+          {t("assets.back")}
+        </Link>
+        <PageHeader
+          action={
+            canWrite ? (
+              <div className="flex gap-2">
+                <Button asChild variant="outline">
+                  <Link href={`/assets/${asset.id}/edit`}>
+                    <Pencil aria-hidden="true" className="size-4" />
+                    {t("action.edit")}
+                  </Link>
+                </Button>
+                <ArchiveAssetButton
+                  assetCode={asset.assetCode}
+                  assetId={asset.id}
+                />
+              </div>
+            ) : asset.publicId ? (
+              <Button asChild variant="outline">
+                <Link href={`/assets/${asset.id}/identity`}>
+                  <QrCode aria-hidden="true" className="size-4" />
+                  QR / NFC
+                </Link>
+              </Button>
+            ) : null
+          }
+          description={<span className="font-mono">{asset.assetCode}</span>}
+          eyebrow={t("nav.assets")}
+          title={
+            <span className="flex flex-wrap items-center gap-2">
               {asset.name}
-            </h1>
-            <AssetStatusBadge status={asset.status} />
-            <AssetStatusBadge condition={asset.condition} />
-          </div>
-          <p className="text-muted-foreground mt-1 font-mono text-sm">
-            {asset.assetCode}
-          </p>
-        </div>
-
-        {canWrite ? (
-          <div className="flex gap-2">
-            <Button asChild variant="outline">
-              <Link href={`/assets/${asset.id}/edit`}>
-                <Pencil aria-hidden="true" className="size-4" />
-                {t("action.edit")}
-              </Link>
-            </Button>
-            <ArchiveAssetButton
-              assetCode={asset.assetCode}
-              assetId={asset.id}
-            />
-          </div>
-        ) : asset.publicId ? (
-          <Button asChild variant="outline">
-            <Link href={`/assets/${asset.id}/identity`}>
-              <QrCode aria-hidden="true" className="size-4" />
-              QR / NFC
-            </Link>
-          </Button>
-        ) : null}
+              <AssetStatusBadge status={asset.status} />
+              <AssetStatusBadge condition={asset.condition} />
+            </span>
+          }
+        />
       </div>
       {asset.publicId && canWrite ? (
         <Button asChild className="w-full sm:w-auto" variant="outline">
@@ -445,17 +446,14 @@ export default async function AssetDetailPage({
 
       {activeTab === "documents" ? (
         asset.documents.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-10 text-center">
-            <FileText
-              aria-hidden="true"
-              className="text-muted-foreground mx-auto mb-3 size-8"
-            />
-            <p className="text-muted-foreground text-sm">
-              {locale === "th"
+          <EmptyState
+            icon={FileText}
+            message={
+              locale === "th"
                 ? "ยังไม่มีเอกสารสำหรับเครื่องนี้"
-                : "No documents for this machine"}
-            </p>
-          </div>
+                : "No documents for this machine"
+            }
+          />
         ) : (
           <div className="grid gap-3">
             {asset.documents.map((document) => (

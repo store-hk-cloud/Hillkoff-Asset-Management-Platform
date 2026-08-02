@@ -1,7 +1,9 @@
 "use client";
 
 import { useLanguage } from "@/components/providers/language-provider";
+import { EmptyState } from "@/components/shared/empty-state";
 import type { MovementLog } from "@/domain/entities/movement-log";
+import { History } from "lucide-react";
 
 export function MovementList({
   movements,
@@ -30,9 +32,12 @@ export function MovementList({
 
   if (movements.length === 0) {
     return (
-      <div className="text-muted-foreground rounded-lg border border-dashed p-10 text-center text-sm">
-        {locale === "th" ? "ยังไม่มีประวัติการเคลื่อนไหว" : "No movement logs"}
-      </div>
+      <EmptyState
+        icon={History}
+        message={
+          locale === "th" ? "ยังไม่มีประวัติการเคลื่อนไหว" : "No movement logs"
+        }
+      />
     );
   }
 

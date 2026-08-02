@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { useLanguage } from "@/components/providers/language-provider";
+import { Select } from "@/components/ui/select";
 import type { TechnicianSummary } from "@/domain/entities/technician-work";
 import { listTechnicians } from "@/features/technician/services/technician-api.service";
 
@@ -50,7 +51,7 @@ export function TechnicianSelect({
 
   return (
     <>
-      <select
+      <Select
         className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
         id={id}
         name={name}
@@ -72,7 +73,7 @@ export function TechnicianSelect({
             {technician.displayName} · {technician.email}
           </option>
         ))}
-      </select>
+      </Select>
       {error ? <p className="text-destructive text-xs">{error}</p> : null}
     </>
   );

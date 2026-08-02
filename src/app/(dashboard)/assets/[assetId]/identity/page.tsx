@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { PageHeader } from "@/components/shared/page-header";
 import { QrCodeCard } from "@/features/asset-identity/components/qr-code-card";
 import { NfcRegistration } from "@/features/asset-identity/components/nfc-registration";
 import { requireSession } from "@/lib/auth/dal";
@@ -23,17 +24,11 @@ export default async function IdentityPage({ params }: IdentityPageProps) {
 
   return (
     <section className="space-y-6">
-      <div>
-        <p className="text-muted-foreground font-mono text-sm">
-          {asset.assetCode}
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {locale === "th" ? "QR และ NFC" : "QR and NFC"} · {asset.name}
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Public ID: {asset.publicId}
-        </p>
-      </div>
+      <PageHeader
+        description={`Public ID: ${asset.publicId}`}
+        eyebrow={`${asset.assetCode} · ${locale === "th" ? "ตัวตนเครื่อง" : "Machine identity"}`}
+        title={`${locale === "th" ? "QR และ NFC" : "QR and NFC"} · ${asset.name}`}
+      />
       <div className="grid gap-4 lg:grid-cols-2">
         <QrCodeCard assetId={asset.id} qrUrl={asset.qrUrl} />
         <NfcRegistration

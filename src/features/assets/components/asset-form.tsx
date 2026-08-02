@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { FormField } from "@/components/shared/form-field";
 import { useLanguage } from "@/components/providers/language-provider";
 import {
   createAsset,
@@ -24,6 +27,14 @@ import {
   WAREHOUSES,
   type WarehouseId,
 } from "@/domain/master-data/warehouses";
+import {
+  assetCreateSchema,
+  assetUpdateSchema,
+} from "@/features/assets/schemas/asset.schema";
+import {
+  getFieldErrors,
+  type FieldErrors,
+} from "@/lib/validation/field-errors";
 
 export interface AssetFormInitialValues {
   readonly id: string;
@@ -62,6 +73,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [name, setName] = useState(initialValues?.name ?? "");
   const [description, setDescription] = useState(
     initialValues?.description ?? "",
@@ -115,12 +127,10 @@ export function AssetForm({ initialValues }: AssetFormProps) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    setSubmitting(true);
+    setFieldErrors({});
 
     const formData = new FormData(event.currentTarget);
-    const warrantyDocuments = String(
-      formData.get("warrantyDocuments") ?? "",
-    )
+    const warrantyDocuments = String(formData.get("warrantyDocuments") ?? "")
       .split(/\r?\n/)
       .map((item) => item.trim())
       .filter(Boolean);
@@ -158,10 +168,20 @@ export function AssetForm({ initialValues }: AssetFormProps) {
           }),
     };
 
+    const validation = initialValues
+      ? assetUpdateSchema.safeParse(payload)
+      : assetCreateSchema.safeParse(payload);
+    if (!validation.success) {
+      setFieldErrors(getFieldErrors(validation.error));
+      return;
+    }
+
+    setSubmitting(true);
+
     try {
       const asset = initialValues
-        ? await updateAsset(initialValues.id, payload)
-        : await createAsset(payload);
+        ? await updateAsset(initialValues.id, validation.data)
+        : await createAsset(validation.data);
       router.replace(`/assets/${asset.id}`);
       router.refresh();
     } catch (submitError) {
@@ -179,8 +199,8 @@ export function AssetForm({ initialValues }: AssetFormProps) {
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="assetCode">
-            {locale === "th" ? "รหัสเครื่อง" : "Machine code"} *
+          <Label htmlFor="assetCode" required>
+            {locale === "th" ? "รหัสเครื่อง" : "Machine code"}
           </Label>
           <Input
             defaultValue={initialValues?.assetCode}
@@ -206,8 +226,8 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="name">
-            {locale === "th" ? "ชื่อเครื่อง" : "Machine name"} *
+          <Label htmlFor="name" required>
+            {locale === "th" ? "ชื่อเครื่อง" : "Machine name"}
           </Label>
           <Input
             id="name"
@@ -220,10 +240,10 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="categoryKey">
-            {locale === "th" ? "หมวดหมู่" : "Category"} *
+          <Label htmlFor="categoryKey" required>
+            {locale === "th" ? "หมวดหมู่" : "Category"}
           </Label>
-          <select
+          <Select
             className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
             id="categoryKey"
             name="categoryKey"
@@ -241,7 +261,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
                 {locale === "th" ? item.nameTh : item.nameEn}
               </option>
             ))}
-          </select>
+          </Select>
           <input name="category" type="hidden" value={category} />
           {categoryKey === "other" ? (
             <Input
@@ -260,7 +280,9 @@ export function AssetForm({ initialValues }: AssetFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="serialNumber">Serial Number *</Label>
+          <Label htmlFor="serialNumber" required>
+            Serial Number
+          </Label>
           <Input
             defaultValue={initialValues?.serialNumber ?? ""}
             id="serialNumber"
@@ -287,7 +309,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
           <Label htmlFor="condition">
             {locale === "th" ? "สภาพ" : "Condition"}
           </Label>
-          <select
+          <Select
             className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
             defaultValue={initialValues?.condition ?? "operational"}
             id="condition"
@@ -302,14 +324,14 @@ export function AssetForm({ initialValues }: AssetFormProps) {
             <option value="out_of_service">
               {locale === "th" ? "หยุดใช้งาน" : "Out of service"}
             </option>
-          </select>
+          </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="warehouseId">
-            {locale === "th" ? "คลังเก็บ" : "Warehouse"} *
+          <Label htmlFor="warehouseId" required>
+            {locale === "th" ? "คลังเก็บ" : "Warehouse"}
           </Label>
-          <select
+          <Select
             className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm disabled:opacity-50"
             disabled={Boolean(initialValues)}
             id="warehouseId"
@@ -331,7 +353,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
                 {locale === "th" ? warehouse.nameTh : warehouse.nameEn}
               </option>
             ))}
-          </select>
+          </Select>
           <input name="locationName" type="hidden" value={locationName} />
         </div>
 
@@ -358,18 +380,21 @@ export function AssetForm({ initialValues }: AssetFormProps) {
           />
         </div>
 
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="description">
-            {locale === "th" ? "รายละเอียด" : "Description"}
-          </Label>
-          <textarea
-            className="border-input bg-background focus-visible:ring-ring min-h-28 w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
-            id="description"
-            maxLength={2000}
-            name="description"
-            onChange={(event) => setDescription(event.currentTarget.value)}
-            value={description}
-          />
+        <div className="sm:col-span-2">
+          <FormField
+            error={fieldErrors.description}
+            htmlFor="description"
+            label={locale === "th" ? "รายละเอียด" : "Description"}
+          >
+            <Textarea
+              className="border-input bg-background focus-visible:ring-ring min-h-28 w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
+              id="description"
+              maxLength={2000}
+              name="description"
+              onChange={(event) => setDescription(event.currentTarget.value)}
+              value={description}
+            />
+          </FormField>
         </div>
       </div>
 
@@ -390,7 +415,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
               <Label htmlFor="warrantyStatus">
                 {locale === "th" ? "สถานะประกัน" : "Warranty status"}
               </Label>
-              <select
+              <Select
                 className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
                 defaultValue={initialValues.warranty.status}
                 id="warrantyStatus"
@@ -408,13 +433,13 @@ export function AssetForm({ initialValues }: AssetFormProps) {
                 <option value="void">
                   {locale === "th" ? "ยกเลิกประกัน" : "Void"}
                 </option>
-              </select>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="warrantyCoverageType">
                 {locale === "th" ? "ความคุ้มครอง" : "Coverage"}
               </Label>
-              <select
+              <Select
                 className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
                 defaultValue={initialValues.warranty.coverageType}
                 id="warrantyCoverageType"
@@ -429,7 +454,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
                 <option value="parts">
                   {locale === "th" ? "เฉพาะอะไหล่" : "Parts only"}
                 </option>
-              </select>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="warrantyStartedAt">
@@ -479,7 +504,9 @@ export function AssetForm({ initialValues }: AssetFormProps) {
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="warrantyProviderContact">
-                {locale === "th" ? "ช่องทางติดต่อผู้ให้ประกัน" : "Provider contact"}
+                {locale === "th"
+                  ? "ช่องทางติดต่อผู้ให้ประกัน"
+                  : "Provider contact"}
               </Label>
               <Input
                 defaultValue={initialValues.warranty.providerContact}
@@ -490,9 +517,11 @@ export function AssetForm({ initialValues }: AssetFormProps) {
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="warrantyDocuments">
-                {locale === "th" ? "ลิงก์เอกสารประกัน" : "Warranty document links"}
+                {locale === "th"
+                  ? "ลิงก์เอกสารประกัน"
+                  : "Warranty document links"}
               </Label>
-              <textarea
+              <Textarea
                 className="border-input bg-background focus-visible:ring-ring min-h-24 w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
                 defaultValue={initialValues.warranty.documents.join("\n")}
                 id="warrantyDocuments"
@@ -504,7 +533,7 @@ export function AssetForm({ initialValues }: AssetFormProps) {
               <Label htmlFor="warrantyVoidReason">
                 {locale === "th" ? "เหตุผลยกเลิกประกัน" : "Void reason"}
               </Label>
-              <textarea
+              <Textarea
                 className="border-input bg-background focus-visible:ring-ring min-h-20 w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2"
                 defaultValue={initialValues.warranty.voidReason ?? ""}
                 id="warrantyVoidReason"

@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { ProfileForm } from "@/features/user-profile/components/profile-form";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
@@ -19,14 +20,11 @@ export default async function ProfilePage() {
 
   return (
     <section className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t("profile.title")}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {t("profile.description")}
-        </p>
-      </div>
+      <PageHeader
+        description={t("profile.description")}
+        eyebrow={locale === "th" ? "บัญชีผู้ใช้" : "User account"}
+        title={t("profile.title")}
+      />
 
       <Card>
         <CardHeader>

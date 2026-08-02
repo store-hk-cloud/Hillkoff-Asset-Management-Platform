@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 import { useLanguage } from "@/components/providers/language-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import {
   ASSET_CATEGORIES,
   type AssetCategoryKey,
@@ -127,7 +128,7 @@ export function AssetSearchForm({
           </div>
         ) : null}
       </div>
-      <select
+      <Select
         className="border-input bg-background h-10 rounded-md border px-3 text-sm"
         defaultValue={status}
         name="status"
@@ -139,8 +140,8 @@ export function AssetSearchForm({
           {locale === "th" ? "เก็บถาวร" : "Archived"}
         </option>
         <option value="all">{locale === "th" ? "ทั้งหมด" : "All"}</option>
-      </select>
-      <select
+      </Select>
+      <Select
         className="border-input bg-background h-10 rounded-md border px-3 text-sm"
         defaultValue={warehouseId ?? "all"}
         name="warehouseId"
@@ -156,8 +157,8 @@ export function AssetSearchForm({
               : ""}
           </option>
         ))}
-      </select>
-      <select
+      </Select>
+      <Select
         className="border-input bg-background h-10 rounded-md border px-3 text-sm"
         defaultValue={categoryKey}
         name="categoryKey"
@@ -172,7 +173,7 @@ export function AssetSearchForm({
               : category.nameEn}
           </option>
         ))}
-      </select>
+      </Select>
       <Button type="submit">{t("action.search")}</Button>
     </form>
   );

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { AnalyticsManagementService } from "@/services/analytics-management.service";
@@ -17,14 +18,15 @@ export default async function DashboardPage() {
   if (!analytics.canView(profile)) {
     return (
       <section className="space-y-6">
-        <div>
-          <p className="text-muted-foreground text-sm">
-            {t("dashboard.welcome")}
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {profile.displayName}
-          </h1>
-        </div>
+        <PageHeader
+          description={
+            locale === "th"
+              ? "ดูข้อมูลบัญชีและเข้าสู่พื้นที่ทำงานที่เหมาะกับบทบาทของคุณ"
+              : "Review your account and open the workspace for your role."
+          }
+          eyebrow={t("dashboard.welcome")}
+          title={profile.displayName}
+        />
         <Card>
           <CardContent className="space-y-4 py-6 text-sm">
             <p>{profile.email}</p>
@@ -48,31 +50,29 @@ export default async function DashboardPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-muted-foreground text-sm">
-            {locale === "th"
-              ? "ข้อมูลวิเคราะห์ผู้บริหาร"
-              : "Executive Analytics"}{" "}
-            · {snapshot.source}
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            {t("dashboard.title")}
-          </h1>
-        </div>
-        <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <Link href="/api/analytics/export/excel">
-              {locale === "th" ? "ส่งออก Excel" : "Export Excel"}
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/api/analytics/export/pdf">
-              {locale === "th" ? "ส่งออก PDF" : "Export PDF"}
-            </Link>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        action={
+          <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <Link href="/api/analytics/export/excel">
+                {locale === "th" ? "ส่งออก Excel" : "Export Excel"}
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/api/analytics/export/pdf">
+                {locale === "th" ? "ส่งออก PDF" : "Export PDF"}
+              </Link>
+            </Button>
+          </div>
+        }
+        description={
+          locale === "th"
+            ? "ติดตามตัวชี้วัดและแนวโน้มการจัดการสินทรัพย์"
+            : "Track asset-management metrics and operational trends."
+        }
+        eyebrow={`${locale === "th" ? "ข้อมูลวิเคราะห์ผู้บริหาร" : "Executive Analytics"} · ${snapshot.source}`}
+        title={t("dashboard.title")}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Metric
@@ -98,11 +98,15 @@ export default async function DashboardPage() {
           value={`${snapshot.pmCompletionRate.toFixed(1)}%`}
         />
         <Metric
-          title={locale === "th" ? "ประกันใกล้หมด 30 วัน" : "Warranty Expiring 30d"}
+          title={
+            locale === "th" ? "ประกันใกล้หมด 30 วัน" : "Warranty Expiring 30d"
+          }
           value={snapshot.warrantyExpiring30.toString()}
         />
         <Metric
-          title={locale === "th" ? "ประกันใกล้หมด 90 วัน" : "Warranty Expiring 90d"}
+          title={
+            locale === "th" ? "ประกันใกล้หมด 90 วัน" : "Warranty Expiring 90d"
+          }
           value={snapshot.warrantyExpiring90.toString()}
         />
       </div>
@@ -135,16 +139,16 @@ export default async function DashboardPage() {
                 ? `${item.daysRemaining} วัน`
                 : `${item.daysRemaining} days`,
           }))}
-          title={locale === "th" ? "เครื่องใกล้หมดประกัน" : "Expiring Warranties"}
+          title={
+            locale === "th" ? "เครื่องใกล้หมดประกัน" : "Expiring Warranties"
+          }
         />
         <ListCard
           items={snapshot.topFailureAssets.map((asset) => ({
             label: `${asset.assetCode} · ${asset.assetName}`,
             value: asset.value.toString(),
           }))}
-          title={
-            locale === "th" ? "เครื่องที่เสียบ่อย" : "Top Failure Assets"
-          }
+          title={locale === "th" ? "เครื่องที่เสียบ่อย" : "Top Failure Assets"}
         />
         <ListCard
           items={snapshot.topRepairCost.map((asset) => ({

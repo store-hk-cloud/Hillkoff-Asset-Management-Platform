@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { useLanguage } from "@/components/providers/language-provider";
 import type { InventoryPart } from "@/domain/entities/inventory";
 
@@ -193,7 +194,7 @@ export function InventoryManager({
         </h2>
         <div className="space-y-2">
           <Label htmlFor="partId">{locale === "th" ? "อะไหล่" : "Part"}</Label>
-          <select
+          <Select
             className="border-input bg-background h-11 w-full rounded-md border px-3 text-sm"
             id="partId"
             onChange={(event) => setSelected(event.target.value)}
@@ -204,12 +205,12 @@ export function InventoryManager({
                 {part.partNumber} · {part.name} ({part.quantityOnHand})
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="type">{locale === "th" ? "ประเภท" : "Type"}</Label>
-            <select
+            <Select
               className="border-input bg-background h-11 w-full rounded-md border px-3 text-sm"
               id="type"
               name="type"
@@ -225,7 +226,7 @@ export function InventoryManager({
                   ? "ปรับยอดสต็อก (+/-)"
                   : "Stock Adjustment (+/-)"}
               </option>
-            </select>
+            </Select>
           </div>
           <Field
             label={locale === "th" ? "จำนวน" : "Quantity"}
