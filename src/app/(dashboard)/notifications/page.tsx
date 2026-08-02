@@ -2,9 +2,18 @@ import { Bell } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatusBadge } from "@/components/shared/status-badge";
+import type { NotificationStatus } from "@/domain/entities/notification";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { NotificationManagementService } from "@/services/notification-management.service";
+
+function notificationTone(status: NotificationStatus) {
+  if (status === "sent") return "success" as const;
+  if (status === "failed") return "danger" as const;
+  if (status === "retry") return "warning" as const;
+  return "neutral" as const;
+}
 
 const service = new NotificationManagementService();
 export default async function NotificationsPage() {
@@ -55,9 +64,9 @@ export default async function NotificationsPage() {
               <CardHeader>
                 <div className="flex items-start justify-between gap-3">
                   <CardTitle className="text-base">{item.title}</CardTitle>
-                  <span className="bg-muted rounded-full px-2 py-1 text-xs">
+                  <StatusBadge tone={notificationTone(item.status)}>
                     {item.status}
-                  </span>
+                  </StatusBadge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">

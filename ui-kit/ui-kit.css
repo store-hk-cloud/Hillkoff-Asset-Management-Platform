@@ -36,6 +36,9 @@
   --danger: #c0392b;
   --danger-bg: rgba(192, 57, 43, 0.1);
   --danger-line: rgba(192, 57, 43, 0.32);
+  --info: #1d5fa8;
+  --info-bg: rgba(29, 95, 168, 0.1);
+  --info-line: rgba(29, 95, 168, 0.32);
 
   /* Shape */
   --radius-sm: 6px;
@@ -74,6 +77,9 @@
   --danger: #e0685c;
   --danger-bg: rgba(224, 104, 92, 0.14);
   --danger-line: rgba(224, 104, 92, 0.34);
+  --info: #5b9bd9;
+  --info-bg: rgba(91, 155, 217, 0.16);
+  --info-line: rgba(91, 155, 217, 0.36);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
@@ -184,6 +190,12 @@
   background: var(--danger-bg);
   color: var(--danger);
   border-color: var(--danger-line);
+}
+
+.status-badge.is-info {
+  background: var(--info-bg);
+  color: var(--info);
+  border-color: var(--info-line);
 }
 
 /* ---------------------------------------------------------------------- */

@@ -16,6 +16,7 @@ export async function GET(_request: Request, context: Context) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
 
+  const correlationId = crypto.randomUUID();
   try {
     const { userId } = await context.params;
     const user = await service.get(userId, session.profile);
@@ -24,7 +25,7 @@ export async function GET(_request: Request, context: Context) {
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    return userManagementErrorResponse(error);
+    return userManagementErrorResponse(error, correlationId);
   }
 }
 
@@ -35,18 +36,19 @@ export async function PATCH(request: Request, context: Context) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
 
+  const requestContext = createUserManagementContext(request, session.profile);
   try {
     const { userId } = await context.params;
     const user = await service.update(
       userId,
       managedUserUpdateSchema.parse(await request.json()),
-      createUserManagementContext(request, session.profile),
+      requestContext,
     );
     return NextResponse.json({
       success: true,
       data: { id: user.uid, version: user.version },
     });
   } catch (error) {
-    return userManagementErrorResponse(error);
+    return userManagementErrorResponse(error, requestContext.correlationId);
   }
 }

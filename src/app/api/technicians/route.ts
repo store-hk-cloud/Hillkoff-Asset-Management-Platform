@@ -9,12 +9,13 @@ const service = new TechnicianWorkspaceService();
 export async function GET() {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     return NextResponse.json({
       success: true,
       data: await service.technicians(session.profile),
     });
   } catch (error) {
-    return technicianErrorResponse(error);
+    return technicianErrorResponse(error, correlationId);
   }
 }

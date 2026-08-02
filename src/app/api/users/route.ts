@@ -15,6 +15,7 @@ export async function GET() {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
 
+  const correlationId = crypto.randomUUID();
   try {
     const users = await service.list(session.profile);
     return NextResponse.json(
@@ -22,7 +23,7 @@ export async function GET() {
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    return userManagementErrorResponse(error);
+    return userManagementErrorResponse(error, correlationId);
   }
 }
 
@@ -33,10 +34,11 @@ export async function POST(request: Request) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
 
+  const requestContext = createUserManagementContext(request, session.profile);
   try {
     const result = await service.create(
       managedUserCreateSchema.parse(await request.json()),
-      createUserManagementContext(request, session.profile),
+      requestContext,
     );
     return NextResponse.json(
       {
@@ -49,6 +51,6 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
-    return userManagementErrorResponse(error);
+    return userManagementErrorResponse(error, requestContext.correlationId);
   }
 }

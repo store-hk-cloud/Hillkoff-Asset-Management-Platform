@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { AssetError } from "@/domain/errors/asset.error";
 import { PmError } from "@/domain/errors/pm.error";
+import { logger } from "@/lib/logging/logger";
 import type { PmRequestContext } from "@/services/pm-management.service";
 
 export function createPmContext(
@@ -20,8 +21,9 @@ export function createPmContext(
   };
 }
 
-export function pmErrorResponse(error: unknown) {
+export function pmErrorResponse(error: unknown, correlationId?: string) {
   if (error instanceof AssetError) {
+    logger.warn("PM request rejected", { correlationId, code: error.code });
     return NextResponse.json(
       { success: false, error: { code: error.code, message: error.message } },
       { status: error.code === "ASSET_NOT_FOUND" ? 404 : 409 },
@@ -37,11 +39,13 @@ export function pmErrorResponse(error: unknown) {
           : error.code === "PM_VERSION_CONFLICT"
             ? 409
             : 400;
+    logger.warn("PM request rejected", { correlationId, code: error.code });
     return NextResponse.json(
       { success: false, error: { code: error.code, message: error.message } },
       { status },
     );
   }
+  logger.error("Unhandled PM request error", error, { correlationId });
   return NextResponse.json(
     {
       success: false,

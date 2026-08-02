@@ -11,13 +11,14 @@ const service = new InventoryManagementService();
 export async function GET() {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     return NextResponse.json({
       success: true,
       data: await service.list(session.profile),
     });
   } catch (error) {
-    return inventoryErrorResponse(error);
+    return inventoryErrorResponse(error, correlationId);
   }
 }
 
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     const part = await service.create(
       inventoryPartSchema.parse(await request.json()),
@@ -37,6 +39,6 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
-    return inventoryErrorResponse(error);
+    return inventoryErrorResponse(error, correlationId);
   }
 }

@@ -15,6 +15,7 @@ import { useLanguage } from "@/components/providers/language-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { StatusBadge } from "@/components/shared/status-badge";
 import type {
   TechnicianWorkItem,
   TechnicianWorkspace as Workspace,
@@ -265,16 +266,12 @@ function WorkSection({
               <CardContent className="space-y-3 p-4 pt-0 text-sm">
                 <p>{item.assetName}</p>
                 <div className="flex flex-wrap gap-2 text-xs">
-                  <span className="bg-muted rounded-full px-2 py-1">
-                    {typeLabel(item.type, locale)}
-                  </span>
-                  <span className="bg-muted rounded-full px-2 py-1">
-                    {item.workStatus}
-                  </span>
+                  <StatusBadge>{typeLabel(item.type, locale)}</StatusBadge>
+                  <StatusBadge>{item.workStatus}</StatusBadge>
                   {item.overdue ? (
-                    <span className="rounded-full bg-red-100 px-2 py-1 text-red-800">
+                    <StatusBadge tone="danger">
                       {locale === "th" ? "เกินกำหนด" : "Overdue"}
-                    </span>
+                    </StatusBadge>
                   ) : null}
                 </div>
                 {item.assignmentStatus === "pending" && !readOnly ? (

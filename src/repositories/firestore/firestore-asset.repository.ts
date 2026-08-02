@@ -146,6 +146,8 @@ function mapDocumentMetadata(data: DocumentData): AssetDocument {
   };
 }
 
+const WAREHOUSE_COUNT_SCAN_LIMIT = 500;
+
 function mapAsset(data: DocumentData): Asset {
   const status = data.status;
   const condition = data.condition;
@@ -618,12 +620,16 @@ export class FirestoreAssetRepository implements AssetRepository {
           return { warehouseId, count: snapshot.data().count };
         }
 
+        // Bound the scan: without this, a common first keyword combined with
+        // a rarer second keyword would force a full-collection read per
+        // warehouse just to compute a display count.
         const snapshot = await query
           .where(
             firstKeyword.length >= 2 ? "searchPrefixes" : "searchKeywords",
             "array-contains",
             firstKeyword,
           )
+          .limit(WAREHOUSE_COUNT_SCAN_LIMIT)
           .get();
         const count = snapshot.docs
           .map((document) => mapAsset(document.data()))

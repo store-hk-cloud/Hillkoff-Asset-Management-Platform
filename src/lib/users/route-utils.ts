@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { UserManagementError } from "@/domain/errors/user-management.error";
+import { logger } from "@/lib/logging/logger";
 import type { UserManagementRequestContext } from "@/services/user-management.service";
 
 export function createUserManagementContext(
@@ -19,7 +20,10 @@ export function createUserManagementContext(
   };
 }
 
-export function userManagementErrorResponse(error: unknown) {
+export function userManagementErrorResponse(
+  error: unknown,
+  correlationId?: string,
+) {
   if (error instanceof UserManagementError) {
     const status =
       error.code === "USER_ACCESS_DENIED" ||
@@ -31,12 +35,19 @@ export function userManagementErrorResponse(error: unknown) {
               error.code === "USER_VERSION_CONFLICT"
             ? 409
             : 400;
+    logger.warn("User management request rejected", {
+      correlationId,
+      code: error.code,
+    });
     return NextResponse.json(
       { success: false, error: { code: error.code, message: error.message } },
       { status },
     );
   }
 
+  logger.error("Unhandled user management request error", error, {
+    correlationId,
+  });
   return NextResponse.json(
     {
       success: false,

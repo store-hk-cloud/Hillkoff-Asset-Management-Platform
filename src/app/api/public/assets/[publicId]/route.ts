@@ -8,6 +8,7 @@ const service = new AssetIdentityManagementService();
 type RouteContext = { params: Promise<{ publicId: string }> };
 
 export async function GET(_request: Request, context: RouteContext) {
+  const correlationId = crypto.randomUUID();
   try {
     const { publicId } = await context.params;
     const session = await getCurrentSession();
@@ -22,6 +23,6 @@ export async function GET(_request: Request, context: RouteContext) {
       },
     );
   } catch (error) {
-    return identityErrorResponse(error);
+    return identityErrorResponse(error, correlationId);
   }
 }

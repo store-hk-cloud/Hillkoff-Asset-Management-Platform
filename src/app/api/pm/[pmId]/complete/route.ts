@@ -15,19 +15,16 @@ export async function POST(request: Request, context: Context) {
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const requestContext = createPmContext(request, session.profile);
   try {
     const { pmId } = await context.params;
     const input = completePmSchema.parse(await request.json());
-    const job = await service.complete(
-      pmId,
-      input,
-      createPmContext(request, session.profile),
-    );
+    const job = await service.complete(pmId, input, requestContext);
     return NextResponse.json({
       success: true,
       data: { id: job.id, status: job.status, version: job.version },
     });
   } catch (error) {
-    return pmErrorResponse(error);
+    return pmErrorResponse(error, requestContext.correlationId);
   }
 }

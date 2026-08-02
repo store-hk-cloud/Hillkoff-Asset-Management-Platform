@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { AssetError } from "@/domain/errors/asset.error";
 import { InstallationError } from "@/domain/errors/installation.error";
+import { logger } from "@/lib/logging/logger";
 import type { InstallationRequestContext } from "@/services/installation-management.service";
 
 export function createInstallationContext(
@@ -20,8 +21,15 @@ export function createInstallationContext(
   };
 }
 
-export function installationErrorResponse(error: unknown) {
+export function installationErrorResponse(
+  error: unknown,
+  correlationId?: string,
+) {
   if (error instanceof AssetError) {
+    logger.warn("Installation request rejected", {
+      correlationId,
+      code: error.code,
+    });
     return NextResponse.json(
       { success: false, error: { code: error.code, message: error.message } },
       { status: error.code === "ASSET_NOT_FOUND" ? 404 : 409 },
@@ -38,11 +46,18 @@ export function installationErrorResponse(error: unknown) {
           : error.code === "INSTALLATION_VERSION_CONFLICT"
             ? 409
             : 400;
+    logger.warn("Installation request rejected", {
+      correlationId,
+      code: error.code,
+    });
     return NextResponse.json(
       { success: false, error: { code: error.code, message: error.message } },
       { status },
     );
   }
+  logger.error("Unhandled installation request error", error, {
+    correlationId,
+  });
   return NextResponse.json(
     {
       success: false,

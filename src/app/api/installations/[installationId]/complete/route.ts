@@ -18,6 +18,7 @@ export async function POST(request: Request, context: Context) {
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const requestContext = createInstallationContext(request, session.profile);
   try {
     const { installationId } = await context.params;
     const input = completeInstallationSchema.parse(await request.json());
@@ -36,13 +37,13 @@ export async function POST(request: Request, context: Context) {
           signedAt: now,
         },
       },
-      createInstallationContext(request, session.profile),
+      requestContext,
     );
     return NextResponse.json({
       success: true,
       data: { id: installation.id, status: installation.status },
     });
   } catch (error) {
-    return installationErrorResponse(error);
+    return installationErrorResponse(error, requestContext.correlationId);
   }
 }

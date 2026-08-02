@@ -17,6 +17,7 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
 
+  const correlationId = crypto.randomUUID();
   try {
     const { assetCode } = await context.params;
     const asset = await warehouseService.findAssetByCode(
@@ -28,6 +29,6 @@ export async function GET(_request: Request, context: RouteContext) {
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    return warehouseErrorResponse(error);
+    return warehouseErrorResponse(error, correlationId);
   }
 }

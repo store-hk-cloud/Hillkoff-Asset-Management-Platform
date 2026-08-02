@@ -11,7 +11,7 @@ type RouteContext = { params: Promise<{ assetId: string }> };
 export async function GET(_request: Request, context: RouteContext) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
-
+  const correlationId = crypto.randomUUID();
   try {
     const { assetId } = await context.params;
     const result = await service.get(assetId, session.profile);
@@ -20,6 +20,6 @@ export async function GET(_request: Request, context: RouteContext) {
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    return identityErrorResponse(error);
+    return identityErrorResponse(error, correlationId);
   }
 }

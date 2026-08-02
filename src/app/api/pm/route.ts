@@ -20,6 +20,7 @@ function parseDateParam(value: string | null): Date | null {
 export async function GET(request: Request) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     const params = new URL(request.url).searchParams;
     const status =
@@ -39,7 +40,7 @@ export async function GET(request: Request) {
       }),
     });
   } catch (error) {
-    return pmErrorResponse(error);
+    return pmErrorResponse(error, correlationId);
   }
 }
 
@@ -49,17 +50,15 @@ export async function POST(request: Request) {
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const context = createPmContext(request, session.profile);
   try {
     const input = schedulePmSchema.parse(await request.json());
-    const job = await service.schedule(
-      input,
-      createPmContext(request, session.profile),
-    );
+    const job = await service.schedule(input, context);
     return NextResponse.json(
       { success: true, data: { id: job.id } },
       { status: 201 },
     );
   } catch (error) {
-    return pmErrorResponse(error);
+    return pmErrorResponse(error, context.correlationId);
   }
 }

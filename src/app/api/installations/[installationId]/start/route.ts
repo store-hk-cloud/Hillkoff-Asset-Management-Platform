@@ -17,17 +17,15 @@ export async function POST(request: Request, context: Context) {
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const requestContext = createInstallationContext(request, session.profile);
   try {
     const { installationId } = await context.params;
-    const installation = await service.start(
-      installationId,
-      createInstallationContext(request, session.profile),
-    );
+    const installation = await service.start(installationId, requestContext);
     return NextResponse.json({
       success: true,
       data: { id: installation.id, version: installation.version },
     });
   } catch (error) {
-    return installationErrorResponse(error);
+    return installationErrorResponse(error, requestContext.correlationId);
   }
 }

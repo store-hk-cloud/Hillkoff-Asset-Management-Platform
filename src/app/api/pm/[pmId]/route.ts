@@ -10,6 +10,7 @@ type Context = { params: Promise<{ pmId: string }> };
 export async function GET(_request: Request, context: Context) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     const { pmId } = await context.params;
     return NextResponse.json({
@@ -17,6 +18,6 @@ export async function GET(_request: Request, context: Context) {
       data: await service.get(pmId, session.profile),
     });
   } catch (error) {
-    return pmErrorResponse(error);
+    return pmErrorResponse(error, correlationId);
   }
 }

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { TechnicianAssignmentError } from "@/domain/services/technician-assignment.service";
+import { logger } from "@/lib/logging/logger";
 import type { TechnicianRequestContext } from "@/services/technician-workspace.service";
 
 export function createTechnicianContext(
@@ -19,7 +20,10 @@ export function createTechnicianContext(
   };
 }
 
-export function technicianErrorResponse(error: unknown) {
+export function technicianErrorResponse(
+  error: unknown,
+  correlationId?: string,
+) {
   if (error instanceof TechnicianAssignmentError) {
     const status =
       error.code === "TECHNICIAN_ACCESS_DENIED"
@@ -29,11 +33,18 @@ export function technicianErrorResponse(error: unknown) {
           : error.code === "TECHNICIAN_ASSIGNMENT_CONFLICT"
             ? 409
             : 400;
+    logger.warn("Technician request rejected", {
+      correlationId,
+      code: error.code,
+    });
     return NextResponse.json(
       { success: false, error: { code: error.code, message: error.message } },
       { status },
     );
   }
+  logger.error("Unhandled technician request error", error, {
+    correlationId,
+  });
   return NextResponse.json(
     {
       success: false,

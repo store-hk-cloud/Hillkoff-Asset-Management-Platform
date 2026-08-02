@@ -11,6 +11,8 @@ ui-debug.log*
 .env.local
 .env.*.local
 !.env.example
+*firebase-adminsdk*.json
+*service-account*.json
 *.tsbuildinfo
 coverage/
 dist/

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { ASSET_EVENT_TYPES } from "@/domain/entities/asset-event";
-import { AssetError } from "@/domain/errors/asset.error";
 import { getCurrentSession } from "@/lib/auth/dal";
+import { assetErrorResponse } from "@/lib/assets/route-utils";
 import { AssetManagementService } from "@/services/asset-management.service";
 
 const assetService = new AssetManagementService();
@@ -11,32 +11,6 @@ type RouteContext = {
   params: Promise<{ assetId: string }>;
 };
 
-function errorResponse(error: unknown) {
-  if (error instanceof AssetError) {
-    const status =
-      error.code === "ASSET_ACCESS_DENIED"
-        ? 403
-        : error.code === "ASSET_NOT_FOUND"
-          ? 404
-          : error.code.includes("CONFLICT")
-            ? 409
-            : 400;
-
-    return NextResponse.json(
-      { success: false, error: { code: error.code, message: error.message } },
-      { status },
-    );
-  }
-
-  return NextResponse.json(
-    {
-      success: false,
-      error: { code: "INVALID_ASSET", message: "Invalid asset request." },
-    },
-    { status: 400 },
-  );
-}
-
 export async function GET(request: Request, context: RouteContext) {
   const session = await getCurrentSession();
 
@@ -44,6 +18,7 @@ export async function GET(request: Request, context: RouteContext) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
 
+  const correlationId = crypto.randomUUID();
   try {
     const { assetId } = await context.params;
     const requestedTypes = new URL(request.url).searchParams
@@ -62,6 +37,6 @@ export async function GET(request: Request, context: RouteContext) {
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    return errorResponse(error);
+    return assetErrorResponse(error, correlationId);
   }
 }

@@ -4,10 +4,10 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatusBadge } from "@/components/shared/status-badge";
 import type { RepairStatus } from "@/domain/entities/repair-ticket";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
-import { cn } from "@/lib/utils";
 import { RepairManagementService } from "@/services/repair-management.service";
 
 const service = new RepairManagementService();
@@ -134,20 +134,18 @@ export default async function RepairsPage() {
 }
 
 function Status({ label, status }: { label: string; status: RepairStatus }) {
+  const tone =
+    status === "completed" || status === "closed"
+      ? "success"
+      : status === "waiting_parts"
+        ? "warning"
+        : status === "in_progress"
+          ? "info"
+          : "neutral";
+
   return (
-    <span
-      className={cn(
-        "shrink-0 rounded-full px-2 py-1 text-xs font-medium",
-        status === "completed" || status === "closed"
-          ? "bg-green-100 text-green-800"
-          : status === "waiting_parts"
-            ? "bg-amber-100 text-amber-800"
-            : status === "in_progress"
-              ? "bg-blue-100 text-blue-800"
-              : "bg-muted text-muted-foreground",
-      )}
-    >
+    <StatusBadge className="shrink-0" tone={tone}>
       {label}
-    </span>
+    </StatusBadge>
   );
 }

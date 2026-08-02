@@ -4,10 +4,10 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatusBadge } from "@/components/shared/status-badge";
 import type { InstallationStatus } from "@/domain/entities/installation";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
-import { cn } from "@/lib/utils";
 import { InstallationManagementService } from "@/services/installation-management.service";
 
 const service = new InstallationManagementService();
@@ -151,15 +151,11 @@ function Status({
   status: InstallationStatus;
 }) {
   return (
-    <span
-      className={cn(
-        "shrink-0 rounded-full px-2 py-1 text-xs font-medium",
-        status === "in_progress"
-          ? "bg-blue-100 text-blue-800"
-          : "bg-amber-100 text-amber-800",
-      )}
+    <StatusBadge
+      className="shrink-0"
+      tone={status === "in_progress" ? "info" : "warning"}
     >
       {label}
-    </span>
+    </StatusBadge>
   );
 }

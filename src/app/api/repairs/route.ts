@@ -14,13 +14,14 @@ const service = new RepairManagementService();
 export async function GET() {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     return NextResponse.json({
       success: true,
       data: await service.list(session.profile),
     });
   } catch (error) {
-    return repairErrorResponse(error);
+    return repairErrorResponse(error, correlationId);
   }
 }
 
@@ -30,17 +31,15 @@ export async function POST(request: Request) {
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const requestContext = createRepairContext(request, session.profile);
   try {
     const input = createRepairSchema.parse(await request.json());
-    const ticket = await service.create(
-      input,
-      createRepairContext(request, session.profile),
-    );
+    const ticket = await service.create(input, requestContext);
     return NextResponse.json(
       { success: true, data: { id: ticket.id } },
       { status: 201 },
     );
   } catch (error) {
-    return repairErrorResponse(error);
+    return repairErrorResponse(error, requestContext.correlationId);
   }
 }

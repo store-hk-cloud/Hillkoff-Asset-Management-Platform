@@ -15,6 +15,7 @@ type Context = { params: Promise<{ repairId: string }> };
 export async function GET(_request: Request, context: Context) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     const { repairId } = await context.params;
     return NextResponse.json({
@@ -22,7 +23,7 @@ export async function GET(_request: Request, context: Context) {
       data: await service.get(repairId, session.profile),
     });
   } catch (error) {
-    return repairErrorResponse(error);
+    return repairErrorResponse(error, correlationId);
   }
 }
 
@@ -32,6 +33,7 @@ export async function PATCH(request: Request, context: Context) {
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const requestContext = createRepairContext(request, session.profile);
   try {
     const { repairId } = await context.params;
     const input = updateRepairSchema.parse(await request.json());
@@ -46,7 +48,7 @@ export async function PATCH(request: Request, context: Context) {
           uploadedBy: session.profile.uid,
         })),
       },
-      createRepairContext(request, session.profile),
+      requestContext,
     );
     return NextResponse.json({
       success: true,
@@ -57,6 +59,6 @@ export async function PATCH(request: Request, context: Context) {
       },
     });
   } catch (error) {
-    return repairErrorResponse(error);
+    return repairErrorResponse(error, requestContext.correlationId);
   }
 }

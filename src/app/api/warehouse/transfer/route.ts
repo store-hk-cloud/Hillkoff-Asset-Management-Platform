@@ -22,12 +22,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
 
+  const requestContext = createWarehouseContext(request, session.profile);
   try {
     const input = transferAssetSchema.parse(await request.json());
-    const movement = await warehouseService.transfer(
-      input,
-      createWarehouseContext(request, session.profile),
-    );
+    const movement = await warehouseService.transfer(input, requestContext);
     return NextResponse.json(
       {
         success: true,
@@ -39,6 +37,6 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
-    return warehouseErrorResponse(error);
+    return warehouseErrorResponse(error, requestContext.correlationId);
   }
 }

@@ -10,6 +10,7 @@ type Context = { params: Promise<{ installationId: string }> };
 export async function GET(_request: Request, context: Context) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     const { installationId } = await context.params;
     return NextResponse.json({
@@ -17,6 +18,6 @@ export async function GET(_request: Request, context: Context) {
       data: await service.get(installationId, session.profile),
     });
   } catch (error) {
-    return installationErrorResponse(error);
+    return installationErrorResponse(error, correlationId);
   }
 }

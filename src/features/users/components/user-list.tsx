@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { useLanguage } from "@/components/providers/language-provider";
 import { Card, CardContent } from "@/components/ui/card";
+import { StatusBadge } from "@/components/shared/status-badge";
 import type { UserProfile } from "@/domain/entities/user-profile";
 
 export function UserList({ users }: { users: readonly UserProfile[] }) {
@@ -35,11 +36,13 @@ export function UserList({ users }: { users: readonly UserProfile[] }) {
                     (locale === "th" ? "ทุกขอบเขต" : "All scope")}
                 </p>
               </div>
-              <span
-                className={
+              <StatusBadge
+                tone={
                   user.status === "active"
-                    ? "text-sm font-medium text-emerald-700"
-                    : "text-muted-foreground text-sm font-medium"
+                    ? "success"
+                    : user.status === "invited"
+                      ? "warning"
+                      : "neutral"
                 }
               >
                 {locale === "th"
@@ -49,7 +52,7 @@ export function UserList({ users }: { users: readonly UserProfile[] }) {
                       ? "รอตั้งรหัสผ่าน"
                       : "ปิดใช้งาน"
                   : user.status}
-              </span>
+              </StatusBadge>
             </CardContent>
           </Card>
         </Link>

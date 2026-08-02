@@ -9,7 +9,11 @@ import {
   getSessionCookieOptions,
 } from "@/lib/auth/cookies";
 import { csrfTokensMatch, requestHasAllowedOrigin } from "@/lib/auth/csrf";
+import { logger } from "@/lib/logging/logger";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit/rate-limiter";
 import { AuthenticationService } from "@/services/authentication.service";
+
+const LOGIN_RATE_LIMIT = { max: 20, windowMs: 15 * 60 * 1000 };
 
 const requestSchema = z.object({
   idToken: z.string().min(1),
@@ -19,6 +23,28 @@ const requestSchema = z.object({
 const authenticationService = new AuthenticationService();
 
 export async function POST(request: Request) {
+  const ip = clientIp(request);
+  const rateLimit = await checkRateLimit(`login:${ip}`, LOGIN_RATE_LIMIT);
+  if (!rateLimit.allowed) {
+    logger.warn("Login rate limit exceeded", { ip });
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "RATE_LIMITED",
+          message: "Too many login attempts. Try again later.",
+        },
+      },
+      {
+        status: 429,
+        headers: {
+          "Cache-Control": "no-store",
+          "Retry-After": String(Math.ceil(rateLimit.retryAfterMs / 1000)),
+        },
+      },
+    );
+  }
+
   try {
     const payload = requestSchema.parse(await request.json());
     const cookieStore = await cookies();

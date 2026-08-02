@@ -1,8 +1,8 @@
 "use client";
 
 import { useLanguage } from "@/components/providers/language-provider";
+import { StatusBadge } from "@/components/shared/status-badge";
 import type { AssetCondition, AssetStatus } from "@/domain/entities/asset";
-import { cn } from "@/lib/utils";
 
 type AssetStatusBadgeProps = Readonly<{
   status?: AssetStatus;
@@ -28,19 +28,12 @@ export function AssetStatusBadge({ status, condition }: AssetStatusBadgeProps) {
           needs_repair: "Needs repair",
           out_of_service: "Out of service",
         };
+  const tone =
+    value === "active" || value === "operational"
+      ? "success"
+      : value === "needs_repair"
+        ? "warning"
+        : "neutral";
 
-  return (
-    <span
-      className={cn(
-        "inline-flex rounded-full px-2.5 py-1 text-xs font-medium",
-        value === "active" || value === "operational"
-          ? "bg-green-100 text-green-800"
-          : value === "needs_repair"
-            ? "bg-amber-100 text-amber-800"
-            : "bg-neutral-100 text-neutral-700",
-      )}
-    >
-      {labels[value] ?? value}
-    </span>
-  );
+  return <StatusBadge tone={tone}>{labels[value] ?? value}</StatusBadge>;
 }

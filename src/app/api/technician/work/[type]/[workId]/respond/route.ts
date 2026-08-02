@@ -23,16 +23,17 @@ export async function POST(
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const requestContext = createTechnicianContext(request, session.profile);
   try {
     const { type, workId } = await context.params;
     const result = await service.respond(
       technicianWorkTypeSchema.parse(type),
       workId,
       technicianResponseSchema.parse(await request.json()),
-      createTechnicianContext(request, session.profile),
+      requestContext,
     );
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    return technicianErrorResponse(error);
+    return technicianErrorResponse(error, requestContext.correlationId);
   }
 }

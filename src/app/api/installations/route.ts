@@ -14,13 +14,14 @@ const service = new InstallationManagementService();
 export async function GET() {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     return NextResponse.json({
       success: true,
       data: await service.listQueue(session.profile),
     });
   } catch (error) {
-    return installationErrorResponse(error);
+    return installationErrorResponse(error, correlationId);
   }
 }
 
@@ -30,17 +31,15 @@ export async function POST(request: Request) {
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const requestContext = createInstallationContext(request, session.profile);
   try {
     const input = scheduleInstallationSchema.parse(await request.json());
-    const installation = await service.schedule(
-      input,
-      createInstallationContext(request, session.profile),
-    );
+    const installation = await service.schedule(input, requestContext);
     return NextResponse.json(
       { success: true, data: { id: installation.id } },
       { status: 201 },
     );
   } catch (error) {
-    return installationErrorResponse(error);
+    return installationErrorResponse(error, requestContext.correlationId);
   }
 }

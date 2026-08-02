@@ -19,6 +19,7 @@ export async function POST(request: Request, context: RouteContext) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
 
+  const requestContext = createIdentityContext(request, session.profile);
   try {
     const { assetId } = await context.params;
     const input = nfcVerificationSchema.parse(await request.json());
@@ -26,13 +27,13 @@ export async function POST(request: Request, context: RouteContext) {
       assetId,
       input.observedUrl,
       input.tagSerialNumber,
-      createIdentityContext(request, session.profile),
+      requestContext,
     );
     return NextResponse.json({
       success: true,
       data: { status: registration.status },
     });
   } catch (error) {
-    return identityErrorResponse(error);
+    return identityErrorResponse(error, requestContext.correlationId);
   }
 }

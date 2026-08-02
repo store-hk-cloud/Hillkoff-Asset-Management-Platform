@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { AssetError } from "@/domain/errors/asset.error";
 import { assetUpdateSchema } from "@/features/assets/schemas/asset.schema";
 import { getCurrentSession } from "@/lib/auth/dal";
+import { assetErrorResponse } from "@/lib/assets/route-utils";
 import { isTrustedMutationRequest } from "@/lib/auth/mutation-security";
 import { AssetManagementService } from "@/services/asset-management.service";
 
@@ -27,32 +27,6 @@ function createContext(
   };
 }
 
-function errorResponse(error: unknown) {
-  if (error instanceof AssetError) {
-    const status =
-      error.code === "ASSET_ACCESS_DENIED"
-        ? 403
-        : error.code === "ASSET_NOT_FOUND"
-          ? 404
-          : error.code.includes("CONFLICT")
-            ? 409
-            : 400;
-
-    return NextResponse.json(
-      { success: false, error: { code: error.code, message: error.message } },
-      { status },
-    );
-  }
-
-  return NextResponse.json(
-    {
-      success: false,
-      error: { code: "INVALID_ASSET", message: "Invalid asset request." },
-    },
-    { status: 400 },
-  );
-}
-
 export async function GET(_request: Request, context: RouteContext) {
   const session = await getCurrentSession();
 
@@ -60,6 +34,7 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
 
+  const correlationId = crypto.randomUUID();
   try {
     const { assetId } = await context.params;
     const asset = await assetService.get(assetId, session.profile);
@@ -68,7 +43,7 @@ export async function GET(_request: Request, context: RouteContext) {
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    return errorResponse(error);
+    return assetErrorResponse(error, correlationId);
   }
 }
 
@@ -83,17 +58,14 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
 
+  const requestContext = createContext(request, session.profile);
   try {
     const { assetId } = await context.params;
     const input = assetUpdateSchema.parse(await request.json());
-    const asset = await assetService.update(
-      assetId,
-      input,
-      createContext(request, session.profile),
-    );
+    const asset = await assetService.update(assetId, input, requestContext);
     return NextResponse.json({ success: true, data: { id: asset.id } });
   } catch (error) {
-    return errorResponse(error);
+    return assetErrorResponse(error, requestContext.correlationId);
   }
 }
 
@@ -108,14 +80,12 @@ export async function DELETE(request: Request, context: RouteContext) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
 
+  const requestContext = createContext(request, session.profile);
   try {
     const { assetId } = await context.params;
-    const asset = await assetService.archive(
-      assetId,
-      createContext(request, session.profile),
-    );
+    const asset = await assetService.archive(assetId, requestContext);
     return NextResponse.json({ success: true, data: { id: asset.id } });
   } catch (error) {
-    return errorResponse(error);
+    return assetErrorResponse(error, requestContext.correlationId);
   }
 }

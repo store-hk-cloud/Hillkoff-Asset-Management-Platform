@@ -15,6 +15,7 @@ export async function PATCH(request: Request, context: Context) {
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     const { partId } = await context.params;
     const part = await service.update(
@@ -27,7 +28,7 @@ export async function PATCH(request: Request, context: Context) {
       data: { id: part.id, version: part.version },
     });
   } catch (error) {
-    return inventoryErrorResponse(error);
+    return inventoryErrorResponse(error, correlationId);
   }
 }
 
@@ -37,6 +38,7 @@ export async function DELETE(request: Request, context: Context) {
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     const { partId } = await context.params;
     const body = (await request.json()) as { expectedVersion?: unknown };
@@ -56,6 +58,6 @@ export async function DELETE(request: Request, context: Context) {
       data: { id: part.id, version: part.version },
     });
   } catch (error) {
-    return inventoryErrorResponse(error);
+    return inventoryErrorResponse(error, correlationId);
   }
 }

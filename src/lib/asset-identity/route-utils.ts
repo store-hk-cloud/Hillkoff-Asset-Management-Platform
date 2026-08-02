@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { AssetIdentityError } from "@/domain/errors/asset-identity.error";
+import { logger } from "@/lib/logging/logger";
 import type { IdentityRequestContext } from "@/services/asset-identity-management.service";
 
 export function createIdentityContext(
@@ -19,7 +20,7 @@ export function createIdentityContext(
   };
 }
 
-export function identityErrorResponse(error: unknown) {
+export function identityErrorResponse(error: unknown, correlationId?: string) {
   if (error instanceof AssetIdentityError) {
     const status =
       error.code === "IDENTITY_ACCESS_DENIED"
@@ -30,12 +31,19 @@ export function identityErrorResponse(error: unknown) {
           : error.code === "ASSET_VERSION_CONFLICT"
             ? 409
             : 400;
+    logger.warn("Asset identity request rejected", {
+      correlationId,
+      code: error.code,
+    });
     return NextResponse.json(
       { success: false, error: { code: error.code, message: error.message } },
       { status },
     );
   }
 
+  logger.error("Unhandled asset identity request error", error, {
+    correlationId,
+  });
   return NextResponse.json(
     {
       success: false,

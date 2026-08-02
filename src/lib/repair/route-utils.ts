@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { AssetError } from "@/domain/errors/asset.error";
 import { RepairError } from "@/domain/errors/repair.error";
+import { logger } from "@/lib/logging/logger";
 import type { RepairRequestContext } from "@/services/repair-management.service";
 
 export function createRepairContext(
@@ -20,8 +21,12 @@ export function createRepairContext(
   };
 }
 
-export function repairErrorResponse(error: unknown) {
+export function repairErrorResponse(error: unknown, correlationId?: string) {
   if (error instanceof AssetError) {
+    logger.warn("Repair request rejected", {
+      correlationId,
+      code: error.code,
+    });
     return NextResponse.json(
       { success: false, error: { code: error.code, message: error.message } },
       { status: error.code === "ASSET_NOT_FOUND" ? 404 : 409 },
@@ -37,11 +42,16 @@ export function repairErrorResponse(error: unknown) {
           : error.code === "REPAIR_VERSION_CONFLICT"
             ? 409
             : 400;
+    logger.warn("Repair request rejected", {
+      correlationId,
+      code: error.code,
+    });
     return NextResponse.json(
       { success: false, error: { code: error.code, message: error.message } },
       { status },
     );
   }
+  logger.error("Unhandled repair request error", error, { correlationId });
   return NextResponse.json(
     {
       success: false,

@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { AssetError } from "@/domain/errors/asset.error";
 import { WarehouseError } from "@/domain/errors/warehouse.error";
+import { logger } from "@/lib/logging/logger";
 import type { WarehouseRequestContext } from "@/services/warehouse-management.service";
 
 export function createWarehouseContext(
@@ -20,8 +21,15 @@ export function createWarehouseContext(
   };
 }
 
-export function warehouseErrorResponse(error: unknown) {
+export function warehouseErrorResponse(
+  error: unknown,
+  correlationId?: string,
+) {
   if (error instanceof AssetError) {
+    logger.warn("Warehouse request rejected", {
+      correlationId,
+      code: error.code,
+    });
     return NextResponse.json(
       { success: false, error: { code: error.code, message: error.message } },
       { status: error.code === "ASSET_NOT_FOUND" ? 404 : 409 },
@@ -40,12 +48,17 @@ export function warehouseErrorResponse(error: unknown) {
             ? 409
             : 400;
 
+    logger.warn("Warehouse request rejected", {
+      correlationId,
+      code: error.code,
+    });
     return NextResponse.json(
       { success: false, error: { code: error.code, message: error.message } },
       { status },
     );
   }
 
+  logger.error("Unhandled warehouse request error", error, { correlationId });
   return NextResponse.json(
     {
       success: false,

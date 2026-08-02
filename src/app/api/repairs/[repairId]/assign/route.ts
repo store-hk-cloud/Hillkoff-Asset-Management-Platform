@@ -18,14 +18,11 @@ export async function POST(request: Request, context: Context) {
   }
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const requestContext = createRepairContext(request, session.profile);
   try {
     const { repairId } = await context.params;
     const input = assignRepairSchema.parse(await request.json());
-    const ticket = await service.assign(
-      repairId,
-      input,
-      createRepairContext(request, session.profile),
-    );
+    const ticket = await service.assign(repairId, input, requestContext);
     return NextResponse.json({
       success: true,
       data: {
@@ -35,6 +32,6 @@ export async function POST(request: Request, context: Context) {
       },
     });
   } catch (error) {
-    return repairErrorResponse(error);
+    return repairErrorResponse(error, requestContext.correlationId);
   }
 }

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { AssetError } from "@/domain/errors/asset.error";
 import {
   assetCreateSchema,
   assetSearchSchema,
 } from "@/features/assets/schemas/asset.schema";
 import { getCurrentSession } from "@/lib/auth/dal";
+import { assetErrorResponse } from "@/lib/assets/route-utils";
 import { isTrustedMutationRequest } from "@/lib/auth/mutation-security";
 import { AssetManagementService } from "@/services/asset-management.service";
 
@@ -26,35 +26,6 @@ function createContext(
   };
 }
 
-function assetErrorResponse(error: unknown) {
-  if (error instanceof AssetError) {
-    const status =
-      error.code === "ASSET_ACCESS_DENIED"
-        ? 403
-        : error.code === "ASSET_CODE_CONFLICT" ||
-            error.code === "ASSET_SERIAL_CONFLICT" ||
-            error.code === "ASSET_REFERENCE_AMBIGUOUS" ||
-            error.code === "ASSET_VERSION_CONFLICT"
-          ? 409
-          : error.code === "ASSET_NOT_FOUND"
-            ? 404
-            : 400;
-
-    return NextResponse.json(
-      { success: false, error: { code: error.code, message: error.message } },
-      { status },
-    );
-  }
-
-  return NextResponse.json(
-    {
-      success: false,
-      error: { code: "INVALID_ASSET", message: "Invalid asset data." },
-    },
-    { status: 400 },
-  );
-}
-
 export async function GET(request: Request) {
   const session = await getCurrentSession();
 
@@ -62,6 +33,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
 
+  const correlationId = crypto.randomUUID();
   try {
     const url = new URL(request.url);
     const criteria = assetSearchSchema.parse({
@@ -78,7 +50,7 @@ export async function GET(request: Request) {
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    return assetErrorResponse(error);
+    return assetErrorResponse(error, correlationId);
   }
 }
 
@@ -93,18 +65,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
 
+  const requestContext = createContext(request, session.profile);
   try {
     const input = assetCreateSchema.parse(await request.json());
-    const asset = await assetService.create(
-      input,
-      createContext(request, session.profile),
-    );
+    const asset = await assetService.create(input, requestContext);
 
     return NextResponse.json(
       { success: true, data: { id: asset.id } },
       { status: 201 },
     );
   } catch (error) {
-    return assetErrorResponse(error);
+    return assetErrorResponse(error, requestContext.correlationId);
   }
 }

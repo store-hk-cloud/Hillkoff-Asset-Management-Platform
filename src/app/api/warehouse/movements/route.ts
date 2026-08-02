@@ -14,6 +14,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
 
+  const correlationId = crypto.randomUUID();
   try {
     const type = movementSearchSchema.parse({
       type: new URL(request.url).searchParams.get("type") ?? "all",
@@ -27,6 +28,6 @@ export async function GET(request: Request) {
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    return warehouseErrorResponse(error);
+    return warehouseErrorResponse(error, correlationId);
   }
 }

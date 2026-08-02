@@ -12,6 +12,7 @@ export async function GET(
 ) {
   const session = await getCurrentSession();
   if (!session) return NextResponse.json({ success: false }, { status: 401 });
+  const correlationId = crypto.randomUUID();
   try {
     const { reference } = await context.params;
     return NextResponse.json({
@@ -22,6 +23,6 @@ export async function GET(
       ),
     });
   } catch (error) {
-    return technicianErrorResponse(error);
+    return technicianErrorResponse(error, correlationId);
   }
 }
