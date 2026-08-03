@@ -982,7 +982,287 @@ export const helpGuides: readonly HelpGuide[] = [
       },
     ],
   },
+  {
+    id: "dashboard-overview",
+    category: "administration",
+    icon: "book",
+    roles: ["all"],
+    title: {
+      th: "คู่มือการทำงานหน้า Dashboard",
+      en: "Dashboard operating guide",
+    },
+    summary: {
+      th: "วิธีอ่านภาพรวม ตรวจงานค้าง และเปลี่ยนตัวเลขให้เป็นรายการที่ต้องดำเนินการ",
+      en: "How to read the overview, identify backlog, and turn indicators into actions.",
+    },
+    outcome: {
+      th: "เริ่มต้นวันทำงานด้วยภาพรวมที่ถูกต้อง รู้ว่างานใดเร่งด่วนและต้องส่งต่อให้ใคร",
+      en: "Start the day with a reliable overview, clear priorities, and named owners for follow-up.",
+    },
+    steps: [
+      {
+        title: {
+          th: "เปิด Dashboard และตรวจบทบาท",
+          en: "Open Dashboard and confirm scope",
+        },
+        detail: {
+          th: "ตรวจว่าชื่อผู้ใช้และบทบาทถูกต้อง เพราะตัวเลขและเมนูจะแสดงตามสิทธิ์ของคุณ อ่านช่วงเวลาและแหล่งข้อมูลก่อนนำตัวเลขไปสรุป",
+          en: "Confirm the signed-in user and role because metrics and menus are permission-scoped. Check the time range and data source before drawing conclusions.",
+        },
+        href: "/dashboard",
+      },
+      {
+        title: {
+          th: "ตรวจเครื่องและงานที่ผิดปกติ",
+          en: "Review machine and job exceptions",
+        },
+        detail: {
+          th: "ดูเครื่องตามสถานะ งานซ่อมที่ค้าง เครื่องเสียบ่อย และรายการที่ใกล้หมดประกัน แล้วเปิดรายการต้นทางเพื่อดูรายละเอียดก่อนมอบหมายงาน",
+          en: "Review asset status, open repairs, repeat failures, and expiring warranties. Open the source records before assigning follow-up work.",
+        },
+        href: "/assets",
+      },
+      {
+        title: {
+          th: "ตรวจ PM และสต็อกที่มีผลต่อการบริการ",
+          en: "Review PM and stock constraints",
+        },
+        detail: {
+          th: "ตรวจอัตรา PM ที่เสร็จ งานที่ใกล้ครบกำหนด และอะไหล่ต่ำกว่าจุดสั่งซื้อ เชื่อมโยงรายการกับทีมช่างหรือคลังเพื่อกำหนดเจ้าของและกำหนดเวลา",
+          en: "Review PM completion, due work, and parts below reorder point. Route each issue to the technician or warehouse owner with a due time.",
+        },
+        href: "/pm",
+      },
+      {
+        title: {
+          th: "บันทึกผลการติดตามที่ต้นทาง",
+          en: "Close the loop at the source",
+        },
+        detail: {
+          th: "Dashboard ใช้สำหรับชี้เป้า ไม่ใช่ที่ปิดงาน หลังติดตามแล้วให้อัปเดตสถานะในโมดูลต้นทางและตรวจว่าตัวเลขสะท้อนการเปลี่ยนแปลงในรอบถัดไป",
+          en: "Dashboard is a signal, not the place to close work. Update the source module and confirm the next refresh reflects the change.",
+        },
+      },
+    ],
+    checklist: [
+      {
+        th: "ตรวจช่วงเวลาและขอบเขตข้อมูล",
+        en: "Confirm time range and data scope.",
+      },
+      {
+        th: "เปิดรายการต้นทางก่อนตัดสินใจ",
+        en: "Open source records before deciding.",
+      },
+      {
+        th: "ทุกประเด็นมีเจ้าของและกำหนดเวลา",
+        en: "Every issue has an owner and due time.",
+      },
+      { th: "ปิดงานในโมดูลต้นทาง", en: "Close work in the source module." },
+    ],
+    cautions: [
+      {
+        th: "อย่าสรุปจากตัวเลขอย่างเดียว หากจะอนุมัติหรือแก้ไขต้องตรวจรายละเอียดรายการจริง",
+        en: "Do not act on a number alone; inspect the source record before approving or correcting work.",
+      },
+    ],
+  },
+  {
+    id: "preventive-maintenance",
+    category: "service-operations",
+    icon: "calendar",
+    roles: [
+      "admin",
+      "warehouse",
+      "technician",
+      "branch",
+      "customer",
+      "executive",
+    ],
+    title: {
+      th: "คู่มือการทำงาน PM โดยเฉพาะ",
+      en: "Preventive maintenance operating guide",
+    },
+    summary: {
+      th: "วางรอบ PM ตรวจงานที่ถึงกำหนด บันทึกผลตาม checklist และสร้างรอบถัดไปให้ต่อเนื่อง",
+      en: "Plan PM cycles, execute due work, record checklist results, and create the next cycle without gaps.",
+    },
+    outcome: {
+      th: "เครื่องมีแผน PM ที่ชัดเจน งานที่ทำจริงมีผลตรวจและหลักฐานครบ และรอบถัดไปไม่หลุดจากระบบ",
+      en: "Each machine has a clear PM plan, completed work has evidence, and the next due cycle is preserved.",
+    },
+    steps: [
+      {
+        title: { th: "ตรวจรายการ PM ที่ถึงกำหนด", en: "Review due PM work" },
+        detail: {
+          th: "เปิด PM ตรวจเครื่อง วันที่ครบกำหนด รอบความถี่ และประวัติครั้งล่าสุด จัดลำดับงานที่เลยกำหนดหรือมีความเสี่ยงสูงก่อน",
+          en: "Open PM and review machine, due date, cadence, and last completion. Prioritize overdue or high-risk work first.",
+        },
+        href: "/pm",
+      },
+      {
+        title: {
+          th: "จัดตารางและเตรียมช่าง",
+          en: "Schedule and prepare the technician",
+        },
+        detail: {
+          th: "กำหนดวันเวลา สถานที่ ผู้รับผิดชอบ เครื่องมือ และอะไหล่ที่จำเป็น ตรวจไม่ให้ชนกับงานบริการอื่น และยืนยันความพร้อมกับลูกค้าหรือสาขา",
+          en: "Set date, time, location, owner, tools, and required parts. Check conflicts with other service work and confirm readiness with the customer or branch.",
+        },
+        href: "/pm/schedule",
+      },
+      {
+        title: {
+          th: "ตรวจตาม checklist และบันทึกค่าจริง",
+          en: "Execute the checklist and record actual readings",
+        },
+        detail: {
+          th: "เช็กอินที่เครื่อง ตรวจสภาพตามรายการ บันทึกค่าอ่าน อาการผิดปกติ รูปถ่าย และอะไหล่ที่ใช้ หากพบงานซ่อมเพิ่มเติมให้เปิดหรือเชื่อมโยงงานซ่อมแทนการใส่รวมแบบไม่มีขอบเขต",
+          en: "Check in at the machine, complete each item, and record readings, exceptions, photos, and parts. Create or link a repair for additional work instead of hiding it in an unscoped note.",
+        },
+      },
+      {
+        title: {
+          th: "ตรวจผลและรับรองการปิดงาน",
+          en: "Verify results and close the work",
+        },
+        detail: {
+          th: "ทดสอบการทำงาน สรุปสิ่งที่ทำและคำแนะนำ ส่งมอบให้ผู้รับผิดชอบตรวจรับ แล้วปิดงานด้วยสถานะที่ตรงกับผลจริง",
+          en: "Test operation, summarize work and recommendations, obtain acceptance from the responsible person, and close with the status that matches reality.",
+        },
+      },
+      {
+        title: {
+          th: "กำหนดรอบถัดไปและตรวจประวัติ",
+          en: "Set the next cycle and verify history",
+        },
+        detail: {
+          th: "หลังปิดงานให้ตรวจวันครบกำหนดครั้งถัดไปและเปิด history ยืนยันว่าผล PM ถูกบันทึกกับเครื่องที่ถูกต้อง หากรอบเปลี่ยนให้บันทึกเหตุผลไว้",
+          en: "After closeout, verify the next due date and review history against the correct machine. Record a reason whenever the cadence changes.",
+        },
+        href: "/pm/history",
+      },
+    ],
+    checklist: [
+      {
+        th: "เครื่องและรอบ PM ถูกต้อง",
+        en: "Machine and PM cycle are correct.",
+      },
+      {
+        th: "ครบทุก checklist item และค่าที่วัดได้",
+        en: "Every checklist item and reading is recorded.",
+      },
+      {
+        th: "แยกงานซ่อมเพิ่มเติมออกจาก PM",
+        en: "Additional repair work is separated from PM.",
+      },
+      {
+        th: "มีการรับรองผลและวันครบกำหนดครั้งถัดไป",
+        en: "Acceptance and the next due date are present.",
+      },
+    ],
+    cautions: [
+      {
+        th: "ห้ามปิด PM โดยไม่ตรวจวันรอบถัดไป เพราะจะทำให้เครื่องหลุดจากแผนบำรุงรักษา",
+        en: "Never close PM without checking the next due date; otherwise the machine can fall out of the maintenance plan.",
+      },
+    ],
+  },
+  {
+    id: "inventory-control",
+    category: "warehouse",
+    icon: "warehouse",
+    roles: ["admin", "warehouse", "technician", "executive"],
+    title: {
+      th: "คู่มือควบคุมสต็อกอะไหล่โดยเฉพาะ",
+      en: "Inventory control operating guide",
+    },
+    summary: {
+      th: "ตรวจยอดอะไหล่ รับเข้า ตัดใช้ ตรวจจุดสั่งซื้อ และแก้ความคลาดเคลื่อนอย่างมีหลักฐาน",
+      en: "Check part balances, receive stock, consume parts, monitor reorder points, and correct variances with evidence.",
+    },
+    outcome: {
+      th: "ยอดอะไหล่ในระบบตรงกับของจริง ต้นทุนเชื่อมโยงกับงาน และการเติมสต็อกเกิดก่อนของขาด",
+      en: "System balances match physical stock, costs trace to work, and replenishment happens before stockout.",
+    },
+    steps: [
+      {
+        title: {
+          th: "ตรวจยอดก่อนหยิบหรือรับของ",
+          en: "Check balance before picking or receiving",
+        },
+        detail: {
+          th: "ค้นหาด้วยรหัสอะไหล่ ตรวจคลัง จำนวนคงเหลือ จุดสั่งซื้อ และรายการค้าง หากยอดในระบบกับของจริงไม่ตรงให้หยุดและรายงานก่อนทำรายการใหม่",
+          en: "Search by part number and verify warehouse, on-hand quantity, reorder point, and pending movements. If system and physical stock differ, stop and report before creating another transaction.",
+        },
+        href: "/inventory",
+      },
+      {
+        title: {
+          th: "รับเข้าและจัดเก็บตามคลัง",
+          en: "Receive and put away by warehouse",
+        },
+        detail: {
+          th: "ตรวจจำนวน รุ่น lot/serial สภาพ และเอกสารรับเข้า จากนั้นบันทึกเข้าคลังที่ถูกต้อง พร้อมระบุข้อยกเว้นเมื่อของชำรุดหรือจำนวนไม่ครบ",
+          en: "Verify quantity, model, lot/serial, condition, and receipt documents. Post to the correct warehouse and record exceptions for damage or shortage.",
+        },
+      },
+      {
+        title: {
+          th: "ตัดอะไหล่จากงานที่ใช้จริง",
+          en: "Consume parts from the actual job",
+        },
+        detail: {
+          th: "เลือกงานซ่อมหรืองานบริการที่ใช้อะไหล่ ระบุรายการและจำนวนตามจริง ตรวจผู้รับผิดชอบและเหตุผล เพื่อให้ต้นทุนและประวัติเครื่องย้อนกลับได้",
+          en: "Select the repair or service job that used the part, record the actual item and quantity, and include owner and reason so cost and machine history remain traceable.",
+        },
+        href: "/warehouse/movements",
+      },
+      {
+        title: {
+          th: "ติดตามจุดสั่งซื้อและรายการผิดปกติ",
+          en: "Monitor reorder points and exceptions",
+        },
+        detail: {
+          th: "ตรวจรายการใกล้หมดหรือหมดแล้ว จัดลำดับตามงานที่กำลังจะเกิดขึ้น และตรวจ movement log เมื่อพบยอดติดลบ รายการซ้ำ หรือการแก้ไขที่ไม่คุ้นเคย",
+          en: "Review low or out-of-stock parts, prioritize by upcoming work, and inspect movement logs for negative balances, duplicates, or unfamiliar corrections.",
+        },
+      },
+      {
+        title: { th: "กระทบยอดและส่งต่อผู้ดูแล", en: "Reconcile and hand off" },
+        detail: {
+          th: "เปรียบเทียบยอดระบบกับการนับจริง บันทึกผลต่างและเอกสารอ้างอิง แล้วส่งให้ผู้ดูแลคลังอนุมัติการแก้ไขตามขั้นตอน ห้ามปรับยอดด้วยรายการหลอก",
+          en: "Reconcile system balance with the physical count, record variance and references, and route corrections for warehouse approval. Never force a balance with a false movement.",
+        },
+      },
+    ],
+    checklist: [
+      {
+        th: "รหัสอะไหล่และคลังถูกต้อง",
+        en: "Part number and warehouse are correct.",
+      },
+      {
+        th: "จำนวนตรงกับของจริงและเอกสาร",
+        en: "Quantity matches physical stock and documents.",
+      },
+      {
+        th: "การตัดใช้ผูกกับงานจริง",
+        en: "Consumption is linked to the actual job.",
+      },
+      {
+        th: "ผลต่างมีหลักฐานและผู้อนุมัติ",
+        en: "Variance has evidence and an approver.",
+      },
+    ],
+    cautions: [
+      {
+        th: "อย่าปรับยอดเพื่อให้ตัวเลขสวย ต้องแก้ด้วยกระบวนการกระทบยอดที่ตรวจสอบได้",
+        en: "Do not adjust balances just to make numbers look right; use an auditable reconciliation process.",
+      },
+    ],
+  },
 ];
+
+export type HelpGuideId = (typeof helpGuides)[number]["id"];
 
 export const helpCategoryLabels: Readonly<Record<HelpCategory, LocalizedText>> =
   {

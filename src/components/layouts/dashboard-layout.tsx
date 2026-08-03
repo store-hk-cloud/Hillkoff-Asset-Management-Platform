@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import {
   Bell,
+  BookOpen,
   Boxes,
   CalendarCog,
   ChevronRight,
@@ -29,6 +30,8 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import type { UserRole } from "@/domain/value-objects/user-role";
 import { LogoutButton } from "@/features/auth/components/logout-button";
+import type { HelpGuideId } from "@/features/help/help-content";
+import type { Locale } from "@/lib/i18n/config";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +43,7 @@ type NavigationItem = {
   roles: readonly UserRole[];
   icon: LucideIcon;
   group: NavigationGroup;
+  guideId: HelpGuideId;
 };
 
 type DashboardLayoutProps = Readonly<{
@@ -65,6 +69,7 @@ const navigation: readonly NavigationItem[] = [
     roles: allRoles,
     icon: LayoutDashboard,
     group: "workspace",
+    guideId: "dashboard-overview",
   },
   {
     href: "/assets",
@@ -72,6 +77,7 @@ const navigation: readonly NavigationItem[] = [
     roles: allRoles,
     icon: Boxes,
     group: "workspace",
+    guideId: "machines-and-identity",
   },
   {
     href: "/technician",
@@ -79,6 +85,7 @@ const navigation: readonly NavigationItem[] = [
     roles: ["technician"],
     icon: HardHat,
     group: "workspace",
+    guideId: "technician-daily-work",
   },
   {
     href: "/service-jobs",
@@ -94,6 +101,7 @@ const navigation: readonly NavigationItem[] = [
     ],
     icon: ClipboardList,
     group: "workspace",
+    guideId: "service-lifecycle",
   },
   {
     href: "/warehouse",
@@ -101,6 +109,7 @@ const navigation: readonly NavigationItem[] = [
     roles: ["admin", "warehouse", "sales", "branch", "executive"],
     icon: Warehouse,
     group: "operations",
+    guideId: "warehouse-and-inventory",
   },
   {
     href: "/installations",
@@ -108,6 +117,7 @@ const navigation: readonly NavigationItem[] = [
     roles: ["admin", "technician", "sales", "customer", "executive"],
     icon: PackageCheck,
     group: "operations",
+    guideId: "installation-and-pm",
   },
   {
     href: "/repairs",
@@ -115,6 +125,7 @@ const navigation: readonly NavigationItem[] = [
     roles: allRoles,
     icon: Wrench,
     group: "operations",
+    guideId: "repairs",
   },
   {
     href: "/pm",
@@ -129,6 +140,7 @@ const navigation: readonly NavigationItem[] = [
     ],
     icon: CalendarCog,
     group: "operations",
+    guideId: "preventive-maintenance",
   },
   {
     href: "/inventory",
@@ -136,6 +148,7 @@ const navigation: readonly NavigationItem[] = [
     roles: ["admin", "warehouse", "technician", "executive"],
     icon: PackageCheck,
     group: "operations",
+    guideId: "inventory-control",
   },
   {
     href: "/notifications",
@@ -143,6 +156,7 @@ const navigation: readonly NavigationItem[] = [
     roles: ["admin", "technician", "executive"],
     icon: Bell,
     group: "system",
+    guideId: "notifications-and-dashboard",
   },
   {
     href: "/users",
@@ -150,6 +164,7 @@ const navigation: readonly NavigationItem[] = [
     roles: ["admin"],
     icon: Users,
     group: "system",
+    guideId: "users-and-access",
   },
   {
     href: "/help",
@@ -157,6 +172,7 @@ const navigation: readonly NavigationItem[] = [
     roles: allRoles,
     icon: CircleHelp,
     group: "system",
+    guideId: "start-here",
   },
 ];
 
@@ -171,7 +187,7 @@ export function DashboardLayout({
   displayName,
   role,
 }: DashboardLayoutProps) {
-  const { t } = useLanguage();
+  const { locale, t } = useLanguage();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const visibleNavigation = navigation.filter((item) =>
@@ -264,6 +280,8 @@ export function DashboardLayout({
                       icon={item.icon}
                       key={item.href}
                       label={t(item.labelKey)}
+                      guideId={item.guideId}
+                      locale={locale}
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
                     />
@@ -382,43 +400,61 @@ export function DashboardLayout({
 
 function NavigationLink({
   active,
+  guideId,
   href,
   icon: Icon,
   label,
+  locale,
   onClick,
 }: {
   active: boolean;
   href: string;
   icon: LucideIcon;
+  guideId: HelpGuideId;
   label: string;
+  locale: Locale;
   onClick(): void;
 }) {
   return (
-    <Link
-      aria-current={active ? "page" : undefined}
-      className={cn(
-        "group focus-visible:ring-ring flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors outline-none focus-visible:ring-2",
-        active
-          ? "bg-primary/10 text-primary"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground",
-      )}
-      href={href}
-      onClick={onClick}
-    >
-      <Icon
-        aria-hidden="true"
+    <div className="flex items-center gap-1">
+      <Link
+        aria-current={active ? "page" : undefined}
         className={cn(
-          "size-[18px]",
+          "group focus-visible:ring-ring flex min-w-0 flex-1 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors outline-none focus-visible:ring-2",
           active
-            ? "text-primary"
-            : "text-muted-foreground group-hover:text-foreground",
+            ? "bg-primary/10 text-primary"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground",
         )}
-      />
-      <span className="flex-1 truncate">{label}</span>
-      {active ? (
-        <span aria-hidden="true" className="bg-primary size-1.5 rounded-full" />
-      ) : null}
-    </Link>
+        href={href}
+        onClick={onClick}
+      >
+        <Icon
+          aria-hidden="true"
+          className={cn(
+            "size-[18px]",
+            active
+              ? "text-primary"
+              : "text-muted-foreground group-hover:text-foreground",
+          )}
+        />
+        <span className="flex-1 truncate">{label}</span>
+        {active ? (
+          <span
+            aria-hidden="true"
+            className="bg-primary size-1.5 rounded-full"
+          />
+        ) : null}
+      </Link>
+      <Link
+        aria-label={locale === "th" ? `คู่มือ ${label}` : `${label} user guide`}
+        className="text-muted-foreground hover:bg-accent hover:text-primary focus-visible:ring-ring flex size-9 shrink-0 items-center justify-center rounded-lg outline-none focus-visible:ring-2"
+        href={`/help/${guideId}`}
+        onClick={onClick}
+        title={locale === "th" ? `คู่มือ ${label}` : `${label} user guide`}
+      >
+        <BookOpen aria-hidden="true" className="size-4" />
+      </Link>
+    </div>
   );
 }
 

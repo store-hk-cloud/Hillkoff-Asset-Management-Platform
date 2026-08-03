@@ -14,6 +14,21 @@ describe("in-app help content", () => {
 
     expect(helpGuides.length).toBeGreaterThanOrEqual(9);
     expect(
+      [
+        "dashboard-overview",
+        "machines-and-identity",
+        "technician-daily-work",
+        "service-lifecycle",
+        "warehouse-and-inventory",
+        "installation-and-pm",
+        "repairs",
+        "preventive-maintenance",
+        "inventory-control",
+        "notifications-and-dashboard",
+        "users-and-access",
+      ].every((id) => helpGuides.some((guide) => guide.id === id)),
+    ).toBe(true);
+    expect(
       helpCategoryOrder.every((category) => categories.has(category)),
     ).toBe(true);
     expect(new Set(helpGuides.map((guide) => guide.id)).size).toBe(
