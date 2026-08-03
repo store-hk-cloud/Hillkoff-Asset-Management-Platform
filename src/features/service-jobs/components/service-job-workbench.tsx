@@ -14,7 +14,7 @@ export function ServiceJobWorkbench({
     <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
       <Card>
         <CardHeader>
-          <CardTitle>Field execution</CardTitle>
+          <CardTitle>การปฏิบัติงานหน้างาน / Field execution</CardTitle>
         </CardHeader>
         <CardContent>
           <ServiceJobExecutionForm jobId={jobId} version={version} />
@@ -22,7 +22,7 @@ export function ServiceJobWorkbench({
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Assignment</CardTitle>
+          <CardTitle>การมอบหมายงาน / Assignment</CardTitle>
         </CardHeader>
         <CardContent>
           <ServiceJobAssignmentForm jobId={jobId} technicians={technicians} />

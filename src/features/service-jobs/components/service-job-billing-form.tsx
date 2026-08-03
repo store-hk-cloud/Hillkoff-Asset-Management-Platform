@@ -8,13 +8,13 @@ export function ServiceJobBillingForm({
   return (
     <div className="flex flex-wrap gap-2">
       <Button disabled={disabled} type="button">
-        Issue service invoice
+        ออกใบแจ้งหนี้ค่าบริการ / Issue service invoice
       </Button>
       <Button disabled={disabled} type="button" variant="outline">
-        Issue parts invoice
+        ออกใบแจ้งหนี้ค่าอะไหล่ / Issue parts invoice
       </Button>
       <Button disabled={disabled} type="button" variant="outline">
-        Print document
+        พิมพ์เอกสาร / Print document
       </Button>
     </div>
   );

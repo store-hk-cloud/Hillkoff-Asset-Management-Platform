@@ -7,7 +7,10 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
     error?: { message?: string };
   };
   if (!response.ok || payload.data === undefined) {
-    throw new Error(payload.error?.message ?? "Service job request failed.");
+    throw new Error(
+      payload.error?.message ??
+        "ดำเนินการงานบริการไม่สำเร็จ / Service job request failed.",
+    );
   }
   return payload.data;
 }
@@ -17,7 +20,11 @@ async function csrfToken() {
     credentials: "same-origin",
     cache: "no-store",
   });
-  if (!response.ok) throw new Error("Secure request initialization failed.");
+  if (!response.ok) {
+    throw new Error(
+      "เริ่มต้นการเชื่อมต่อที่ปลอดภัยไม่สำเร็จ / Secure request initialization failed.",
+    );
+  }
   return ((await response.json()) as { csrfToken: string }).csrfToken;
 }
 

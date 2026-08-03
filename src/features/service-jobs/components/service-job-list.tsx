@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ClipboardList } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
+import { useLanguage } from "@/components/providers/language-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ServiceJobWorkType } from "@/domain/entities/service-job";
 import { ServiceJobStatusBadge } from "@/features/service-jobs/components/service-job-status-badge";
@@ -12,6 +13,7 @@ import {
   listServiceJobs,
   type ServiceJobListItem,
 } from "@/features/service-jobs/services/service-job-api.service";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 
 export function ServiceJobList({
   canCreate,
@@ -20,6 +22,7 @@ export function ServiceJobList({
   canCreate: boolean;
   initialWorkType?: ServiceJobWorkType | "all";
 }) {
+  const { locale } = useLanguage();
   const [jobs, setJobs] = useState<readonly ServiceJobListItem[]>([]);
   const [status, setStatus] = useState("all");
   const [workType, setWorkType] = useState<ServiceJobWorkType | "all">(
@@ -42,7 +45,11 @@ export function ServiceJobList({
           setError(
             cause instanceof Error
               ? cause.message
-              : "Unable to load service jobs.",
+              : thaiPrimary(
+                  locale,
+                  "โหลดรายการงานบริการไม่สำเร็จ",
+                  "Unable to load service jobs.",
+                ),
           );
       })
       .finally(() => {
@@ -51,7 +58,7 @@ export function ServiceJobList({
     return () => {
       active = false;
     };
-  }, [status, workType]);
+  }, [locale, status, workType]);
 
   return (
     <section className="space-y-6">
@@ -59,18 +66,18 @@ export function ServiceJobList({
         action={
           canCreate ? (
             <Link className="primary-button" href="/service-jobs/new">
-              Create service job
+              งานบริการใหม่ / Create service job
             </Link>
           ) : undefined
         }
-        description="One operational queue for repair, installation, and new-machine testing."
-        eyebrow="Service operations"
-        title="Service jobs"
+        description="รวมคิวงานซ่อม งานติดตั้ง และทดสอบเครื่องใหม่ไว้ในระบบบริการกลาง / One operational queue for repair, installation, and new-machine testing."
+        eyebrow="งานบริการ / Service operations"
+        title="งานบริการ / Service jobs"
       />
       <div
         className="flex flex-wrap gap-2"
         role="group"
-        aria-label="Filter service jobs"
+        aria-label="กรองงานบริการ / Filter service jobs"
       >
         {(
           [
@@ -89,14 +96,14 @@ export function ServiceJobList({
             onClick={() => setStatus(value)}
             type="button"
           >
-            {value.replaceAll("_", " ")}
+            {statusLabel(value)}
           </button>
         ))}
       </div>
       <div
         className="flex flex-wrap gap-2"
         role="group"
-        aria-label="Filter service work type"
+        aria-label="กรองประเภทงานบริการ / Filter service work type"
       >
         {(["all", "repair", "installation", "new_machine_test"] as const).map(
           (value) => (
@@ -106,14 +113,14 @@ export function ServiceJobList({
               onClick={() => setWorkType(value)}
               type="button"
             >
-              {value === "all" ? "All work" : value.replaceAll("_", " ")}
+              {workTypeLabel(value)}
             </button>
           ),
         )}
       </div>
       {loading ? (
         <div aria-live="polite" className="rounded-lg border p-8 text-center">
-          Loading service jobs…
+          กำลังโหลดงานบริการ… / Loading service jobs…
         </div>
       ) : error ? (
         <div
@@ -125,7 +132,7 @@ export function ServiceJobList({
       ) : jobs.length === 0 ? (
         <EmptyState
           icon={ClipboardList}
-          message="No service jobs match this filter."
+          message="ไม่พบงานบริการตามตัวกรอง / No service jobs match this filter."
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -145,7 +152,8 @@ export function ServiceJobList({
                   <p>{job.customerName}</p>
                   <p className="text-muted-foreground">{job.assetLabel}</p>
                   <p className="text-muted-foreground text-xs">
-                    {job.workType} · {job.fulfillmentMode}
+                    {workTypeLabel(job.workType)} ·{" "}
+                    {fulfillmentLabel(job.fulfillmentMode)}
                   </p>
                 </CardContent>
               </Card>
@@ -155,4 +163,36 @@ export function ServiceJobList({
       )}
     </section>
   );
+}
+
+function statusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    all: "ทั้งหมด / All",
+    received: "รับเรื่องแล้ว / Received",
+    scheduled: "นัดหมายแล้ว / Scheduled",
+    assigned: "มอบหมายแล้ว / Assigned",
+    in_progress: "กำลังดำเนินการ / In progress",
+    assessment_pending: "รอประเมิน / Assessment pending",
+    completed: "เสร็จสิ้น / Completed",
+  };
+  return labels[status] ?? status.replaceAll("_", " ");
+}
+
+function workTypeLabel(workType: string): string {
+  const labels: Record<string, string> = {
+    all: "งานทั้งหมด / All work",
+    repair: "งานซ่อม / Repair",
+    installation: "งานติดตั้ง / Installation",
+    new_machine_test: "ทดสอบเครื่องใหม่ / New-machine test",
+  };
+  return labels[workType] ?? workType.replaceAll("_", " ");
+}
+
+function fulfillmentLabel(mode: string): string {
+  const labels: Record<string, string> = {
+    onsite: "หน้างาน / On-site",
+    carry_in: "นำเครื่องเข้าศูนย์ / Carry-in",
+    carrier: "ขนส่ง / Carrier",
+  };
+  return labels[mode] ?? mode.replaceAll("_", " ");
 }

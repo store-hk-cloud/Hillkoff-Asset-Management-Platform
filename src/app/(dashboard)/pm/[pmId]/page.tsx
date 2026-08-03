@@ -8,13 +8,14 @@ import { PmCompletionForm } from "@/features/pm/components/pm-completion-form";
 import { TechnicianAssignmentForm } from "@/features/technician/components/technician-assignment-form";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 import { PmManagementService } from "@/services/pm-management.service";
 
 const service = new PmManagementService();
 type Props = { params: Promise<{ pmId: string }> };
 
 export default async function PmDetailPage({ params }: Props) {
-  const { locale, t } = await getServerTranslator();
+  const { locale } = await getServerTranslator();
   const { profile } = await requireSession();
   const { pmId } = await params;
   let job;
@@ -45,11 +46,15 @@ export default async function PmDetailPage({ params }: Props) {
           className="text-muted-foreground hover:text-foreground text-sm"
           href="/pm"
         >
-          ← {t("pm.title")}
+          ← {thaiPrimary(locale, "งานบำรุงรักษา PM", "Preventive maintenance")}
         </Link>
         <PageHeader
           description={<span className="font-mono">{job.jobNumber}</span>}
-          eyebrow={t("nav.pm")}
+          eyebrow={thaiPrimary(
+            locale,
+            "งานบำรุงรักษา PM",
+            "Preventive maintenance",
+          )}
           title={
             <span className="flex flex-wrap items-center gap-2">
               {job.title}
@@ -64,41 +69,41 @@ export default async function PmDetailPage({ params }: Props) {
       <Card>
         <CardHeader>
           <CardTitle>
-            {locale === "th" ? "รายละเอียด PM" : "PM Details"}
+            {thaiPrimary(locale, "รายละเอียด PM", "PM details")}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 text-sm sm:grid-cols-2">
           <Detail
-            label={locale === "th" ? "เครื่อง" : "Asset"}
+            label={thaiPrimary(locale, "เครื่อง", "Asset")}
             value={`${job.assetCode} · ${job.assetName}`}
           />
           <Detail
-            label={locale === "th" ? "กำหนดวัน" : "Scheduled"}
+            label={thaiPrimary(locale, "กำหนดวัน", "Scheduled")}
             value={formatter.format(job.scheduledAt)}
           />
           <Detail
-            label={locale === "th" ? "ช่างผู้รับผิดชอบ" : "Technician"}
+            label={thaiPrimary(locale, "ช่างผู้รับผิดชอบ", "Technician")}
             value={job.assignedTechnicianName}
           />
           <Detail
-            label={locale === "th" ? "รอบการทำซ้ำ" : "Recurrence"}
+            label={thaiPrimary(locale, "รอบการทำซ้ำ", "Recurrence")}
             value={
               job.recurrenceMonths
                 ? locale === "th"
                   ? `ทุก ${job.recurrenceMonths} เดือน`
-                  : `Every ${job.recurrenceMonths} months`
+                  : `${thaiPrimary(locale, "ทุก", "Every")} ${job.recurrenceMonths} ${thaiPrimary(locale, "เดือน", "months")}`
                 : "—"
             }
           />
           {job.completedAt ? (
             <Detail
-              label={locale === "th" ? "เสร็จสิ้น" : "Completed"}
+              label={thaiPrimary(locale, "เสร็จสิ้น", "Completed")}
               value={formatter.format(job.completedAt)}
             />
           ) : null}
           {job.nextDueAt ? (
             <Detail
-              label={locale === "th" ? "กำหนดครั้งถัดไป" : "Next Due"}
+              label={thaiPrimary(locale, "กำหนดครั้งถัดไป", "Next due")}
               value={formatter.format(job.nextDueAt)}
             />
           ) : null}
@@ -109,7 +114,7 @@ export default async function PmDetailPage({ params }: Props) {
         <Card>
           <CardHeader>
             <CardTitle>
-              {locale === "th" ? "มอบหมายช่างใหม่" : "Reassign technician"}
+              {thaiPrimary(locale, "มอบหมายช่างใหม่", "Reassign technician")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -126,7 +131,7 @@ export default async function PmDetailPage({ params }: Props) {
         <Card>
           <CardHeader>
             <CardTitle>
-              {locale === "th" ? "ปิดงาน PM" : "PM Completion"}
+              {thaiPrimary(locale, "ปิดงาน PM", "PM completion")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -141,7 +146,7 @@ export default async function PmDetailPage({ params }: Props) {
         <Card>
           <CardHeader>
             <CardTitle>
-              {locale === "th" ? "รายการตรวจ PM" : "PM Checklist"}
+              {thaiPrimary(locale, "รายการตรวจ PM", "PM checklist")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
@@ -159,9 +164,11 @@ export default async function PmDetailPage({ params }: Props) {
             {job.completionNotes ? (
               <div className="border-t pt-4">
                 <Detail
-                  label={
-                    locale === "th" ? "หมายเหตุการปิดงาน" : "Completion Notes"
-                  }
+                  label={thaiPrimary(
+                    locale,
+                    "หมายเหตุการปิดงาน",
+                    "Completion notes",
+                  )}
                   value={job.completionNotes}
                 />
               </div>

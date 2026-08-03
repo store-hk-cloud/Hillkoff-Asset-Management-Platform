@@ -25,18 +25,20 @@ export function ServiceJobExecutionForm({
             solution: data.get("solution"),
           },
         });
-        setMessage("Draft saved safely for synchronization.");
+        setMessage(
+          "บันทึกร่างงานอย่างปลอดภัย รอซิงก์ข้อมูล / Draft saved safely for synchronization.",
+        );
       }}
     >
       <label className="grid gap-2 text-sm">
-        Root cause
+        สาเหตุหลัก / Root cause
         <textarea className="input min-h-24" name="rootCause" required />
       </label>
       <label className="grid gap-2 text-sm">
-        Solution
+        วิธีแก้ไข / Solution
         <textarea className="input min-h-24" name="solution" required />
       </label>
-      <Button type="submit">Save field draft</Button>
+      <Button type="submit">บันทึกร่างงานหน้างาน / Save field draft</Button>
       {message ? (
         <p aria-live="polite" className="text-muted-foreground text-sm">
           {message}

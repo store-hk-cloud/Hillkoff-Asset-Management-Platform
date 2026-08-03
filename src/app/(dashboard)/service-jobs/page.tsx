@@ -6,7 +6,7 @@ type Props = {
   searchParams: Promise<{ workType?: string }>;
 };
 
-export const metadata = { title: "Service jobs" };
+export const metadata = { title: "งานบริการ / Service jobs" };
 
 export default async function ServiceJobsPage({ searchParams }: Props) {
   const { profile } = await requireSession();

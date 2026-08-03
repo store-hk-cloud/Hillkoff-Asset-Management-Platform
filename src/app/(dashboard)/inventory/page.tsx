@@ -7,14 +7,15 @@ import { PageHeader } from "@/components/shared/page-header";
 import { InventoryManager } from "@/features/inventory/components/inventory-manager";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 import { InventoryManagementService } from "@/services/inventory-management.service";
 
 const service = new InventoryManagementService();
 
-export const metadata = { title: "Inventory" };
+export const metadata = { title: "คลังอะไหล่ / Inventory" };
 
 export default async function InventoryPage() {
-  const { locale, t } = await getServerTranslator();
+  const { locale } = await getServerTranslator();
   const { profile } = await requireSession();
   if (!service.canView(profile)) notFound();
   const parts = await service.list(profile);
@@ -28,10 +29,14 @@ export default async function InventoryPage() {
         description={
           locale === "th"
             ? "จัดการอะไหล่ ปริมาณคงเหลือ และจุดสั่งซื้อ"
-            : "Manage spare parts, stock levels, and reorder points."
+            : thaiPrimary(
+                locale,
+                "จัดการอะไหล่ ปริมาณคงเหลือ และจุดสั่งซื้อ",
+                "Manage spare parts, stock levels, and reorder points.",
+              )
         }
-        eyebrow={t("nav.inventory")}
-        title={t("inventory.title")}
+        eyebrow={thaiPrimary(locale, "คลังอะไหล่", "Inventory")}
+        title={thaiPrimary(locale, "คลังอะไหล่", "Inventory")}
       />
 
       {lowStock.length > 0 ? (
@@ -39,8 +44,12 @@ export default async function InventoryPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base text-amber-900">
               <AlertTriangle aria-hidden="true" className="size-5" />
-              {locale === "th" ? "แจ้งเตือนอะไหล่ใกล้หมด" : "Low Stock Alert"} (
-              {lowStock.length})
+              {thaiPrimary(
+                locale,
+                "แจ้งเตือนอะไหล่ใกล้หมด",
+                "Low stock alert",
+              )}{" "}
+              ({lowStock.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-2 text-sm text-amber-900 sm:grid-cols-2">
@@ -59,9 +68,11 @@ export default async function InventoryPage() {
       {parts.length === 0 ? (
         <EmptyState
           icon={Package}
-          message={
-            locale === "th" ? "ยังไม่มีรายการอะไหล่" : "No inventory parts"
-          }
+          message={thaiPrimary(
+            locale,
+            "ยังไม่มีรายการอะไหล่",
+            "No inventory parts",
+          )}
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -78,7 +89,7 @@ export default async function InventoryPage() {
                   {part.quantityOnHand.toLocaleString("th-TH")} {part.unit}
                 </p>
                 <p className="text-muted-foreground">
-                  {locale === "th" ? "จุดสั่งซื้อซ้ำ" : "Reorder at"}{" "}
+                  {thaiPrimary(locale, "จุดสั่งซื้อซ้ำ", "Reorder at")}{" "}
                   {part.reorderPoint.toLocaleString(
                     locale === "th" ? "th-TH" : "en-US",
                   )}

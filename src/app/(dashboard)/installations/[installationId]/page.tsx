@@ -9,6 +9,7 @@ import { InstallationWorkForm } from "@/features/installations/components/instal
 import { TechnicianAssignmentForm } from "@/features/technician/components/technician-assignment-form";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 import { InstallationManagementService } from "@/services/installation-management.service";
 
 const service = new InstallationManagementService();
@@ -37,7 +38,7 @@ async function loadInstallation(
 export default async function InstallationDetailPage({
   params,
 }: InstallationDetailPageProps) {
-  const { locale, t } = await getServerTranslator();
+  const { locale } = await getServerTranslator();
   const { profile } = await requireSession();
   const { installationId } = await params;
   const installation = await loadInstallation(installationId, profile);
@@ -65,7 +66,7 @@ export default async function InstallationDetailPage({
           className="text-muted-foreground hover:text-foreground text-sm"
           href="/service-jobs?workType=installation"
         >
-          ← {t("installations.title")}
+          ← {thaiPrimary(locale, "งานติดตั้ง", "Installation")}
         </Link>
         <PageHeader
           description={
@@ -73,7 +74,7 @@ export default async function InstallationDetailPage({
               {installation.assetCode} · {installation.installationNumber}
             </span>
           }
-          eyebrow={t("nav.installations")}
+          eyebrow={thaiPrimary(locale, "งานติดตั้ง", "Installation")}
           title={
             <span className="flex flex-wrap items-center gap-2">
               {installation.assetName}
@@ -90,7 +91,7 @@ export default async function InstallationDetailPage({
         <Card>
           <CardHeader>
             <CardTitle>
-              {locale === "th" ? "มอบหมายช่างใหม่" : "Reassign technician"}
+              {thaiPrimary(locale, "มอบหมายช่างใหม่", "Reassign technician")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -106,19 +107,21 @@ export default async function InstallationDetailPage({
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{locale === "th" ? "นัดหมาย" : "Appointment"}</CardTitle>
+            <CardTitle>
+              {thaiPrimary(locale, "นัดหมาย", "Appointment")}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <Detail
-              label={locale === "th" ? "กำหนดติดตั้ง" : "Scheduled for"}
+              label={thaiPrimary(locale, "กำหนดติดตั้ง", "Scheduled for")}
               value={dateTimeFormatter.format(installation.scheduledAt)}
             />
             <Detail
-              label={locale === "th" ? "ลูกค้า" : "Customer"}
+              label={thaiPrimary(locale, "ลูกค้า", "Customer")}
               value={installation.customerName}
             />
             <Detail
-              label={t("field.customerId")}
+              label={thaiPrimary(locale, "รหัสลูกค้า", "Customer ID")}
               value={installation.customerId}
             />
             <div className="flex items-start gap-2">
@@ -135,7 +138,11 @@ export default async function InstallationDetailPage({
             <CardTitle>
               {locale === "th"
                 ? "ผู้รับผิดชอบและการรับประกัน"
-                : "Assignment & Warranty"}
+                : thaiPrimary(
+                    locale,
+                    "ผู้รับผิดชอบและการรับประกัน",
+                    "Assignment & warranty",
+                  )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
@@ -152,16 +159,16 @@ export default async function InstallationDetailPage({
                 className="text-muted-foreground size-4"
               />
               <span>
-                {locale === "th" ? "รับประกัน" : "Warranty"}{" "}
+                {thaiPrimary(locale, "รับประกัน", "Warranty")}{" "}
                 {installation.warrantyMonths}{" "}
-                {locale === "th" ? "เดือน" : "months"}
+                {thaiPrimary(locale, "เดือน", "months")}
               </span>
             </div>
             {installation.completedAt ? (
               <div className="flex items-center gap-2 text-green-700">
                 <CheckCircle2 aria-hidden="true" className="size-4" />
                 <span>
-                  {locale === "th" ? "เสร็จสิ้น" : "Completed"}{" "}
+                  {thaiPrimary(locale, "เสร็จสิ้น", "Completed")}{" "}
                   {dateFormatter.format(installation.completedAt)}
                 </span>
               </div>
@@ -174,7 +181,7 @@ export default async function InstallationDetailPage({
         <Card>
           <CardHeader>
             <CardTitle>
-              {locale === "th" ? "ปฏิบัติงานติดตั้ง" : "Installation Work"}
+              {thaiPrimary(locale, "ปฏิบัติงานติดตั้ง", "Installation work")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -191,7 +198,11 @@ export default async function InstallationDetailPage({
           <CardContent className="text-muted-foreground py-6 text-sm">
             {locale === "th"
               ? "คุณมีสิทธิ์ดูสถานะงานนี้ แต่การปฏิบัติงานต้องดำเนินการโดยช่างที่ได้รับมอบหมายหรือผู้ดูแลระบบ"
-              : "You may view this job, but only the assigned technician or an administrator can perform the work."}
+              : thaiPrimary(
+                  locale,
+                  "คุณดูสถานะงานนี้ได้ แต่การปฏิบัติงานต้องดำเนินการโดยช่างที่ได้รับมอบหมายหรือผู้ดูแลระบบ",
+                  "You may view this job, but only the assigned technician or an administrator can perform the work.",
+                )}
           </CardContent>
         </Card>
       )}

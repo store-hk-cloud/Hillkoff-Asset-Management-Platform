@@ -68,7 +68,7 @@ export function ServiceJobIntakeForm({
       setError(
         cause instanceof Error
           ? cause.message
-          : "Unable to create service job.",
+          : "สร้างงานบริการไม่สำเร็จ / Unable to create service job.",
       );
     } finally {
       setBusy(false);
@@ -78,36 +78,40 @@ export function ServiceJobIntakeForm({
     <form className="space-y-6" onSubmit={submit}>
       <Card>
         <CardHeader>
-          <CardTitle>Customer and request</CardTitle>
+          <CardTitle>
+            ข้อมูลลูกค้าและคำขอรับบริการ / Customer and request
+          </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-sm">
-            Work type
+            ประเภทงาน / Work type
             <select
               className="input"
               defaultValue={initialWorkType}
               name="workType"
               required
             >
-              <option value="repair">Repair</option>
-              <option value="installation">Installation</option>
-              <option value="new_machine_test">New machine test</option>
+              <option value="repair">งานซ่อม / Repair</option>
+              <option value="installation">งานติดตั้ง / Installation</option>
+              <option value="new_machine_test">
+                ทดสอบเครื่องใหม่ / New machine test
+              </option>
             </select>
           </label>
           <label className="grid gap-2 text-sm">
-            Fulfillment
+            รูปแบบรับบริการ / Fulfillment
             <select className="input" name="fulfillmentMode" required>
-              <option value="onsite">On-site</option>
-              <option value="carry_in">Carry-in</option>
-              <option value="carrier">Carrier</option>
+              <option value="onsite">หน้างาน / On-site</option>
+              <option value="carry_in">นำเครื่องเข้าศูนย์ / Carry-in</option>
+              <option value="carrier">ขนส่ง / Carrier</option>
             </select>
           </label>
           <label className="grid gap-2 text-sm">
-            Title
+            หัวข้องาน / Title
             <input className="input" maxLength={200} name="title" required />
           </label>
           <label className="grid gap-2 text-sm">
-            Customer name
+            ชื่อลูกค้า / Customer name
             <input
               className="input"
               maxLength={160}
@@ -116,7 +120,7 @@ export function ServiceJobIntakeForm({
             />
           </label>
           <label className="grid gap-2 text-sm">
-            Contact name
+            ผู้ติดต่อ / Contact name
             <input
               className="input"
               maxLength={160}
@@ -125,11 +129,11 @@ export function ServiceJobIntakeForm({
             />
           </label>
           <label className="grid gap-2 text-sm">
-            Phone
+            โทรศัพท์ / Phone
             <input className="input" maxLength={40} name="phone" required />
           </label>
           <label className="grid gap-2 text-sm md:col-span-2">
-            Service address
+            ที่อยู่รับบริการ / Service address
             <input
               className="input"
               maxLength={1000}
@@ -138,7 +142,7 @@ export function ServiceJobIntakeForm({
             />
           </label>
           <label className="grid gap-2 text-sm md:col-span-2">
-            Description
+            รายละเอียดปัญหาหรือความต้องการ / Description
             <textarea
               className="input min-h-28"
               maxLength={3000}
@@ -150,35 +154,35 @@ export function ServiceJobIntakeForm({
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Machine snapshot</CardTitle>
+          <CardTitle>ข้อมูลเครื่อง / Machine snapshot</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-sm">
-            Asset code
+            รหัสเครื่อง / Asset code
             <input className="input" name="assetCode" />
           </label>
           <label className="grid gap-2 text-sm">
-            Serial number
+            หมายเลขเครื่อง / Serial number
             <input className="input" name="serialNumber" />
           </label>
           <label className="grid gap-2 text-sm">
-            Equipment type
+            ประเภทอุปกรณ์ / Equipment type
             <input className="input" name="equipmentType" required />
           </label>
           <label className="grid gap-2 text-sm">
-            Brand
+            ยี่ห้อ / Brand
             <input className="input" name="brand" required />
           </label>
           <label className="grid gap-2 text-sm">
-            Model
+            รุ่น / Model
             <input className="input" name="model" required />
           </label>
           <label className="grid gap-2 text-sm">
-            Warranty
+            การรับประกัน / Warranty
             <select className="input" name="warrantyStatus">
-              <option value="unknown">Unknown</option>
-              <option value="active">Active</option>
-              <option value="expired">Expired</option>
+              <option value="unknown">ไม่ทราบ / Unknown</option>
+              <option value="active">มีผล / Active</option>
+              <option value="expired">หมดอายุ / Expired</option>
             </select>
           </label>
         </CardContent>
@@ -189,7 +193,9 @@ export function ServiceJobIntakeForm({
         </p>
       ) : null}
       <Button disabled={busy} type="submit">
-        {busy ? "Creating…" : "Create service job"}
+        {busy
+          ? "กำลังสร้าง… / Creating…"
+          : "สร้างงานบริการ / Create service job"}
       </Button>
     </form>
   );

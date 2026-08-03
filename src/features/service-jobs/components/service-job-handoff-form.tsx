@@ -4,14 +4,14 @@ export function ServiceJobHandoffForm() {
   return (
     <form className="space-y-3">
       <label className="grid gap-2 text-sm">
-        Customer signature file
+        ไฟล์ลายเซ็นลูกค้า / Customer signature file
         <input accept="image/png" className="input" type="file" />
       </label>
       <label className="grid gap-2 text-sm">
-        Override reason
+        เหตุผลกรณีข้ามขั้นตอน / Override reason
         <textarea className="input" maxLength={1000} />
       </label>
-      <Button type="submit">Complete handoff</Button>
+      <Button type="submit">ยืนยันส่งมอบงาน / Complete handoff</Button>
     </form>
   );
 }

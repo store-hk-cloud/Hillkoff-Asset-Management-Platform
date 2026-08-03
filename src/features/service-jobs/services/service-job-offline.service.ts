@@ -66,5 +66,9 @@ export function assertOnlineOnlyAction(
   action: "check_in" | "check_out" | "approve" | "issue" | "handoff" | "close",
   online = typeof navigator === "undefined" || navigator.onLine,
 ) {
-  if (!online) throw new Error(`${action} requires an online connection.`);
+  if (!online) {
+    throw new Error(
+      `${action} ต้องเชื่อมต่ออินเทอร์เน็ต / requires an online connection.`,
+    );
+  }
 }

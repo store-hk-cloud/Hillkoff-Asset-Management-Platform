@@ -5,7 +5,11 @@ async function csrf(): Promise<string> {
     cache: "no-store",
     credentials: "same-origin",
   });
-  if (!response.ok) throw new Error("Unable to initialize secure request.");
+  if (!response.ok) {
+    throw new Error(
+      "เริ่มต้นการเชื่อมต่อที่ปลอดภัยไม่สำเร็จ / Unable to initialize secure request.",
+    );
+  }
   return ((await response.json()) as { csrfToken: string }).csrfToken;
 }
 
@@ -25,7 +29,10 @@ async function mutate(url: string, method: "POST" | "PATCH", body: unknown) {
     error?: { message?: string };
   };
   if (!response.ok || !payload.data) {
-    throw new Error(payload.error?.message ?? "Repair operation failed.");
+    throw new Error(
+      payload.error?.message ??
+        "ดำเนินการงานซ่อมไม่สำเร็จ / Repair operation failed.",
+    );
   }
   return payload.data;
 }

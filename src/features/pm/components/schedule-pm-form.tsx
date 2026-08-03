@@ -16,6 +16,7 @@ import {
   getFieldErrors,
   type FieldErrors,
 } from "@/lib/validation/field-errors";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 
 const DEFAULT_CHECKLIST = [
   "ตรวจสอบสภาพและทำความสะอาดเครื่อง",
@@ -72,7 +73,11 @@ export function SchedulePmForm() {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : "ไม่สามารถสร้าง PM Schedule ได้",
+          : thaiPrimary(
+              locale,
+              "ไม่สามารถสร้างแผนบำรุงรักษาได้",
+              "Unable to create PM schedule.",
+            ),
       );
     } finally {
       setBusy(false);
@@ -85,41 +90,49 @@ export function SchedulePmForm() {
         <Field
           label={
             locale === "th"
-              ? "Serial Number / Machine ID / รหัสเครื่อง"
-              : "Serial number / Machine ID / Machine code"
+              ? "รหัสเครื่อง / Serial Number / Machine ID"
+              : thaiPrimary(
+                  locale,
+                  "รหัสเครื่อง",
+                  "Serial number / Machine ID / Machine code",
+                )
           }
           name="assetCode"
           error={fieldErrors.assetCode}
           required
         />
         <Field
-          label={locale === "th" ? "หัวข้องาน PM" : "PM title"}
+          label={thaiPrimary(locale, "หัวข้องาน PM", "PM title")}
           name="title"
           error={fieldErrors.title}
           required
         />
         <Field
-          label={locale === "th" ? "วันที่และเวลา" : "Date and time"}
+          label={thaiPrimary(locale, "วันที่และเวลา", "Date and time")}
           name="scheduledAt"
           error={fieldErrors.scheduledAt}
           required
           type="datetime-local"
         />
         <Field
-          label={locale === "th" ? "รอบ PM (เดือน)" : "PM interval (months)"}
+          label={thaiPrimary(locale, "รอบ PM (เดือน)", "PM interval (months)")}
           min="1"
           name="recurrenceMonths"
           error={fieldErrors.recurrenceMonths}
           placeholder={
             locale === "th"
               ? "เว้นว่างหากไม่มีรอบ"
-              : "Leave blank if not recurring"
+              : thaiPrimary(
+                  locale,
+                  "เว้นว่างหากไม่มีรอบ",
+                  "Leave blank if not recurring",
+                )
           }
           type="number"
         />
         <div className="space-y-2">
           <Label htmlFor="assignedTechnicianId" required>
-            {locale === "th" ? "ช่างผู้รับผิดชอบ" : "Assigned technician"}
+            {thaiPrimary(locale, "ช่างผู้รับผิดชอบ", "Assigned technician")}
           </Label>
           <TechnicianSelect
             onTechnicianChange={(technician) =>
@@ -128,7 +141,7 @@ export function SchedulePmForm() {
           />
         </div>
         <Field
-          label={locale === "th" ? "ชื่อช่าง" : "Technician name"}
+          label={thaiPrimary(locale, "ชื่อช่าง", "Technician name")}
           name="assignedTechnicianName"
           error={fieldErrors.assignedTechnicianName}
           readOnly
@@ -139,7 +152,11 @@ export function SchedulePmForm() {
           <Label htmlFor="checklist">
             {locale === "th"
               ? "รายการตรวจ PM (หนึ่งรายการต่อบรรทัด)"
-              : "PM checklist (one item per line)"}
+              : thaiPrimary(
+                  locale,
+                  "รายการตรวจ PM (หนึ่งรายการต่อบรรทัด)",
+                  "PM checklist (one item per line)",
+                )}
           </Label>
           <Textarea
             className="min-h-44"
@@ -160,7 +177,7 @@ export function SchedulePmForm() {
           ? t("status.loading")
           : locale === "th"
             ? "กำหนดแผน PM"
-            : "Schedule PM"}
+            : thaiPrimary(locale, "กำหนดแผน PM", "Schedule PM")}
       </Button>
     </form>
   );

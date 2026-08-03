@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/components/providers/language-provider";
 import { assignRepairTicket } from "@/features/repairs/services/repair-api.service";
 import { TechnicianSelect } from "@/features/technician/components/technician-select";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 
 type AssignRepairFormProps = Readonly<{
   repairId: string;
@@ -38,7 +39,11 @@ export function AssignRepairForm({ repairId, version }: AssignRepairFormProps) {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : "ไม่สามารถมอบหมายช่างได้",
+          : thaiPrimary(
+              locale,
+              "ไม่สามารถมอบหมายช่างได้",
+              "Unable to assign technician.",
+            ),
       );
     } finally {
       setBusy(false);
@@ -49,7 +54,7 @@ export function AssignRepairForm({ repairId, version }: AssignRepairFormProps) {
     <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit}>
       <div className="space-y-2">
         <Label htmlFor="technicianId">
-          {locale === "th" ? "รหัสผู้ใช้ของช่าง" : "Technician User ID"}
+          {thaiPrimary(locale, "รหัสผู้ใช้ของช่าง", "Technician user ID")}
         </Label>
         <TechnicianSelect
           id="technicianId"
@@ -61,7 +66,7 @@ export function AssignRepairForm({ repairId, version }: AssignRepairFormProps) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="technicianName">
-          {locale === "th" ? "ชื่อช่าง" : "Technician name"}
+          {thaiPrimary(locale, "ชื่อช่าง", "Technician name")}
         </Label>
         <Input
           id="technicianName"
@@ -83,9 +88,7 @@ export function AssignRepairForm({ repairId, version }: AssignRepairFormProps) {
       >
         {busy
           ? t("status.loading")
-          : locale === "th"
-            ? "มอบหมายช่าง"
-            : "Assign Technician"}
+          : thaiPrimary(locale, "มอบหมายช่าง", "Assign technician")}
       </Button>
     </form>
   );

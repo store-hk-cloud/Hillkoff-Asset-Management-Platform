@@ -9,7 +9,7 @@ export function ServiceJobTimeline({
         <li key={`${event.at}-${event.label}`}>
           <p className="font-medium">{event.label}</p>
           <p className="text-muted-foreground text-xs">
-            {event.actor} · {event.at}
+            {event.actor} • {event.at}
           </p>
         </li>
       ))}

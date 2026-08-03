@@ -1,20 +1,20 @@
 import { StatusBadge } from "@/components/shared/status-badge";
 
 const labels: Record<string, string> = {
-  draft: "Draft",
-  received: "Received",
-  scheduled: "Scheduled",
-  assigned: "Assigned",
-  in_progress: "In progress",
-  waiting_parts: "Waiting parts",
-  waiting_customer: "Waiting customer",
-  assessment_pending: "Assessment pending",
-  approved: "Approved",
-  completed: "Completed",
-  invoiced: "Invoiced",
-  handed_off: "Handed off",
-  closed: "Closed",
-  cancelled: "Cancelled",
+  draft: "ร่าง / Draft",
+  received: "รับเรื่องแล้ว / Received",
+  scheduled: "นัดหมายแล้ว / Scheduled",
+  assigned: "มอบหมายแล้ว / Assigned",
+  in_progress: "กำลังดำเนินการ / In progress",
+  waiting_parts: "รออะไหล่ / Waiting parts",
+  waiting_customer: "รอลูกค้า / Waiting customer",
+  assessment_pending: "รอประเมิน / Assessment pending",
+  approved: "อนุมัติแล้ว / Approved",
+  completed: "เสร็จสิ้น / Completed",
+  invoiced: "ออกใบแจ้งหนี้แล้ว / Invoiced",
+  handed_off: "ส่งมอบแล้ว / Handed off",
+  closed: "ปิดงานแล้ว / Closed",
+  cancelled: "ยกเลิก / Cancelled",
 };
 
 export function ServiceJobStatusBadge({ status }: { status: string }) {

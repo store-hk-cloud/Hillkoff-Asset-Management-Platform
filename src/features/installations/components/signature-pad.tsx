@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type PointerEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/providers/language-provider";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 
 type SignaturePadProps = Readonly<{
   onChange: (blob: Blob | null) => void;
@@ -73,9 +74,11 @@ export function SignaturePad({ onChange }: SignaturePadProps) {
   return (
     <div className="space-y-2">
       <canvas
-        aria-label={
-          locale === "th" ? "พื้นที่ลงลายเซ็นลูกค้า" : "Customer signature area"
-        }
+        aria-label={thaiPrimary(
+          locale,
+          "พื้นที่ลงลายเซ็นลูกค้า",
+          "Customer signature area",
+        )}
         className="h-44 w-full touch-none rounded-lg border bg-white"
         onPointerDown={start}
         onPointerMove={draw}
@@ -89,7 +92,7 @@ export function SignaturePad({ onChange }: SignaturePadProps) {
         type="button"
         variant="outline"
       >
-        {locale === "th" ? "ล้างลายเซ็น" : "Clear signature"}
+        {thaiPrimary(locale, "ล้างลายเซ็น", "Clear signature")}
       </Button>
     </div>
   );

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { useLanguage } from "@/components/providers/language-provider";
 import type { InventoryPart } from "@/domain/entities/inventory";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 
 async function mutate(
   url: string,
@@ -32,7 +33,10 @@ async function mutate(
     error?: { message?: string };
   };
   if (!response.ok) {
-    throw new Error(payload.error?.message ?? "Inventory operation failed.");
+    throw new Error(
+      payload.error?.message ??
+        "ดำเนินการคลังอะไหล่ไม่สำเร็จ / Inventory operation failed.",
+    );
   }
 }
 
@@ -64,7 +68,15 @@ export function InventoryManager({
       event.currentTarget.reset();
       router.refresh();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Failed");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : thaiPrimary(
+              locale,
+              "สร้างอะไหล่ไม่สำเร็จ",
+              "Unable to create part.",
+            ),
+      );
     } finally {
       setBusy(false);
     }
@@ -91,7 +103,15 @@ export function InventoryManager({
       event.currentTarget.reset();
       router.refresh();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Failed");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : thaiPrimary(
+              locale,
+              "บันทึกการเคลื่อนไหวไม่สำเร็จ",
+              "Unable to record movement.",
+            ),
+      );
     } finally {
       setBusy(false);
     }
@@ -115,7 +135,15 @@ export function InventoryManager({
       });
       router.refresh();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Failed");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : thaiPrimary(
+              locale,
+              "แก้ไขอะไหล่ไม่สำเร็จ",
+              "Unable to update part.",
+            ),
+      );
     } finally {
       setBusy(false);
     }
@@ -130,7 +158,15 @@ export function InventoryManager({
       });
       router.refresh();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Failed");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : thaiPrimary(
+              locale,
+              "ปิดใช้งานอะไหล่ไม่สำเร็จ",
+              "Unable to deactivate part.",
+            ),
+      );
     } finally {
       setBusy(false);
     }
@@ -142,34 +178,34 @@ export function InventoryManager({
     <div className="grid gap-6 lg:grid-cols-2">
       <form className="space-y-4 rounded-lg border p-4" onSubmit={create}>
         <h2 className="font-semibold">
-          {locale === "th" ? "สร้างอะไหล่" : "Create Part"}
+          {thaiPrimary(locale, "สร้างอะไหล่", "Create part")}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
-            label={locale === "th" ? "รหัสอะไหล่" : "Part Number"}
+            label={thaiPrimary(locale, "รหัสอะไหล่", "Part number")}
             name="partNumber"
             required
           />
           <Field
-            label={locale === "th" ? "ชื่ออะไหล่" : "Part Name"}
+            label={thaiPrimary(locale, "ชื่ออะไหล่", "Part name")}
             name="name"
             required
           />
           <Field
-            label={locale === "th" ? "หน่วย" : "Unit"}
+            label={thaiPrimary(locale, "หน่วย", "Unit")}
             name="unit"
-            placeholder={locale === "th" ? "ชิ้น" : "piece"}
+            placeholder={thaiPrimary(locale, "ชิ้น", "piece")}
             required
           />
           <Field
-            label={locale === "th" ? "จุดสั่งซื้อซ้ำ" : "Reorder Point"}
+            label={thaiPrimary(locale, "จุดสั่งซื้อซ้ำ", "Reorder point")}
             min="0"
             name="reorderPoint"
             required
             type="number"
           />
           <Field
-            label={locale === "th" ? "ต้นทุนต่อหน่วย" : "Unit Cost"}
+            label={thaiPrimary(locale, "ต้นทุนต่อหน่วย", "Unit cost")}
             min="0"
             name="unitCost"
             required
@@ -178,22 +214,24 @@ export function InventoryManager({
           />
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="description">
-              {locale === "th" ? "รายละเอียด" : "Description"}
+              {thaiPrimary(locale, "รายละเอียด", "Description")}
             </Label>
             <Input id="description" name="description" />
           </div>
         </div>
         <Button disabled={busy} type="submit">
-          {locale === "th" ? "สร้างอะไหล่" : "Create Part"}
+          {thaiPrimary(locale, "สร้างอะไหล่", "Create part")}
         </Button>
       </form>
 
       <form className="space-y-4 rounded-lg border p-4" onSubmit={move}>
         <h2 className="font-semibold">
-          {locale === "th" ? "การเคลื่อนไหวสต็อก" : "Stock Movement"}
+          {thaiPrimary(locale, "การเคลื่อนไหวสต็อก", "Stock movement")}
         </h2>
         <div className="space-y-2">
-          <Label htmlFor="partId">{locale === "th" ? "อะไหล่" : "Part"}</Label>
+          <Label htmlFor="partId">
+            {thaiPrimary(locale, "อะไหล่", "Part")}
+          </Label>
           <Select
             className="border-input bg-background h-11 w-full rounded-md border px-3 text-sm"
             id="partId"
@@ -209,44 +247,43 @@ export function InventoryManager({
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="type">{locale === "th" ? "ประเภท" : "Type"}</Label>
+            <Label htmlFor="type">
+              {thaiPrimary(locale, "ประเภท", "Type")}
+            </Label>
             <Select
               className="border-input bg-background h-11 w-full rounded-md border px-3 text-sm"
               id="type"
               name="type"
             >
-              <option value="receive">
-                {locale === "th" ? "รับสต็อก" : "Stock Receive"}
-              </option>
-              <option value="issue">
-                {locale === "th" ? "เบิกสต็อก" : "Stock Issue"}
-              </option>
+              <option value="receive">รับสต็อก / Stock receive</option>
+              <option value="issue">เบิกสต็อก / Stock issue</option>
               <option value="adjustment">
-                {locale === "th"
-                  ? "ปรับยอดสต็อก (+/-)"
-                  : "Stock Adjustment (+/-)"}
+                ปรับยอดสต็อก (+/-) / Stock adjustment (+/-)
               </option>
             </Select>
           </div>
           <Field
-            label={locale === "th" ? "จำนวน" : "Quantity"}
+            label={thaiPrimary(locale, "จำนวน", "Quantity")}
             name="quantity"
             required
             step="0.01"
             type="number"
           />
           <Field
-            label={
-              locale === "th"
-                ? "ต้นทุนต่อหน่วย (ถ้ามี)"
-                : "Unit Cost (optional)"
-            }
+            label={thaiPrimary(
+              locale,
+              "ต้นทุนต่อหน่วย (ถ้ามี)",
+              "Unit cost (optional)",
+            )}
             min="0"
             name="unitCost"
             step="0.01"
             type="number"
           />
-          <Field label={locale === "th" ? "หมายเหตุ" : "Notes"} name="notes" />
+          <Field
+            label={thaiPrimary(locale, "หมายเหตุ", "Notes")}
+            name="notes"
+          />
         </div>
         {error ? (
           <p className="text-destructive text-sm" role="alert">
@@ -254,7 +291,7 @@ export function InventoryManager({
           </p>
         ) : null}
         <Button disabled={busy || !selectedPart} type="submit">
-          {locale === "th" ? "บันทึกการเคลื่อนไหว" : "Record Movement"}
+          {thaiPrimary(locale, "บันทึกการเคลื่อนไหว", "Record movement")}
         </Button>
       </form>
 
@@ -267,37 +304,41 @@ export function InventoryManager({
           <h2 className="font-semibold">
             {locale === "th"
               ? "แก้ไข / ปิดใช้งานอะไหล่"
-              : "Edit / Deactivate Part"}
+              : thaiPrimary(
+                  locale,
+                  "แก้ไข / ปิดใช้งานอะไหล่",
+                  "Edit / deactivate part",
+                )}
           </h2>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field
               defaultValue={selectedPart.partNumber}
-              label={locale === "th" ? "รหัสอะไหล่" : "Part Number"}
+              label={thaiPrimary(locale, "รหัสอะไหล่", "Part number")}
               name="editPartNumber"
               required
             />
             <Field
               defaultValue={selectedPart.name}
-              label={locale === "th" ? "ชื่อ" : "Name"}
+              label={thaiPrimary(locale, "ชื่อ", "Name")}
               name="editName"
               required
             />
             <Field
               defaultValue={selectedPart.unit}
-              label={locale === "th" ? "หน่วย" : "Unit"}
+              label={thaiPrimary(locale, "หน่วย", "Unit")}
               name="editUnit"
               required
             />
             <Field
               defaultValue={selectedPart.reorderPoint}
-              label={locale === "th" ? "จุดสั่งซื้อซ้ำ" : "Reorder Point"}
+              label={thaiPrimary(locale, "จุดสั่งซื้อซ้ำ", "Reorder point")}
               min="0"
               name="editReorderPoint"
               type="number"
             />
             <Field
               defaultValue={selectedPart.unitCost}
-              label={locale === "th" ? "ต้นทุนต่อหน่วย" : "Unit Cost"}
+              label={thaiPrimary(locale, "ต้นทุนต่อหน่วย", "Unit cost")}
               min="0"
               name="editUnitCost"
               step="0.01"
@@ -305,13 +346,13 @@ export function InventoryManager({
             />
             <Field
               defaultValue={selectedPart.description}
-              label={locale === "th" ? "รายละเอียด" : "Description"}
+              label={thaiPrimary(locale, "รายละเอียด", "Description")}
               name="editDescription"
             />
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button disabled={busy} type="submit">
-              {locale === "th" ? "อัปเดตอะไหล่" : "Update Part"}
+              {thaiPrimary(locale, "อัปเดตอะไหล่", "Update part")}
             </Button>
             <Button
               disabled={busy || !selectedPart.active}
@@ -319,7 +360,7 @@ export function InventoryManager({
               type="button"
               variant="destructive"
             >
-              {locale === "th" ? "ปิดใช้งานอะไหล่" : "Deactivate Part"}
+              {thaiPrimary(locale, "ปิดใช้งานอะไหล่", "Deactivate part")}
             </Button>
           </div>
         </form>

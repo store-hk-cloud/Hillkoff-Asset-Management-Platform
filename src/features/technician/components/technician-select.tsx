@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/providers/language-provider";
 import { Select } from "@/components/ui/select";
 import type { TechnicianSummary } from "@/domain/entities/technician-work";
 import { listTechnicians } from "@/features/technician/services/technician-api.service";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 
 type Props = Readonly<{
   id?: string;
@@ -40,14 +41,18 @@ export function TechnicianSelect({
           setError(
             reason instanceof Error
               ? reason.message
-              : "Unable to load technicians.",
+              : thaiPrimary(
+                  locale,
+                  "โหลดรายชื่อช่างไม่สำเร็จ",
+                  "Unable to load technicians.",
+                ),
           );
         }
       });
     return () => {
       active = false;
     };
-  }, []);
+  }, [locale]);
 
   return (
     <>
@@ -66,7 +71,7 @@ export function TechnicianSelect({
         value={value}
       >
         <option value="">
-          {locale === "th" ? "เลือกช่าง" : "Select technician"}
+          {thaiPrimary(locale, "เลือกช่าง", "Select technician")}
         </option>
         {technicians.map((technician) => (
           <option key={technician.id} value={technician.id}>

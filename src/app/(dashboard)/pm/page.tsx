@@ -8,13 +8,16 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 import { PmManagementService } from "@/services/pm-management.service";
 
 const service = new PmManagementService();
-export const metadata = { title: "Preventive Maintenance" };
+export const metadata = {
+  title: "บำรุงรักษาเชิงป้องกัน / Preventive Maintenance",
+};
 
 export default async function PmPage() {
-  const { locale, t } = await getServerTranslator();
+  const { locale } = await getServerTranslator();
   const { profile } = await requireSession();
   if (!service.canView(profile)) notFound();
   const jobs = await service.list(profile, { status: "scheduled" });
@@ -35,7 +38,7 @@ export default async function PmPage() {
             <Button asChild className="h-11 w-full sm:w-auto">
               <Link href="/pm/schedule">
                 <Plus aria-hidden="true" className="size-4" />
-                {locale === "th" ? "กำหนดแผน PM" : "PM Schedule"}
+                {thaiPrimary(locale, "กำหนดแผน PM", "PM Schedule")}
               </Link>
             </Button>
           ) : null
@@ -43,37 +46,51 @@ export default async function PmPage() {
         description={
           locale === "th"
             ? "วางแผน ติดตาม และบันทึกประวัติ PM ของเครื่อง"
-            : "Plan, track, and record preventive maintenance history."
+            : thaiPrimary(
+                locale,
+                "วางแผน ติดตาม และบันทึกประวัติ PM ของเครื่อง",
+                "Plan, track, and record preventive maintenance history.",
+              )
         }
-        eyebrow={t("nav.pm")}
-        title={t("pm.title")}
+        eyebrow={thaiPrimary(
+          locale,
+          "งานบำรุงรักษา PM",
+          "Preventive maintenance",
+        )}
+        title={thaiPrimary(
+          locale,
+          "บำรุงรักษาเชิงป้องกัน",
+          "Preventive maintenance",
+        )}
       />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Button asChild className="h-12 justify-start" variant="outline">
           <Link href="/pm/calendar">
             <CalendarDays aria-hidden="true" className="size-5" />
-            {locale === "th" ? "ปฏิทิน PM" : "PM Calendar"}
+            {thaiPrimary(locale, "ปฏิทิน PM", "PM Calendar")}
           </Link>
         </Button>
         <Button asChild className="h-12 justify-start" variant="outline">
           <Link href="/pm/history">
             <History aria-hidden="true" className="size-5" />
-            {locale === "th" ? "ประวัติ PM" : "PM History"}
+            {thaiPrimary(locale, "ประวัติ PM", "PM History")}
           </Link>
         </Button>
       </div>
 
       <div>
         <h2 className="mb-3 font-semibold">
-          {locale === "th" ? "งาน PM ที่กำลังจะถึง" : "Upcoming PM"}
+          {thaiPrimary(locale, "งาน PM ที่กำลังจะถึง", "Upcoming PM")}
         </h2>
         {jobs.length === 0 ? (
           <EmptyState
             icon={ClipboardCheck}
-            message={
-              locale === "th" ? "ไม่มีงาน PM ที่รอทำ" : "No upcoming PM jobs"
-            }
+            message={thaiPrimary(
+              locale,
+              "ไม่มีงาน PM ที่รอทำ",
+              "No upcoming PM jobs",
+            )}
           />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

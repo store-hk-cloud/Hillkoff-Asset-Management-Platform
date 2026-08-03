@@ -15,6 +15,7 @@ import {
   loadOfflineDraft,
   saveOfflinePayload,
 } from "@/features/technician/services/offline-work.service";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 
 type Props = Readonly<{
   pmId: string;
@@ -67,7 +68,11 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : "ไม่สามารถปิดงาน PM ได้",
+          : thaiPrimary(
+              locale,
+              "ไม่สามารถปิดงาน PM ได้",
+              "Unable to complete PM.",
+            ),
       );
     } finally {
       setBusy(false);
@@ -98,7 +103,7 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
               <span className="text-sm">{item.label}</span>
             </label>
             <input
-              aria-label={`${locale === "th" ? "หมายเหตุ" : "Notes"} ${item.label}`}
+              aria-label={`${thaiPrimary(locale, "หมายเหตุ", "Notes")} ${item.label}`}
               className="border-input bg-background mt-2 h-10 w-full rounded-md border px-3 text-sm"
               onChange={(event) =>
                 setChecklist((current) =>
@@ -109,7 +114,11 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
                   ),
                 )
               }
-              placeholder={locale === "th" ? "หมายเหตุรายการนี้" : "Item notes"}
+              placeholder={thaiPrimary(
+                locale,
+                "หมายเหตุรายการนี้",
+                "Item notes",
+              )}
               value={item.notes}
             />
           </div>
@@ -117,7 +126,7 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="completionNotes">
-          {locale === "th" ? "หมายเหตุการปิดงาน" : "Completion Notes"}
+          {thaiPrimary(locale, "หมายเหตุการปิดงาน", "Completion notes")}
         </Label>
         <Textarea
           className="border-input bg-background min-h-28 w-full rounded-md border px-3 py-2 text-sm"
@@ -138,7 +147,7 @@ export function PmCompletionForm({ pmId, version, initialChecklist }: Props) {
           ? t("status.loading")
           : locale === "th"
             ? "ปิดงาน PM"
-            : "Complete PM"}
+            : thaiPrimary(locale, "ปิดงาน PM", "Complete PM")}
       </Button>
     </form>
   );

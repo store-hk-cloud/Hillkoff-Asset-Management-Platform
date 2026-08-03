@@ -11,7 +11,7 @@ export default function PreventiveMaintenanceError({
     <RouteError
       context={{
         th: "กรุณาลองโหลดรายการ PM อีกครั้ง",
-        en: "Please try loading the preventive maintenance list again.",
+        en: "กรุณาลองโหลดรายการ PM อีกครั้ง / Please try loading the preventive maintenance list again.",
       }}
       reset={reset}
     />

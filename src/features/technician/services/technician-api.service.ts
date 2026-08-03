@@ -27,7 +27,10 @@ async function mutate(url: string, body: unknown) {
     error?: { message?: string };
   };
   if (!response.ok || !payload.data) {
-    throw new Error(payload.error?.message ?? "Technician action failed.");
+    throw new Error(
+      payload.error?.message ??
+        "ดำเนินการงานช่างไม่สำเร็จ / Technician action failed.",
+    );
   }
   return payload.data;
 }
@@ -42,7 +45,10 @@ export async function listTechnicians(): Promise<readonly TechnicianSummary[]> {
     error?: { message?: string };
   };
   if (!response.ok) {
-    throw new Error(payload.error?.message ?? "Unable to load technicians.");
+    throw new Error(
+      payload.error?.message ??
+        "โหลดรายชื่อช่างไม่สำเร็จ / Unable to load technicians.",
+    );
   }
   return payload.data ?? [];
 }
@@ -100,7 +106,10 @@ export async function lookupTechnicianWork(reference: string) {
     error?: { message?: string };
   };
   if (!response.ok || !payload.data) {
-    throw new Error(payload.error?.message ?? "Unable to find assigned work.");
+    throw new Error(
+      payload.error?.message ??
+        "ค้นหางานที่ได้รับมอบหมายไม่สำเร็จ / Unable to find assigned work.",
+    );
   }
   return payload.data;
 }

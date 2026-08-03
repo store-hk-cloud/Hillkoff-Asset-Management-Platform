@@ -7,7 +7,7 @@ type Props = {
   searchParams: Promise<{ workType?: string }>;
 };
 
-export const metadata = { title: "New service job" };
+export const metadata = { title: "สร้างงานบริการ / New service job" };
 export default async function NewServiceJobPage({ searchParams }: Props) {
   await requireRole(["admin", "sales", "warehouse", "branch"]);
   const requestedWorkType = (await searchParams).workType;
@@ -20,9 +20,9 @@ export default async function NewServiceJobPage({ searchParams }: Props) {
   return (
     <section className="space-y-6">
       <PageHeader
-        description="Capture a complete customer, contact, asset, warranty, and fulfillment snapshot."
-        eyebrow="Service operations"
-        title="New service job"
+        description="บันทึกข้อมูลลูกค้า ผู้ติดต่อ เครื่อง การรับประกัน และรูปแบบรับบริการให้ครบ / Capture a complete customer, contact, asset, warranty, and fulfillment snapshot."
+        eyebrow="งานบริการ / Service operations"
+        title="สร้างงานบริการ / New service job"
       />
       <ServiceJobIntakeForm {...(initialWorkType ? { initialWorkType } : {})} />
     </section>

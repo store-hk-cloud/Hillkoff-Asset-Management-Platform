@@ -28,6 +28,7 @@ import {
   respondToServiceJobAssignment,
   respondToTechnicianWork,
 } from "@/features/technician/services/technician-api.service";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 
 export function TechnicianWorkspace({
   workspace,
@@ -51,7 +52,7 @@ export function TechnicianWorkspace({
     if (action === "reject") {
       reason =
         window.prompt(
-          locale === "th" ? "ระบุเหตุผลที่ปฏิเสธงาน" : "Rejection reason",
+          thaiPrimary(locale, "ระบุเหตุผลที่ปฏิเสธงาน", "Rejection reason"),
         ) ?? "";
       if (!reason.trim()) return;
     }
@@ -60,7 +61,9 @@ export function TechnicianWorkspace({
     try {
       if (item.type === "service_job") {
         if (!item.assignmentId) {
-          throw new Error("This service-job assignment is unavailable.");
+          throw new Error(
+            "ไม่พบข้อมูลการมอบหมายงานบริการ / This service-job assignment is unavailable.",
+          );
         }
         await respondToServiceJobAssignment(item.id, item.assignmentId, {
           expectedVersion: item.version,
@@ -79,7 +82,11 @@ export function TechnicianWorkspace({
       setError(
         responseError instanceof Error
           ? responseError.message
-          : "Unable to answer assignment.",
+          : thaiPrimary(
+              locale,
+              "ไม่สามารถตอบรับงานได้",
+              "Unable to answer assignment.",
+            ),
       );
     } finally {
       setBusyId(null);
@@ -94,20 +101,26 @@ export function TechnicianWorkspace({
         router.push(result.work[0]!.href);
       } else if (result.work.length === 0) {
         setError(
-          locale === "th"
-            ? "ไม่พบงานของคุณสำหรับเครื่องนี้"
-            : "No assigned work found for this machine.",
+          thaiPrimary(
+            locale,
+            "ไม่พบงานของคุณสำหรับเครื่องนี้",
+            "No assigned work found for this machine.",
+          ),
         );
       } else {
         setError(
-          locale === "th"
-            ? "พบหลายงาน กรุณาเลือกจากรายการงาน"
-            : "Multiple jobs found. Select one from your work list.",
+          thaiPrimary(
+            locale,
+            "พบหลายงาน กรุณาเลือกจากรายการงาน",
+            "Multiple jobs found. Select one from your work list.",
+          ),
         );
       }
     } catch (lookupError) {
       setError(
-        lookupError instanceof Error ? lookupError.message : "Lookup failed.",
+        lookupError instanceof Error
+          ? lookupError.message
+          : thaiPrimary(locale, "ค้นหางานไม่สำเร็จ", "Lookup failed."),
       );
     }
   }
@@ -126,7 +139,9 @@ export function TechnicianWorkspace({
       await openReference(tag.url);
     } catch (scanError) {
       setError(
-        scanError instanceof Error ? scanError.message : "NFC scan failed.",
+        scanError instanceof Error
+          ? scanError.message
+          : thaiPrimary(locale, "สแกน NFC ไม่สำเร็จ", "NFC scan failed."),
       );
     } finally {
       setScanning(false);
@@ -138,17 +153,17 @@ export function TechnicianWorkspace({
       <div className="grid gap-3 sm:grid-cols-3">
         <Metric
           icon={<ClipboardList className="size-5" />}
-          label={locale === "th" ? "งานใหม่" : "New assignments"}
+          label={thaiPrimary(locale, "งานใหม่", "New assignments")}
           value={workspace.newCount}
         />
         <Metric
           icon={<ScanLine className="size-5" />}
-          label={locale === "th" ? "กำลังทำ" : "In progress"}
+          label={thaiPrimary(locale, "กำลังดำเนินการ", "In progress")}
           value={workspace.inProgressCount}
         />
         <Metric
           icon={<AlertTriangle className="size-5" />}
-          label={locale === "th" ? "เกินกำหนด" : "Overdue"}
+          label={thaiPrimary(locale, "เกินกำหนด", "Overdue")}
           value={workspace.overdueCount}
         />
       </div>
@@ -159,16 +174,16 @@ export function TechnicianWorkspace({
           <Input
             className="pl-9"
             onChange={(event) => setReference(event.currentTarget.value)}
-            placeholder={
-              locale === "th"
-                ? "สแกน QR/NFC หรือกรอก Serial Number"
-                : "Scan QR/NFC or enter serial number"
-            }
+            placeholder={thaiPrimary(
+              locale,
+              "สแกน QR/NFC หรือกรอกหมายเลขเครื่อง",
+              "Scan QR/NFC or enter serial number",
+            )}
             required
             value={reference}
           />
         </div>
-        <Button type="submit">{locale === "th" ? "เปิดงาน" : "Open"}</Button>
+        <Button type="submit">{thaiPrimary(locale, "เปิดงาน", "Open")}</Button>
         <Button
           disabled={scanning}
           onClick={() => void scanNfc()}
@@ -176,41 +191,41 @@ export function TechnicianWorkspace({
           variant="outline"
         >
           <Radio className="size-4" />
-          {locale === "th" ? "แตะ NFC" : "Scan NFC"}
+          {thaiPrimary(locale, "แตะ NFC", "Scan NFC")}
         </Button>
       </form>
       {error ? <p className="text-destructive text-sm">{error}</p> : null}
 
       <WorkSection
         busyId={busyId}
-        empty={locale === "th" ? "ไม่มีงานวันนี้" : "No work today"}
+        empty={thaiPrimary(locale, "ไม่มีงานวันนี้", "No work today")}
         emptyIcon={ClipboardList}
         items={workspace.today}
         locale={locale}
         onRespond={respond}
         readOnly={readOnly}
-        title={locale === "th" ? "งานวันนี้" : "Today"}
+        title={thaiPrimary(locale, "งานวันนี้", "Today")}
       />
       <WorkSection
         busyId={busyId}
-        empty={locale === "th" ? "ไม่มีงานค้าง" : "No active work"}
+        empty={thaiPrimary(locale, "ไม่มีงานค้าง", "No active work")}
         emptyIcon={ScanLine}
         items={workspace.active}
         locale={locale}
         onRespond={respond}
         readOnly={readOnly}
-        title={locale === "th" ? "งานทั้งหมดของฉัน" : "My active work"}
+        title={thaiPrimary(locale, "งานทั้งหมดของฉัน", "My active work")}
       />
       <WorkSection
         busyId={busyId}
-        empty={locale === "th" ? "ยังไม่มีประวัติ" : "No history"}
+        empty={thaiPrimary(locale, "ยังไม่มีประวัติ", "No history")}
         emptyIcon={History}
         icon={<History className="size-5" />}
         items={workspace.history}
         locale={locale}
         onRespond={respond}
         readOnly={readOnly}
-        title={locale === "th" ? "ประวัติงาน" : "Work history"}
+        title={thaiPrimary(locale, "ประวัติงาน", "Work history")}
       />
     </div>
   );
@@ -287,7 +302,7 @@ function WorkSection({
                   <StatusBadge>{item.workStatus}</StatusBadge>
                   {item.overdue ? (
                     <StatusBadge tone="danger">
-                      {locale === "th" ? "เกินกำหนด" : "Overdue"}
+                      {thaiPrimary(locale, "เกินกำหนด", "Overdue")}
                     </StatusBadge>
                   ) : null}
                 </div>
@@ -298,19 +313,19 @@ function WorkSection({
                       onClick={() => void onRespond(item, "reject")}
                       variant="outline"
                     >
-                      {locale === "th" ? "ปฏิเสธ" : "Reject"}
+                      {thaiPrimary(locale, "ปฏิเสธ", "Reject")}
                     </Button>
                     <Button
                       disabled={busyId === item.id}
                       onClick={() => void onRespond(item, "accept")}
                     >
-                      {locale === "th" ? "รับงาน" : "Accept"}
+                      {thaiPrimary(locale, "รับงาน", "Accept")}
                     </Button>
                   </div>
                 ) : (
                   <Button asChild className="w-full" variant="outline">
                     <Link href={item.href}>
-                      {locale === "th" ? "เปิดรายละเอียด" : "Open details"}
+                      {thaiPrimary(locale, "เปิดรายละเอียด", "Open details")}
                     </Link>
                   </Button>
                 )}
@@ -325,18 +340,11 @@ function WorkSection({
 
 function typeLabel(type: TechnicianWorkItem["type"], locale: "th" | "en") {
   const labels = {
-    th: {
-      repair: "งานซ่อม",
-      pm: "งาน PM",
-      installation: "งานติดตั้ง",
-      service_job: "งานบริการ",
-    },
-    en: {
-      repair: "Repair",
-      pm: "PM",
-      installation: "Installation",
-      service_job: "Service job",
-    },
-  };
-  return labels[locale][type];
+    repair: ["งานซ่อม", "Repair"],
+    pm: ["งานบำรุงรักษา PM", "Preventive maintenance (PM)"],
+    installation: ["งานติดตั้ง", "Installation"],
+    service_job: ["งานบริการ", "Service job"],
+  } as const;
+  const [thai, english] = labels[type];
+  return thaiPrimary(locale, thai, english);
 }

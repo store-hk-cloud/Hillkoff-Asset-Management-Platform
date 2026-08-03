@@ -36,6 +36,7 @@ import {
   queueOfflineFiles,
   saveOfflinePayload,
 } from "@/features/technician/services/offline-work.service";
+import { thaiPrimary } from "@/lib/i18n/thai-primary";
 
 type InstallationWorkFormProps = Readonly<{
   installationId: string;
@@ -98,14 +99,18 @@ export function InstallationWorkForm({
       setPendingFiles(0);
     }
     void restoreAndFlush().catch((reason: unknown) =>
-      setError(reason instanceof Error ? reason.message : "Photo sync failed."),
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : thaiPrimary(locale, "ซิงก์รูปภาพไม่สำเร็จ", "Photo sync failed."),
+      ),
     );
     window.addEventListener("online", restoreAndFlush);
     return () => {
       active = false;
       window.removeEventListener("online", restoreAndFlush);
     };
-  }, [draftKey, installationId]);
+  }, [draftKey, installationId, locale]);
 
   useEffect(() => {
     if (!draftLoaded) return;
@@ -241,9 +246,11 @@ export function InstallationWorkForm({
   if (status === "completed") {
     return (
       <p className="rounded-lg bg-green-50 p-4 text-sm text-green-800">
-        {locale === "th"
-          ? "งานติดตั้งเสร็จสมบูรณ์และเปิด Warranty แล้ว"
-          : "Installation is complete and the warranty is active."}
+        {thaiPrimary(
+          locale,
+          "งานติดตั้งเสร็จสมบูรณ์และเปิดการรับประกันแล้ว",
+          "Installation is complete and the warranty is active.",
+        )}
       </p>
     );
   }
@@ -258,13 +265,13 @@ export function InstallationWorkForm({
           onClick={start}
           type="button"
         >
-          {locale === "th" ? "เริ่มงานติดตั้ง" : "Start installation"}
+          {thaiPrimary(locale, "เริ่มงานติดตั้ง", "Start installation")}
         </Button>
       ) : null}
 
       <section className="space-y-3">
         <h2 className="font-semibold">
-          {locale === "th" ? "รายการตรวจติดตั้ง" : "Installation Checklist"}
+          {thaiPrimary(locale, "รายการตรวจติดตั้ง", "Installation checklist")}
         </h2>
         {checklist.map((item, index) => (
           <label
@@ -292,13 +299,15 @@ export function InstallationWorkForm({
 
       <section className="space-y-3">
         <h2 className="font-semibold">
-          {locale === "th" ? "ตำแหน่ง GPS" : "GPS Location"}
+          {thaiPrimary(locale, "ตำแหน่ง GPS", "GPS location")}
         </h2>
         <Button onClick={captureLocation} type="button" variant="outline">
           <MapPin aria-hidden="true" className="size-4" />
-          {locale === "th"
-            ? "บันทึกตำแหน่งปัจจุบัน"
-            : "Capture current location"}
+          {thaiPrimary(
+            locale,
+            "บันทึกตำแหน่งปัจจุบัน",
+            "Capture current location",
+          )}
         </Button>
         {location ? (
           <p className="text-muted-foreground text-sm">
@@ -310,14 +319,14 @@ export function InstallationWorkForm({
 
       <section className="space-y-3">
         <h2 className="font-semibold">
-          {locale === "th" ? "รูปภาพการติดตั้ง" : "Installation Photos"}
+          {thaiPrimary(locale, "รูปภาพการติดตั้ง", "Installation photos")}
         </h2>
         <Label
           className="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-md border"
           htmlFor="installationPhotos"
         >
           <Camera aria-hidden="true" className="size-4" />
-          {locale === "th" ? "ถ่ายหรือเลือกรูป" : "Take or choose photos"}
+          {thaiPrimary(locale, "ถ่ายหรือเลือกรูป", "Take or choose photos")}
         </Label>
         <input
           accept="image/jpeg,image/png,image/webp"
@@ -329,14 +338,14 @@ export function InstallationWorkForm({
           type="file"
         />
         <p className="text-muted-foreground text-sm">
-          {locale === "th" ? "อัปโหลดแล้ว" : "Uploaded"} {photos.length}{" "}
-          {locale === "th" ? "รูป" : "photos"}
+          {thaiPrimary(locale, "อัปโหลดแล้ว", "Uploaded")} {photos.length}{" "}
+          {thaiPrimary(locale, "รูป", "photos")}
         </p>
       </section>
 
       <section className="grid gap-4">
         <h2 className="font-semibold">
-          {locale === "th" ? "การอบรมลูกค้า" : "Customer Training"}
+          {thaiPrimary(locale, "การอบรมลูกค้า", "Customer training")}
         </h2>
         <label className="flex items-center gap-3">
           <input
@@ -346,37 +355,39 @@ export function InstallationWorkForm({
             type="checkbox"
           />
           <span className="text-sm">
-            {locale === "th"
-              ? "อบรมลูกค้าเสร็จแล้ว *"
-              : "Customer training completed *"}
+            {thaiPrimary(
+              locale,
+              "อบรมลูกค้าเสร็จแล้ว *",
+              "Customer training completed *",
+            )}
           </span>
         </label>
         <Field
-          label={locale === "th" ? "ชื่อผู้รับการอบรม" : "Trainee name"}
+          label={thaiPrimary(locale, "ชื่อผู้รับการอบรม", "Trainee name")}
           name="traineeName"
           required
         />
         <Field
-          label={
-            locale === "th"
-              ? "หัวข้ออบรม (คั่นด้วย comma)"
-              : "Training topics (comma separated)"
-          }
+          label={thaiPrimary(
+            locale,
+            "หัวข้ออบรม (คั่นด้วยเครื่องหมายจุลภาค)",
+            "Training topics (comma separated)",
+          )}
           name="trainingTopics"
           required
         />
         <Field
-          label={locale === "th" ? "หมายเหตุการอบรม" : "Training notes"}
+          label={thaiPrimary(locale, "หมายเหตุการอบรม", "Training notes")}
           name="trainingNotes"
         />
       </section>
 
       <section className="space-y-4">
         <h2 className="font-semibold">
-          {locale === "th" ? "ลายเซ็นลูกค้า" : "Customer Signature"}
+          {thaiPrimary(locale, "ลายเซ็นลูกค้า", "Customer signature")}
         </h2>
         <Field
-          label={locale === "th" ? "ชื่อผู้ลงนาม" : "Signer name"}
+          label={thaiPrimary(locale, "ชื่อผู้ลงนาม", "Signer name")}
           name="signerName"
           required
         />
@@ -396,9 +407,11 @@ export function InstallationWorkForm({
       >
         {busy
           ? t("status.loading")
-          : locale === "th"
-            ? "ปิดงานติดตั้งและเปิด Warranty"
-            : "Complete Installation & Activate Warranty"}
+          : thaiPrimary(
+              locale,
+              "ปิดงานติดตั้งและเปิดการรับประกัน",
+              "Complete installation & activate warranty",
+            )}
       </Button>
     </form>
   );

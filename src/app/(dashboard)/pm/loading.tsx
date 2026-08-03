@@ -2,7 +2,10 @@ import { Skeleton } from "@/components/shared/skeleton";
 
 export default function PreventiveMaintenanceLoading() {
   return (
-    <section aria-label="Loading preventive maintenance" className="space-y-6">
+    <section
+      aria-label="กำลังโหลดงานบำรุงรักษา / Loading preventive maintenance"
+      className="space-y-6"
+    >
       <div className="space-y-2">
         <Skeleton className="h-4 w-28" />
         <Skeleton className="h-10 w-72" />
