@@ -35,4 +35,10 @@ export interface ExecutiveDashboardSnapshot {
   readonly topFailureAssets: readonly AnalyticsRankedAsset[];
   readonly topRepairCost: readonly AnalyticsRankedAsset[];
   readonly lowStockParts: readonly AnalyticsLowStockPart[];
+  readonly serviceJobs?: {
+    readonly open: number;
+    readonly completed: number;
+    readonly invoiced: number;
+    readonly averageCycleHours: number | null;
+  };
 }

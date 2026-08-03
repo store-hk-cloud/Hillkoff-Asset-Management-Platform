@@ -78,6 +78,11 @@ const navigation: readonly {
     ],
   },
   {
+    href: "/service-jobs",
+    labelKey: "nav.serviceJobs",
+    roles: ["admin", "warehouse", "technician", "sales", "branch", "customer", "executive"],
+  },
+  {
     href: "/pm",
     labelKey: "nav.pm",
     roles: [

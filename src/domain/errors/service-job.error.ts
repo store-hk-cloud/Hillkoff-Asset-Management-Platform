@@ -1,0 +1,31 @@
+import { DomainError } from "@/domain/errors/domain-error";
+
+export type ServiceJobErrorCode =
+  | "SERVICE_JOB_VERSION_CONFLICT"
+  | "INVALID_SERVICE_JOB_TRANSITION"
+  | "SERVICE_JOB_TRANSITION_PROTECTED"
+  | "SCHEDULED_START_REQUIRED"
+  | "SERVICE_JOB_TERMINAL"
+  | "ASSIGNMENT_LEAD_REQUIRED"
+  | "ASSIGNMENT_DUPLICATE_TECHNICIAN"
+  | "ASSIGNMENT_NAME_REQUIRED"
+  | "COMPLETION_EVIDENCE_REQUIRED"
+  | "COMPLETION_DETAILS_REQUIRED"
+  | "ASSESSMENT_JOB_MISMATCH"
+  | "ASSESSMENT_STATUS_INVALID"
+  | "ASSESSMENT_APPROVAL_REQUIRED"
+  | "BILLING_JOB_STATUS_INVALID"
+  | "BILLING_JOB_TERMINAL"
+  | "HANDOFF_ACKNOWLEDGEMENT_REQUIRED"
+  | "INVALID_MONEY_VALUE"
+  | "FULL_DISCOUNT_REASON_REQUIRED";
+
+export class ServiceJobError extends DomainError {
+  constructor(
+    readonly code: ServiceJobErrorCode,
+    message: string,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+  }
+}

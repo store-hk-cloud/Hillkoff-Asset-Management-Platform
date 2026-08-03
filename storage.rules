@@ -126,6 +126,49 @@ service firebase.storage {
       && request.resource.metadata.uploadedBy == request.auth.uid;
     }
 
+    function serviceJob(jobId) {
+      return firestore.get(
+        /databases/(default)/documents/service_jobs/$(jobId)
+      ).data;
+    }
+
+    function canReadServiceJob(jobId) {
+      let item = serviceJob(jobId);
+      return isActiveUser() && (
+        request.auth.token.role in ['admin', 'sales', 'warehouse', 'executive']
+        || (
+          request.auth.token.role == 'branch'
+          && currentUser().warehouseId != null
+          && item.warehouseId == currentUser().warehouseId
+        )
+        || (
+          request.auth.token.role == 'customer'
+          && currentUser().customerId != null
+          && item.customer.customerId == currentUser().customerId
+        )
+        || (
+          request.auth.token.role == 'technician'
+          && request.auth.uid in item.assignedTechnicianIds
+        )
+      );
+    }
+
+    function canUploadServiceJobEvidence(jobId) {
+      let item = serviceJob(jobId);
+      return isActiveUser()
+        && (
+          isAdmin()
+          || (
+            request.auth.token.role == 'technician'
+            && request.auth.uid in item.assignedTechnicianIds
+            && item.status in ['assigned', 'in_progress', 'waiting_parts', 'waiting_customer']
+          )
+        )
+        && request.resource.metadata.jobId == jobId
+        && request.resource.metadata.uploadedBy == request.auth.uid
+        && request.resource.metadata.ownerUid == request.auth.uid;
+    }
+
     match /users/{userId}/profile/{fileName} {
       allow read: if (
           isActiveUser()
@@ -177,6 +220,26 @@ service firebase.storage {
       allow create, update: if canUploadRepairEvidence(repairId)
         && request.resource.size < 10 * 1024 * 1024
         && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow delete: if isAdmin();
+    }
+
+    match /service-jobs/{jobId}/evidence/{fileName} {
+      allow read: if canReadServiceJob(jobId);
+      allow create, update: if canUploadServiceJobEvidence(jobId)
+        && request.resource.size > 0
+        && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('(image/(jpeg|png|webp)|application/pdf)')
+        && fileName.matches('[A-Za-z0-9_-]+(\\.(jpg|jpeg|png|webp|pdf))?');
+      allow delete: if isAdmin();
+    }
+
+    match /service-jobs/{jobId}/signatures/{fileName} {
+      allow read: if canReadServiceJob(jobId);
+      allow create, update: if canUploadServiceJobEvidence(jobId)
+        && fileName.matches('[A-Za-z0-9_-]+\\.png')
+        && request.resource.size > 0
+        && request.resource.size <= 2 * 1024 * 1024
+        && request.resource.contentType == 'image/png';
       allow delete: if isAdmin();
     }
 

@@ -48,10 +48,7 @@ export const enqueuePmNotification = onDocumentUpdated(
         before.assignedTechnicianId !== after.assignedTechnicianId ||
         (before.assignmentStatus !== "pending" &&
           after.assignmentStatus === "pending");
-      if (
-        assignmentChanged &&
-        typeof after.assignedTechnicianId === "string"
-      ) {
+      if (assignmentChanged && typeof after.assignedTechnicianId === "string") {
         await enqueueNotification({
           type: "pm",
           recipientUserIds: [after.assignedTechnicianId],
@@ -143,6 +140,47 @@ export const enqueueLowStockNotification = onDocumentUpdated(
     } catch (error) {
       console.error(
         `Failed to enqueue low-stock notification ${event.params.partId}:`,
+        error,
+      );
+      throw error;
+    }
+  },
+);
+
+export const enqueueServiceJobNotification = onDocumentUpdated(
+  { document: "service_jobs/{jobId}", retry: true },
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (!before || !after) return;
+    const beforeIds = Array.isArray(before.assignedTechnicianIds)
+      ? before.assignedTechnicianIds
+      : [];
+    const afterIds = Array.isArray(after.assignedTechnicianIds)
+      ? after.assignedTechnicianIds
+      : [];
+    const recipients = afterIds.filter(
+      (id): id is string => typeof id === "string" && !beforeIds.includes(id),
+    );
+    const completed =
+      before.status !== "completed" && after.status === "completed";
+    if (recipients.length === 0 && !completed) return;
+    try {
+      await enqueueNotification({
+        type: "system",
+        recipientUserIds: recipients,
+        title: completed
+          ? `Service job completed: ${after.jobNumber}`
+          : `New service assignment: ${after.jobNumber}`,
+        body: completed
+          ? "The service job is ready for assessment and billing."
+          : "A service job has been assigned to you.",
+        entityType: "system",
+        entityId: event.params.jobId,
+      });
+    } catch (error) {
+      console.error(
+        `Failed to enqueue service job notification ${event.params.jobId}:`,
         error,
       );
       throw error;

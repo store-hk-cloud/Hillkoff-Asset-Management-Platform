@@ -35,7 +35,7 @@ export interface InventoryMovement {
   readonly quantityBefore: number;
   readonly quantityAfter: number;
   readonly unitCost: number;
-  readonly referenceType: "manual" | "repair";
+  readonly referenceType: "manual" | "repair" | "service_job";
   readonly referenceId: string | null;
   readonly notes: string;
   readonly occurredAt: Date;

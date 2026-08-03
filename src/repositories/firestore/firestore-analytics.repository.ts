@@ -13,11 +13,12 @@ import { getFirebaseAdminFirestore } from "@/firebase/admin-firestore";
 export class FirestoreAnalyticsRepository implements AnalyticsRepository {
   async getExecutiveSnapshot(): Promise<ExecutiveDashboardSnapshot> {
     const firestore = getFirebaseAdminFirestore();
-    const [assets, repairs, pmJobs, parts] = await Promise.all([
+    const [assets, repairs, pmJobs, parts, serviceJobs] = await Promise.all([
       firestore.collection("assets").get(),
       firestore.collection("repair_tickets").get(),
       firestore.collection("pm_jobs").get(),
       firestore.collection("inventory_parts").get(),
+      firestore.collection("service_jobs").get(),
     ]);
 
     const assetsByStatus: Record<string, number> = {};
@@ -46,7 +47,10 @@ export class FirestoreAnalyticsRepository implements AnalyticsRepository {
       warrantiesByStatus[warrantyStatus] =
         (warrantiesByStatus[warrantyStatus] ?? 0) + 1;
 
-      if (warrantyStatus === "active" && warranty.expiresAt instanceof Timestamp) {
+      if (
+        warrantyStatus === "active" &&
+        warranty.expiresAt instanceof Timestamp
+      ) {
         const expiresAt = warranty.expiresAt.toDate();
         const daysRemaining = Math.ceil(
           (expiresAt.getTime() - now.getTime()) / 86_400_000,
@@ -164,6 +168,34 @@ export class FirestoreAnalyticsRepository implements AnalyticsRepository {
           reorderPoint: Number(part.reorderPoint),
         }))
         .slice(0, 20),
+      serviceJobs: (() => {
+        let open = 0;
+        let completed = 0;
+        let invoiced = 0;
+        const cycles: number[] = [];
+        serviceJobs.docs.forEach((document) => {
+          const data = document.data();
+          if (["closed", "cancelled"].includes(String(data.status))) return;
+          if (data.status === "completed") completed += 1;
+          else if (data.status === "invoiced") invoiced += 1;
+          else open += 1;
+          if (
+            data.createdAt instanceof Timestamp &&
+            data.completedAt instanceof Timestamp
+          )
+            cycles.push(
+              data.completedAt.toMillis() - data.createdAt.toMillis(),
+            );
+        });
+        return {
+          open,
+          completed,
+          invoiced,
+          averageCycleHours: cycles.length
+            ? cycles.reduce((a, b) => a + b, 0) / cycles.length / 3_600_000
+            : null,
+        };
+      })(),
     };
   }
 }

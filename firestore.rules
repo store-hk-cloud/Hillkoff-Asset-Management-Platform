@@ -275,6 +275,17 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Service jobs are a server-managed aggregate. Sensitive customer,
+    // location, signature, assignment, and financial snapshots must never be
+    // read or mutated directly by the client SDK.
+    match /service_jobs/{jobId} {
+      allow read, write: if false;
+    }
+
+    match /service_jobs/{jobId}/{childCollection}/{childId} {
+      allow read, write: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

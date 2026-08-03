@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@media print {
+  @page { size: A4; margin: 12mm; }
+  body { background: white !important; }
+  .print-document { min-height: 273mm; }
+}
+
 /*
  * Hillkoff Enterprise Dashboard design system.
  * Single source of truth — flat, opaque, information-dense.

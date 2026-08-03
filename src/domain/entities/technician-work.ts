@@ -1,6 +1,11 @@
 import type { UserId } from "@/domain/value-objects/user-id";
 
-export const TECHNICIAN_WORK_TYPES = ["repair", "pm", "installation"] as const;
+export const TECHNICIAN_WORK_TYPES = [
+  "repair",
+  "pm",
+  "installation",
+  "service_job",
+] as const;
 export const TECHNICIAN_ASSIGNMENT_STATUSES = [
   "pending",
   "accepted",

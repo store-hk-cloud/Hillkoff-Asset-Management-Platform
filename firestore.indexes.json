@@ -508,6 +508,47 @@
         { "fieldPath": "idempotencyKey", "order": "ASCENDING" },
         { "fieldPath": "occurredAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "service_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "service_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "assignedTechnicianIds", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "service_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "customer.customerId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "service_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "warehouseId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assignments",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "technicianId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "assignedAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

@@ -33,6 +33,15 @@ function movementType(value: unknown): InventoryMovementType {
   throw new Error("Invalid inventory movement type.");
 }
 
+export function mapInventoryMovementReferenceType(
+  value: unknown,
+): InventoryMovement["referenceType"] {
+  if (value === "manual" || value === "repair" || value === "service_job") {
+    return value;
+  }
+  throw new Error("Invalid inventory movement reference type.");
+}
+
 function mapPart(data: DocumentData): InventoryPart {
   return {
     id: string(data, "id"),
@@ -64,7 +73,7 @@ function mapMovement(data: DocumentData): InventoryMovement {
     quantityBefore: Number(data.quantityBefore),
     quantityAfter: Number(data.quantityAfter),
     unitCost: Number(data.unitCost),
-    referenceType: data.referenceType === "repair" ? "repair" : "manual",
+    referenceType: mapInventoryMovementReferenceType(data.referenceType),
     referenceId: typeof data.referenceId === "string" ? data.referenceId : null,
     notes: string(data, "notes"),
     occurredAt: date(data.occurredAt),

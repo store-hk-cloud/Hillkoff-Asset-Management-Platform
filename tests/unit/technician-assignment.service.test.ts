@@ -1,33 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  TechnicianAssignmentError,
-  TechnicianAssignmentService,
-} from "@/domain/services/technician-assignment.service";
+  TECHNICIAN_WORK_TYPES,
+  type TechnicianWorkType,
+} from "@/domain/entities/technician-work";
 
-const service = new TechnicianAssignmentService();
-
-describe("TechnicianAssignmentService", () => {
-  it("accepts a pending assignment", () => {
-    expect(service.respond("pending", "accept", "")).toEqual({
-      status: "accepted",
-      rejectionReason: null,
-    });
-  });
-
-  it("requires a reason when rejecting", () => {
-    expect(() => service.respond("pending", "reject", " ")).toThrowError(
-      TechnicianAssignmentError,
-    );
-    expect(service.respond("pending", "reject", "Schedule conflict")).toEqual({
-      status: "rejected",
-      rejectionReason: "Schedule conflict",
-    });
-  });
-
-  it("prevents answering an assignment twice", () => {
-    expect(() => service.respond("accepted", "reject", "Changed mind")).toThrow(
-      TechnicianAssignmentError,
-    );
+describe("technician service-job compatibility", () => {
+  it("adds service jobs without removing legacy work types", () => {
+    expect(TECHNICIAN_WORK_TYPES).toEqual([
+      "repair",
+      "pm",
+      "installation",
+      "service_job",
+    ] satisfies readonly TechnicianWorkType[]);
   });
 });

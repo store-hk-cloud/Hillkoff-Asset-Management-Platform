@@ -11,7 +11,8 @@ async function stage(
     | "asset_events"
     | "repair_history"
     | "pm_history"
-    | "inventory_movements",
+    | "inventory_movements"
+    | "service_jobs",
   sourceId: string,
   payload: Record<string, unknown>,
 ) {
@@ -40,7 +41,10 @@ export const stageAssetEvent = onDocumentCreated(
     try {
       await stage("asset_events", event.params.eventId, data);
     } catch (error) {
-      console.error(`Failed to stage asset event ${event.params.eventId}:`, error);
+      console.error(
+        `Failed to stage asset event ${event.params.eventId}:`,
+        error,
+      );
       throw error;
     }
   },
@@ -95,6 +99,29 @@ export const stagePmHistory = onDocumentUpdated(
       await stage("pm_history", event.params.pmId, after);
     } catch (error) {
       console.error(`Failed to stage PM history ${event.params.pmId}:`, error);
+      throw error;
+    }
+  },
+);
+
+export const stageServiceJob = onDocumentUpdated(
+  { document: "service_jobs/{jobId}", retry: true },
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (
+      !before ||
+      !after ||
+      (before.status === after.status && before.version === after.version)
+    )
+      return;
+    try {
+      await stage("service_jobs", event.params.jobId, after);
+    } catch (error) {
+      console.error(
+        `Failed to stage service job ${event.params.jobId}:`,
+        error,
+      );
       throw error;
     }
   },

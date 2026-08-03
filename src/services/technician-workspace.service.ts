@@ -200,6 +200,7 @@ export class TechnicianWorkspaceService {
       repair: ["admin"],
       pm: ["admin", "warehouse"],
       installation: ["admin", "sales"],
+      service_job: [],
     };
     if (!allowedRoles[type].includes(context.actor.role)) {
       throw new TechnicianAssignmentError(

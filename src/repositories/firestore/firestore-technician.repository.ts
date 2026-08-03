@@ -24,6 +24,7 @@ const COLLECTIONS: Record<TechnicianWorkType, string> = {
   repair: "repair_tickets",
   pm: "pm_jobs",
   installation: "installations",
+  service_job: "service_jobs",
 };
 
 function string(data: DocumentData, field: string): string {
@@ -46,15 +47,19 @@ function mapWork(
   data: DocumentData,
 ): TechnicianWorkItem {
   const scheduledAt =
-    type === "repair"
-      ? (date(data.updatedAt) ?? date(data.createdAt) ?? new Date(0))
-      : (date(data.scheduledAt) ?? new Date(0));
+    type === "service_job"
+      ? (date(data.scheduledStartAt) ?? date(data.updatedAt) ?? new Date(0))
+      : type === "repair"
+        ? (date(data.updatedAt) ?? date(data.createdAt) ?? new Date(0))
+        : (date(data.scheduledAt) ?? new Date(0));
   const completedAt =
-    type === "installation"
+    type === "service_job"
       ? date(data.completedAt)
-      : type === "pm"
+      : type === "installation"
         ? date(data.completedAt)
-        : (date(data.closedAt) ?? date(data.completedAt));
+        : type === "pm"
+          ? date(data.completedAt)
+          : (date(data.closedAt) ?? date(data.completedAt));
   const status = string(data, "status");
   const terminal =
     status === "completed" || status === "closed" || status === "cancelled";
@@ -62,33 +67,55 @@ function mapWork(
     id: string(data, "id"),
     type,
     number:
-      type === "repair"
-        ? string(data, "ticketNumber")
-        : type === "pm"
-          ? string(data, "jobNumber")
-          : string(data, "installationNumber"),
+      type === "service_job"
+        ? string(data, "jobNumber")
+        : type === "repair"
+          ? string(data, "ticketNumber")
+          : type === "pm"
+            ? string(data, "jobNumber")
+            : string(data, "installationNumber"),
     title:
-      type === "installation"
-        ? `ติดตั้ง ${string(data, "assetName")}`
-        : string(data, "title"),
-    assetId: string(data, "assetId"),
-    assetCode: string(data, "assetCode"),
-    assetName: string(data, "assetName"),
+      type === "service_job"
+        ? string(data, "title")
+        : type === "installation"
+          ? `ติดตั้ง ${string(data, "assetName")}`
+          : string(data, "title"),
+    assetId:
+      type === "service_job"
+        ? string(data.asset ?? {}, "assetId")
+        : string(data, "assetId"),
+    assetCode:
+      type === "service_job"
+        ? string(data.asset ?? {}, "assetCode")
+        : string(data, "assetCode"),
+    assetName:
+      type === "service_job"
+        ? string(data.asset ?? {}, "model")
+        : string(data, "assetName"),
     scheduledAt,
     workStatus: status,
     assignmentStatus: assignmentStatus(data),
-    assignedTechnicianId: createUserId(string(data, "assignedTechnicianId")),
-    assignedTechnicianName: string(data, "assignedTechnicianName"),
+    assignedTechnicianId: createUserId(
+      type === "service_job"
+        ? string(data, "leadTechnicianId")
+        : string(data, "assignedTechnicianId"),
+    ),
+    assignedTechnicianName:
+      type === "service_job"
+        ? string(data, "leadTechnicianName")
+        : string(data, "assignedTechnicianName"),
     rejectionReason:
       typeof data.assignmentRejectionReason === "string"
         ? data.assignmentRejectionReason
         : null,
     href:
-      type === "repair"
-        ? `/repairs/${string(data, "id")}`
-        : type === "pm"
-          ? `/pm/${string(data, "id")}`
-          : `/installations/${string(data, "id")}`,
+      type === "service_job"
+        ? `/service-jobs/${string(data, "id")}`
+        : type === "repair"
+          ? `/repairs/${string(data, "id")}`
+          : type === "pm"
+            ? `/pm/${string(data, "id")}`
+            : `/installations/${string(data, "id")}`,
     completedAt,
     overdue: !terminal && scheduledAt.getTime() < Date.now() - 86_400_000,
     version: Number(data.version),
@@ -161,6 +188,12 @@ export class FirestoreTechnicianRepository implements TechnicianRepository {
   }
 
   async updateAssignment(update: TechnicianAssignmentUpdate): Promise<void> {
+    if (update.workType === "service_job") {
+      throw new TechnicianAssignmentError(
+        "TECHNICIAN_ASSIGNMENT_CONFLICT",
+        "Service-job assignments must be changed through the service-job API.",
+      );
+    }
     const workReference = this.firestore
       .collection(COLLECTIONS[update.workType])
       .doc(update.workId);

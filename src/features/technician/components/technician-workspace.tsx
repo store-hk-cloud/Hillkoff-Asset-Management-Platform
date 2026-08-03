@@ -313,8 +313,18 @@ function WorkSection({
 
 function typeLabel(type: TechnicianWorkItem["type"], locale: "th" | "en") {
   const labels = {
-    th: { repair: "งานซ่อม", pm: "งาน PM", installation: "งานติดตั้ง" },
-    en: { repair: "Repair", pm: "PM", installation: "Installation" },
+    th: {
+      repair: "งานซ่อม",
+      pm: "งาน PM",
+      installation: "งานติดตั้ง",
+      service_job: "งานบริการ",
+    },
+    en: {
+      repair: "Repair",
+      pm: "PM",
+      installation: "Installation",
+      service_job: "Service job",
+    },
   };
   return labels[locale][type];
 }

@@ -11,6 +11,7 @@ const translations = {
   "nav.warehouse": { th: "คลังสินค้า", en: "Warehouse" },
   "nav.installations": { th: "งานติดตั้ง", en: "Installations" },
   "nav.repairs": { th: "งานซ่อม", en: "Repairs" },
+  "nav.serviceJobs": { th: "งานบริการ", en: "Service operations" },
   "nav.pm": { th: "บำรุงรักษา", en: "PM" },
   "nav.inventory": { th: "อะไหล่", en: "Inventory" },
   "nav.notifications": { th: "การแจ้งเตือน", en: "Notifications" },

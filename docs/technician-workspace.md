@@ -40,6 +40,7 @@ page.
 | Repair       | `admin`               |
 | PM           | `admin`, `warehouse`  |
 | Installation | `admin`, `sales`      |
+| Service job  | `admin`, `sales`      |
 
 The API resolves the technician name from the real `users` collection and
 rejects disabled or non-technician accounts. A submitted display name is never
@@ -67,3 +68,12 @@ firebase deploy --only firestore:rules,firestore:indexes,functions
 
 This activates technician notification triggers and the composite indexes used
 by assigned-work and notification queries.
+
+## Service-job migration
+
+Legacy repair and installation records can be prepared for the unified
+service-job lifecycle with `npm run service-jobs:backfill`; PM records remain
+on the existing PM workflow. The command is
+dry-run by default; review its JSON summary before explicitly adding `--apply`.
+The generated records retain `legacySource` and `legacyId` for traceability and
+are skipped when the deterministic target ID already exists.
