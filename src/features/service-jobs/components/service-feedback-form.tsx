@@ -65,7 +65,7 @@ export function ServiceFeedbackForm({ token }: { token: string }) {
         <label className="block space-y-2 text-sm" key={field}>
           <span className="font-medium">{label}</span>
           <select
-            className="w-full rounded-md border px-3 py-2"
+            className="input"
             value={scores[field]}
             onChange={(event) =>
               setScores((current) => ({
@@ -85,7 +85,7 @@ export function ServiceFeedbackForm({ token }: { token: string }) {
       <label className="block space-y-2 text-sm">
         <span className="font-medium">ความคิดเห็นเพิ่มเติม</span>
         <textarea
-          className="min-h-28 w-full rounded-md border px-3 py-2"
+          className="input min-h-28"
           value={comment}
           onChange={(event) => setComment(event.target.value)}
           maxLength={2000}

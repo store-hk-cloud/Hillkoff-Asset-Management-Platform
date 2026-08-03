@@ -15,8 +15,9 @@
 
 /*
  * Hillkoff Enterprise Dashboard design system.
- * Single source of truth — flat, opaque, information-dense.
- * No glass/blur on content surfaces, no decorative motion.
+ * Single source of truth — opaque, information-dense, and clearly layered.
+ * Content surfaces use restrained borders and elevation so controls never
+ * disappear into the page background.
  * Colors are sourced from hillkoff.com's live brand (teal/cyan/mint).
  */
 
@@ -29,18 +30,18 @@
   --brand-mint: #51ddd7;
 
   /* Surfaces */
-  --page: #f8f8f8;
-  --page-soft: #f0f0f0;
+  --page: #f1f5f4;
+  --page-soft: #e7eeec;
   --surface: #ffffff;
-  --surface-soft: #f5f5f5;
+  --surface-soft: #f5f8f7;
 
   /* Text */
   --text: #333333;
   --muted: #6b6b6b;
 
   /* Lines */
-  --line: rgba(0, 0, 0, 0.1);
-  --line-strong: rgba(0, 0, 0, 0.18);
+  --line: rgba(10, 45, 43, 0.16);
+  --line-strong: rgba(10, 45, 43, 0.28);
 
   /* Status (semantic — not brand-tinted) */
   --success: #1e7d34;
@@ -62,8 +63,12 @@
   --radius-lg: 10px;
   --radius-full: 999px;
 
-  /* Elevation — one flat layer only */
-  --shadow-sm: 0 1px 2px rgba(16, 24, 32, 0.06);
+  /* Elevation — enough separation for dense operational screens. */
+  --shadow-field:
+    0 1px 2px rgba(10, 45, 43, 0.06), 0 0 0 1px rgba(10, 45, 43, 0.02);
+  --shadow-card:
+    0 2px 6px rgba(10, 45, 43, 0.08), 0 10px 24px rgba(10, 45, 43, 0.05);
+  --shadow-sm: var(--shadow-card);
 
   /* shadcn-style aliases used by Tailwind utility classes across the app */
   --background: var(--page);
@@ -85,7 +90,7 @@
   /* Indirection so @theme inline can alias this without a self-referential
      custom property (the Tailwind theme key shares its name with the
      source token above). */
-  --tw-shadow-sm: var(--shadow-sm);
+  --tw-shadow-sm: var(--shadow-card);
 }
 
 .dark {
@@ -95,16 +100,16 @@
   --brand-accent: #00bac6;
   --brand-mint: #51ddd7;
 
-  --page: #04120f;
-  --page-soft: #0c211e;
-  --surface: #14201f;
-  --surface-soft: #0f1918;
+  --page: #061614;
+  --page-soft: #0b211e;
+  --surface: #162c29;
+  --surface-soft: #10231f;
 
   --text: #f5f5f7;
   --muted: #9aa5a3;
 
-  --line: rgba(245, 245, 247, 0.14);
-  --line-strong: rgba(245, 245, 247, 0.22);
+  --line: rgba(245, 245, 247, 0.2);
+  --line-strong: rgba(245, 245, 247, 0.34);
 
   --success: #4caf6b;
   --success-bg: rgba(76, 175, 107, 0.14);
@@ -119,7 +124,11 @@
   --info-bg: rgba(91, 155, 217, 0.16);
   --info-line: rgba(91, 155, 217, 0.36);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-field:
+    0 1px 2px rgba(0, 0, 0, 0.34), 0 0 0 1px rgba(255, 255, 255, 0.02);
+  --shadow-card:
+    0 4px 12px rgba(0, 0, 0, 0.28), 0 14px 30px rgba(0, 0, 0, 0.18);
+  --shadow-sm: var(--shadow-card);
 
   --primary-foreground: #04211f;
 }
@@ -193,9 +202,58 @@ body {
 .scan-panel,
 .report-panel {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
+}
+
+/* Keep custom panels that use Tailwind's bg-card utility on the same surface
+ * contract as the shared Card component. */
+.bg-card {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-card);
+}
+
+/* Shared field class used by service-job forms and public workflows. */
+.input {
+  display: block;
+  min-height: 2.5rem;
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  color: var(--text);
+  padding: 0.5rem 0.75rem;
+  box-shadow: var(--shadow-field);
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+}
+
+.input::placeholder {
+  color: var(--muted);
+}
+
+.input:focus {
+  border-color: var(--primary);
+  box-shadow:
+    0 0 0 3px var(--primary-soft),
+    var(--shadow-field);
+}
+
+.input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Native controls built inline with border-input/bg-background should receive
+ * the same field treatment as the shared Input, Select, and Textarea. */
+.border-input.bg-background {
+  background: var(--surface-soft);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-field);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -247,6 +305,7 @@ body {
   color: var(--text);
   font-weight: 500;
   cursor: pointer;
+  box-shadow: var(--shadow-field);
   transition:
     background-color 150ms ease,
     color 150ms ease,
@@ -280,7 +339,7 @@ body {
   font-weight: 600;
   background: var(--surface-soft);
   color: var(--muted);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
 }
 
 .status-badge.is-success {
@@ -315,9 +374,10 @@ body {
   display: inline-flex;
   gap: 0.25rem;
   padding: 0.2rem;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-md);
   background: var(--surface);
+  box-shadow: var(--shadow-field);
 }
 
 .segmented-control button {

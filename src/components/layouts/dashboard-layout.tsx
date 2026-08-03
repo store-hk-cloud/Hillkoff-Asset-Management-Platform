@@ -234,7 +234,7 @@ export function DashboardLayout({
         id="primary-navigation"
         aria-label="Primary navigation"
         className={cn(
-          "bg-card fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r px-4 py-5 shadow-xl transition-transform duration-200 lg:translate-x-0 lg:shadow-none",
+          "bg-card fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r px-4 py-5 shadow-xl transition-transform duration-200 lg:translate-x-0",
           mobileOpen && "translate-x-0",
         )}
       >
