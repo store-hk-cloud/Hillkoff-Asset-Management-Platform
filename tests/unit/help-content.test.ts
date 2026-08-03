@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { USER_ROLES } from "@/domain/value-objects/user-role";
 import { HelpCenter } from "@/features/help/components/help-center";
+import { HelpManual } from "@/features/help/components/help-manual";
 import { helpCategoryOrder, helpGuides } from "@/features/help/help-content";
 
 describe("in-app help content", () => {
@@ -52,5 +53,20 @@ describe("in-app help content", () => {
     expect(markup).toContain("Standard operating flow");
     expect(markup).toContain("Users, roles, and access control");
     expect(markup).toContain("/profile");
+    expect(markup).toContain("/help/start-here");
+  });
+
+  it("renders a dedicated manual page with procedure and controls", () => {
+    const guide = helpGuides.find((item) => item.id === "service-lifecycle");
+    if (!guide) throw new Error("Expected service lifecycle guide.");
+
+    const markup = renderToStaticMarkup(
+      createElement(HelpManual, { guide, locale: "en" }),
+    );
+
+    expect(markup).toContain('data-help-manual="service-lifecycle"');
+    expect(markup).toContain("Standard operating procedure");
+    expect(markup).toContain("Handoff checklist");
+    expect(markup).toContain("/service-jobs/new");
   });
 });

@@ -340,35 +340,51 @@ function GuideCard({
 
   return (
     <Card className="overflow-hidden">
-      <button
-        aria-controls={`${guide.id}-content`}
-        aria-expanded={expanded}
-        className="hover:bg-accent/50 flex w-full items-start gap-4 px-6 py-5 text-left transition-colors"
-        onClick={onToggle}
-        type="button"
-      >
-        <span className="bg-primary/12 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
-          <Icon aria-hidden="true" className="size-5" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="text-muted-foreground block text-xs font-medium tracking-wide uppercase">
-            {text(helpCategoryLabels[guide.category])}
+      <div className="flex items-start gap-2 px-3 py-3 sm:px-4">
+        <button
+          aria-controls={`${guide.id}-content`}
+          aria-expanded={expanded}
+          className="hover:bg-accent/50 flex min-w-0 flex-1 items-start gap-4 rounded-lg px-3 py-2 text-left transition-colors"
+          onClick={onToggle}
+          type="button"
+        >
+          <span className="bg-primary/12 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
+            <Icon aria-hidden="true" className="size-5" />
           </span>
-          <span className="mt-1 block text-base font-semibold">
-            {text(guide.title)}
+          <span className="min-w-0 flex-1">
+            <span className="text-muted-foreground block text-xs font-medium tracking-wide uppercase">
+              {text(helpCategoryLabels[guide.category])}
+            </span>
+            <span className="mt-1 block text-base font-semibold">
+              {text(guide.title)}
+            </span>
+            <span className="text-muted-foreground mt-1 block text-sm leading-5">
+              {text(guide.summary)}
+            </span>
           </span>
-          <span className="text-muted-foreground mt-1 block text-sm leading-5">
-            {text(guide.summary)}
+          <ChevronDown
+            aria-hidden="true"
+            className={cn(
+              "text-muted-foreground mt-1 size-5 shrink-0 transition-transform",
+              expanded && "rotate-180",
+            )}
+          />
+        </button>
+        <Link
+          aria-label={
+            locale === "th"
+              ? `เปิดคู่มือเต็ม: ${text(guide.title)}`
+              : `Open full manual: ${text(guide.title)}`
+          }
+          className="text-primary hover:bg-primary/8 focus-visible:ring-ring mt-2 flex shrink-0 items-center gap-1 rounded-md px-2 py-2 text-xs font-medium outline-none focus-visible:ring-2"
+          href={`/help/${guide.id}`}
+        >
+          <BookOpen aria-hidden="true" className="size-4" />
+          <span className="hidden sm:inline">
+            {locale === "th" ? "คู่มือเต็ม" : "Full manual"}
           </span>
-        </span>
-        <ChevronDown
-          aria-hidden="true"
-          className={cn(
-            "text-muted-foreground mt-1 size-5 shrink-0 transition-transform",
-            expanded && "rotate-180",
-          )}
-        />
-      </button>
+        </Link>
+      </div>
 
       {expanded ? (
         <div className="border-t" id={`${guide.id}-content`}>
