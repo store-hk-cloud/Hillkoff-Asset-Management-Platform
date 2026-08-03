@@ -133,7 +133,7 @@ export default async function DashboardPage() {
         />
         <ListCard
           items={snapshot.expiringWarranties.map((item) => ({
-            label: `${item.assetCode} ยท ${item.assetName}`,
+            label: `${item.assetCode} · ${item.assetName}`,
             value:
               locale === "th"
                 ? `${item.daysRemaining} วัน`

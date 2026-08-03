@@ -148,6 +148,10 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -179,29 +183,6 @@ body {
   transition:
     background-color 150ms ease,
     color 150ms ease;
-}
-
-/* Auth shell uses explicit layout rules so the split-screen breakpoint remains
- * stable even when utility generation is tree-shaken by the app build. */
-@layer components {
-  .auth-shell {
-    display: block;
-  }
-
-  .auth-brand-panel {
-    display: none;
-  }
-
-  @media (min-width: 64rem) {
-    .auth-shell {
-      display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(28rem, 0.95fr);
-    }
-
-    .auth-brand-panel {
-      display: flex;
-    }
-  }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -399,5 +380,29 @@ body {
 
   .toast-fade-in {
     animation: none;
+  }
+}
+
+/* Keep the auth split-screen deterministic across dev and production builds. */
+.auth-shell {
+  display: block;
+}
+
+.auth-brand-panel {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .auth-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(28rem, 0.95fr);
+  }
+
+  .auth-brand-panel {
+    display: flex;
+    min-height: 100dvh;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3.5rem;
   }
 }

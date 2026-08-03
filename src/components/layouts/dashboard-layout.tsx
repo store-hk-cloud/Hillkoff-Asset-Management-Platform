@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Bell,
   BookOpen,
@@ -193,6 +193,24 @@ export function DashboardLayout({
   const visibleNavigation = navigation.filter((item) =>
     item.roles.includes(role),
   );
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [mobileOpen]);
+
   const currentItem =
     [...visibleNavigation]
       .sort((left, right) => right.href.length - left.href.length)
@@ -205,7 +223,7 @@ export function DashboardLayout({
     <div className="bg-background text-foreground min-h-dvh">
       {mobileOpen ? (
         <button
-          aria-label="Close navigation"
+          aria-label={locale === "th" ? "ปิดเมนูนำทาง" : "Close navigation"}
           className="fixed inset-0 z-30 bg-slate-950/35 backdrop-blur-[1px] lg:hidden"
           onClick={() => setMobileOpen(false)}
           type="button"
@@ -213,6 +231,7 @@ export function DashboardLayout({
       ) : null}
 
       <aside
+        id="primary-navigation"
         aria-label="Primary navigation"
         className={cn(
           "bg-card fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r px-4 py-5 shadow-xl transition-transform duration-200 lg:translate-x-0 lg:shadow-none",
@@ -243,7 +262,7 @@ export function DashboardLayout({
             </span>
           </Link>
           <Button
-            aria-label="Close navigation"
+            aria-label={locale === "th" ? "ปิดเมนูนำทาง" : "Close navigation"}
             className="lg:hidden"
             onClick={() => setMobileOpen(false)}
             size="icon"
@@ -322,7 +341,11 @@ export function DashboardLayout({
           <div className="mx-auto flex min-h-16 max-w-[1600px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
               <Button
-                aria-label="Open navigation"
+                aria-controls="primary-navigation"
+                aria-expanded={mobileOpen}
+                aria-label={
+                  locale === "th" ? "เปิดเมนูนำทาง" : "Open navigation"
+                }
                 className="lg:hidden"
                 onClick={() => setMobileOpen(true)}
                 size="icon"

@@ -14,7 +14,7 @@ export async function AuthLayout({ children }: AuthLayoutProps) {
 
   return (
     <div className="auth-shell bg-background min-h-dvh">
-      <section className="auth-brand-panel relative overflow-hidden bg-[#03211f] p-10 text-white lg:min-h-dvh lg:flex-col lg:justify-between lg:p-14">
+      <section className="auth-brand-panel relative overflow-hidden bg-[#03211f] p-10 text-white">
         <div className="pointer-events-none absolute -top-32 -right-32 size-96 rounded-full bg-[#0aa39c]/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-40 -left-32 size-[28rem] rounded-full bg-[#00bac6]/10 blur-3xl" />
         <div className="relative flex items-center gap-3">
