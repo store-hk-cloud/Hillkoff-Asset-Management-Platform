@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  NEXT_PUBLIC_FIREBASE_API_KEY: ci-api-key
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ci.firebaseapp.com
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: demo-hillkoff-auth
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: demo-hillkoff-auth.appspot.com
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
+  NEXT_PUBLIC_FIREBASE_APP_ID: ci-app-id
+  NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+
+jobs:
+  quality:
+    name: Typecheck, lint, unit tests and audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: >-
+          npx prettier --check package.json playwright.config.ts instrumentation.ts
+          src/lib/logging/logger.ts src/app/api/audit-logs/route.ts
+          src/domain/errors/authentication.error.ts src/features/auth/services/auth.service.ts
+          src/lib/auth/session.ts src/lib/env.ts tests/e2e/smoke.spec.ts tests/unit/logger.test.ts
+          scripts/security/*.mjs docs/operations/*.md .github/workflows/*.yml
+      - run: npm run check
+      - run: npm test -- --run
+      - run: npm run functions:build
+      - run: npm run audit:ci
+
+  firestore-rules:
+    name: Firestore and Storage rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: npm ci
+      - run: npm run test:rules
+
+  build-and-e2e:
+    name: Production build and browser smoke tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore

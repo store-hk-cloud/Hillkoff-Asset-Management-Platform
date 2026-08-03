@@ -66,8 +66,13 @@ export async function login(input: LoginInput): Promise<void> {
     if (!sessionResponse.ok) {
       await signOut(auth);
       const body = (await sessionResponse.json()) as {
-        error?: { message?: string };
+        error?: { code?: string; message?: string };
       };
+      if (body.error?.code === "MFA_REQUIRED") {
+        throw new Error(
+          "ต้องยืนยันตัวตนแบบหลายขั้นตอน / Multi-factor authentication is required.",
+        );
+      }
       throw new Error(body.error?.message ?? "Unable to create session.");
     }
   } catch (error) {

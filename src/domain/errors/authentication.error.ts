@@ -6,6 +6,7 @@ export type AuthenticationErrorCode =
   | "ACCOUNT_DISABLED"
   | "PROFILE_NOT_FOUND"
   | "ROLE_MISMATCH"
+  | "MFA_REQUIRED"
   | "FORBIDDEN"
   | "SESSION_EXPIRED"
   | "CSRF_VALIDATION_FAILED"

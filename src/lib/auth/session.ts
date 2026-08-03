@@ -7,6 +7,7 @@ import { createUserId } from "@/domain/value-objects/user-id";
 import { isUserRole, type UserRole } from "@/domain/value-objects/user-role";
 import { getFirebaseAdminAuth } from "@/firebase/admin-auth";
 import { getSessionExpiresInMilliseconds } from "@/lib/auth/cookies";
+import { getServerEnvironment } from "@/lib/env";
 
 export interface AuthenticatedIdentity {
   readonly uid: ReturnType<typeof createUserId>;
@@ -38,6 +39,17 @@ export async function verifyIdToken(
     idToken,
     true,
   );
+
+  if (
+    getServerEnvironment().AUTH_REQUIRE_MFA &&
+    !decodedToken.firebase?.sign_in_second_factor
+  ) {
+    throw new AuthenticationError(
+      "MFA_REQUIRED",
+      "Multi-factor authentication is required.",
+    );
+  }
+
   return mapDecodedToken(decodedToken);
 }
 

@@ -31,6 +31,15 @@ Supported roles:
 
 The user profile must also have `status: "active"`.
 
+## Multi-factor authentication
+
+Set `AUTH_REQUIRE_MFA=true` only after configuring and enrolling the required
+second factor in Firebase Authentication or Identity Platform. The server
+accepts a session only when Firebase includes a verified
+`sign_in_second_factor` claim. Keep the value `false` during migration so
+unenrolled users are not locked out, then enable it as a controlled rollout
+for administrators first.
+
 ## Security boundaries
 
 1. `src/proxy.ts` performs only an optimistic cookie-presence redirect.
@@ -89,5 +98,7 @@ global sign-out.
 - Deploy Firestore and Storage Rules before enabling users.
 - Configure App Check before exposing direct Firebase client operations.
 - Enable MFA for administrators when Identity Platform is available.
+- Set `AUTH_REQUIRE_MFA=true` after verifying administrator enrollment and the
+  recovery process.
 - Monitor failed login, disabled account, role mismatch, and session failures.
 - Rotate service-account credentials and test session revocation.

@@ -30,6 +30,10 @@ export const serverEnvironmentSchema = z.object({
     .min(1)
     .max(14)
     .default(5),
+  AUTH_REQUIRE_MFA: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
   USER_INVITATION_EXPIRES_IN_HOURS: z.coerce
     .number()
     .int()
@@ -79,6 +83,7 @@ export function getServerEnvironment() {
     BIGQUERY_DATASET_PREFIX: process.env.BIGQUERY_DATASET_PREFIX,
     AUTH_SESSION_COOKIE_NAME: process.env.AUTH_SESSION_COOKIE_NAME,
     AUTH_SESSION_EXPIRES_IN_DAYS: process.env.AUTH_SESSION_EXPIRES_IN_DAYS,
+    AUTH_REQUIRE_MFA: process.env.AUTH_REQUIRE_MFA,
     USER_INVITATION_EXPIRES_IN_HOURS:
       process.env.USER_INVITATION_EXPIRES_IN_HOURS,
     SMTP_HOST: process.env.SMTP_HOST,
