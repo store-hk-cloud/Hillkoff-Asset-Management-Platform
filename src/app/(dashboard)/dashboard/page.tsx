@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
+import { logger } from "@/lib/logging/logger";
 import { AnalyticsManagementService } from "@/services/analytics-management.service";
+import type { ExecutiveDashboardSnapshot } from "@/domain/entities/analytics";
 
 const analytics = new AnalyticsManagementService();
 
@@ -46,7 +48,21 @@ export default async function DashboardPage() {
     );
   }
 
-  const snapshot = await analytics.executiveDashboard(profile);
+  const correlationId = crypto.randomUUID();
+  let snapshot: ExecutiveDashboardSnapshot;
+  let analyticsDegraded = false;
+
+  try {
+    snapshot = await analytics.executiveDashboard(profile);
+  } catch (error) {
+    analyticsDegraded = true;
+    logger.error("Executive dashboard analytics unavailable", error, {
+      correlationId,
+      operation: "dashboard.load",
+      role: profile.role,
+    });
+    snapshot = emptyDashboardSnapshot();
+  }
 
   return (
     <section className="space-y-6">
@@ -73,6 +89,27 @@ export default async function DashboardPage() {
         eyebrow={`${locale === "th" ? "ข้อมูลวิเคราะห์ผู้บริหาร" : "Executive Analytics"} · ${snapshot.source}`}
         title={t("dashboard.title")}
       />
+
+      {analyticsDegraded ? (
+        <Card className="border-amber-500/50 bg-amber-500/5">
+          <CardContent className="space-y-1 py-4 text-sm" role="status">
+            <p className="font-medium">
+              {locale === "th"
+                ? "กำลังแสดงข้อมูลสำรองชั่วคราว"
+                : "Showing temporary fallback data"}
+            </p>
+            <p className="text-muted-foreground">
+              {locale === "th"
+                ? "ระบบวิเคราะห์ยังเชื่อมต่อไม่ได้ กรุณาลองใหม่อีกครั้ง หรือติดต่อผู้ดูแลระบบ"
+                : "Analytics is temporarily unavailable. Try again or contact an administrator."}
+              <span className="mt-1 block font-mono text-xs">
+                {locale === "th" ? "รหัสติดตาม: " : "Correlation ID: "}
+                {correlationId}
+              </span>
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Metric
@@ -160,6 +197,31 @@ export default async function DashboardPage() {
       </div>
     </section>
   );
+}
+
+function emptyDashboardSnapshot(): ExecutiveDashboardSnapshot {
+  return {
+    generatedAt: new Date(),
+    source: "firebase",
+    totalAssets: 0,
+    assetsByStatus: {},
+    repairCost: 0,
+    mtbfHours: null,
+    pmCompletionRate: 0,
+    warrantyExpiring30: 0,
+    warrantyExpiring90: 0,
+    warrantiesByStatus: {},
+    expiringWarranties: [],
+    topFailureAssets: [],
+    topRepairCost: [],
+    lowStockParts: [],
+    serviceJobs: {
+      open: 0,
+      completed: 0,
+      invoiced: 0,
+      averageCycleHours: null,
+    },
+  };
 }
 
 function Metric({ title, value }: { title: string; value: string }) {
