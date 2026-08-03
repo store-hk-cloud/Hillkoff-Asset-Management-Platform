@@ -20,6 +20,7 @@ const translations = {
   "nav.workspace": { th: "พื้นที่ทำงาน", en: "Workspace" },
   "nav.operations": { th: "งานปฏิบัติการ", en: "Operations" },
   "nav.system": { th: "ระบบ", en: "System" },
+  "nav.help": { th: "คู่มือการใช้งาน", en: "User guide" },
   "action.login": { th: "เข้าสู่ระบบ", en: "Sign in" },
   "action.logout": { th: "ออกจากระบบ", en: "Sign out" },
   "action.install": { th: "ติดตั้งแอป", en: "Install app" },

@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ClipboardList,
   HardHat,
+  CircleHelp,
   LayoutDashboard,
   Menu,
   PackageCheck,
@@ -148,6 +149,13 @@ const navigation: readonly NavigationItem[] = [
     labelKey: "nav.users",
     roles: ["admin"],
     icon: Users,
+    group: "system",
+  },
+  {
+    href: "/help",
+    labelKey: "nav.help",
+    roles: allRoles,
+    icon: CircleHelp,
     group: "system",
   },
 ];
@@ -322,6 +330,16 @@ export function DashboardLayout({
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+              <Button
+                aria-label={t("nav.help")}
+                asChild
+                size="icon"
+                variant="ghost"
+              >
+                <Link href="/help">
+                  <CircleHelp aria-hidden="true" className="size-4" />
+                </Link>
+              </Button>
               <InstallAppButton />
               <LanguageSwitcher />
               <ThemeToggle />
