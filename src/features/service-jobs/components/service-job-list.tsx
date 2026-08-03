@@ -47,8 +47,8 @@ export function ServiceJobList({
               ? cause.message
               : thaiPrimary(
                   locale,
-                  "โหลดรายการงานบริการไม่สำเร็จ",
-                  "Unable to load service jobs.",
+                  "โหลดรายการใบงานช่างไม่สำเร็จ",
+                  "Unable to load service work orders.",
                 ),
           );
       })
@@ -66,18 +66,18 @@ export function ServiceJobList({
         action={
           canCreate ? (
             <Link className="primary-button" href="/service-jobs/new">
-              งานบริการใหม่ / Create service job
+              สร้างใบงานช่าง / Create Service Work Order
             </Link>
           ) : undefined
         }
         description="รวมคิวงานซ่อม งานติดตั้ง และทดสอบเครื่องใหม่ไว้ในระบบบริการกลาง / One operational queue for repair, installation, and new-machine testing."
-        eyebrow="งานบริการ / Service operations"
-        title="งานบริการ / Service jobs"
+        eyebrow="งานบริการช่าง / Service Jobs"
+        title="งานบริการช่าง / Service Jobs"
       />
       <div
         className="flex flex-wrap gap-2"
         role="group"
-        aria-label="กรองงานบริการ / Filter service jobs"
+        aria-label="กรองใบงานช่าง / Filter service work orders"
       >
         {(
           [
@@ -103,7 +103,7 @@ export function ServiceJobList({
       <div
         className="flex flex-wrap gap-2"
         role="group"
-        aria-label="กรองประเภทงานบริการ / Filter service work type"
+        aria-label="กรองประเภทงานช่าง / Filter service work type"
       >
         {(["all", "repair", "installation", "new_machine_test"] as const).map(
           (value) => (
@@ -120,7 +120,7 @@ export function ServiceJobList({
       </div>
       {loading ? (
         <div aria-live="polite" className="rounded-lg border p-8 text-center">
-          กำลังโหลดงานบริการ… / Loading service jobs…
+          กำลังโหลดใบงานช่าง… / Loading service work orders…
         </div>
       ) : error ? (
         <div
@@ -132,7 +132,7 @@ export function ServiceJobList({
       ) : jobs.length === 0 ? (
         <EmptyState
           icon={ClipboardList}
-          message="ไม่พบงานบริการตามตัวกรอง / No service jobs match this filter."
+          message="ไม่พบใบงานช่างตามตัวกรอง / No service work orders match this filter."
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

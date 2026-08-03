@@ -42,7 +42,7 @@ bucket, IAM และ retention policy ใน change record แล้ว
 1. ประกาศ incident owner, snapshot/export ที่จะใช้ และเวลาที่เริ่มกู้คืน
 2. สร้าง project หรือ database สำหรับ recovery แยกจาก production
 3. restore ไปยัง target ที่ตรวจสอบแล้ว ห้ามเขียนทับ production โดยตรง
-4. ตรวจจำนวนเอกสาร, user roles, service jobs, audit logs, storage paths และ Rules
+4. ตรวจจำนวนเอกสาร, user roles, ใบงานช่าง (Service Jobs), audit logs, storage paths และ Rules
 5. ทดสอบ login, งานช่าง, เอกสารพิมพ์, notification และ health check
 6. บันทึกเวลาที่กู้ได้จริงเทียบกับ RTO และข้อมูลล่าสุดเทียบกับ RPO
 7. อนุมัติการสลับ traffic หรือการนำข้อมูลกลับ production โดยผู้มีอำนาจ

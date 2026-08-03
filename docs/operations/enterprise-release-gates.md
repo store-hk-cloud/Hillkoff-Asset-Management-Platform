@@ -10,7 +10,7 @@ repository ออกจากสิ่งที่ต้องตั้งค่
 - `npm run test:rules` ตรวจ Firestore และ Storage Rules ด้วย emulator
 - `npm run functions:build` ตรวจ Cloud Functions build
 - `npm run build` ตรวจ production build
-- `npm run test:e2e` ตรวจ health endpoint และ authentication boundary ของหน้าช่างกับงานบริการ
+- `npm run test:e2e` ตรวจ health endpoint และ authentication boundary ของหน้าช่างกับงานบริการช่าง
 - `npm run audit:ci` ล้มเหลวเมื่อพบ vulnerability ระดับ high ขึ้นไป
 - GitHub Actions มี CI, CodeQL และ dependency review
 - instrumentation ของ Next.js ส่ง unhandled request error พร้อม correlation ID

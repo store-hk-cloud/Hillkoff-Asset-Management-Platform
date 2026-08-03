@@ -9,7 +9,7 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   if (!response.ok || payload.data === undefined) {
     throw new Error(
       payload.error?.message ??
-        "ดำเนินการงานบริการไม่สำเร็จ / Service job request failed.",
+        "ดำเนินการใบงานช่างไม่สำเร็จ / Service work order request failed.",
     );
   }
   return payload.data;

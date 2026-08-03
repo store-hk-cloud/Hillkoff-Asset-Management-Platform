@@ -52,7 +52,7 @@ export function ServiceFeedbackForm({ token }: { token: string }) {
       <div className="space-y-1">
         <h1 className="text-xl font-semibold">ประเมินการให้บริการ</h1>
         <p className="text-muted-foreground text-sm">
-          ความคิดเห็นของคุณช่วยให้เราปรับปรุงงานบริการ
+          ความคิดเห็นของคุณช่วยให้เราปรับปรุงงานบริการช่าง
         </p>
       </div>
       {(

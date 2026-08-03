@@ -1,6 +1,6 @@
 # Accessibility และ performance quality bar
 
-เกณฑ์นี้ใช้ตรวจทุกหน้าหลัก โดยเฉพาะหน้ารวมงานบริการและ workspace ของช่าง
+เกณฑ์นี้ใช้ตรวจทุกหน้าหลัก โดยเฉพาะหน้ารวมงานบริการช่างและ workspace ของช่าง
 
 ## Accessibility
 

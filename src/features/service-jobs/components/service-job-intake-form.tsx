@@ -68,7 +68,7 @@ export function ServiceJobIntakeForm({
       setError(
         cause instanceof Error
           ? cause.message
-          : "สร้างงานบริการไม่สำเร็จ / Unable to create service job.",
+          : "สร้างใบงานช่างไม่สำเร็จ / Unable to create service work order.",
       );
     } finally {
       setBusy(false);
@@ -79,7 +79,8 @@ export function ServiceJobIntakeForm({
       <Card>
         <CardHeader>
           <CardTitle>
-            ข้อมูลลูกค้าและคำขอรับบริการ / Customer and request
+            ข้อมูลลูกค้าและคำขอรับบริการช่าง / Customer and technician service
+            request
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
@@ -99,7 +100,7 @@ export function ServiceJobIntakeForm({
             </select>
           </label>
           <label className="grid gap-2 text-sm">
-            รูปแบบรับบริการ / Fulfillment
+            รูปแบบเข้าปฏิบัติงาน / Work fulfillment
             <select className="input" name="fulfillmentMode" required>
               <option value="onsite">หน้างาน / On-site</option>
               <option value="carry_in">นำเครื่องเข้าศูนย์ / Carry-in</option>
@@ -133,7 +134,7 @@ export function ServiceJobIntakeForm({
             <input className="input" maxLength={40} name="phone" required />
           </label>
           <label className="grid gap-2 text-sm md:col-span-2">
-            ที่อยู่รับบริการ / Service address
+            สถานที่ปฏิบัติงาน / Service location
             <input
               className="input"
               maxLength={1000}
@@ -195,7 +196,7 @@ export function ServiceJobIntakeForm({
       <Button disabled={busy} type="submit">
         {busy
           ? "กำลังสร้าง… / Creating…"
-          : "สร้างงานบริการ / Create service job"}
+          : "สร้างใบงานช่าง / Create Service Work Order"}
       </Button>
     </form>
   );

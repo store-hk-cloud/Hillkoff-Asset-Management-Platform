@@ -40,7 +40,7 @@ page.
 | Repair       | `admin`               |
 | PM           | `admin`, `warehouse`  |
 | Installation | `admin`, `sales`      |
-| Service job  | `admin`, `sales`      |
+| ใบงานช่าง (Service Work Order) | `admin`, `sales`      |
 
 The API resolves the technician name from the real `users` collection and
 rejects disabled or non-technician accounts. A submitted display name is never

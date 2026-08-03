@@ -235,16 +235,16 @@ export const helpGuides: readonly HelpGuide[] = [
     icon: "service",
     roles: ["all"],
     title: {
-      th: "วงจรงานบริการตั้งแต่รับเรื่องถึงปิดงาน",
-      en: "Service lifecycle: intake to closeout",
+      th: "วงจรใบงานช่างตั้งแต่รับเรื่องถึงปิดงาน",
+      en: "Service Work Order lifecycle: intake to closeout",
     },
     summary: {
-      th: "ใช้ Service operations เป็นแหล่งข้อมูลหลักของงานบริการ การมอบหมาย การประเมิน การทำงาน เอกสาร และการรับรองผล",
-      en: "Use Service operations as the system of record for intake, assignment, assessment, execution, documents, and acceptance.",
+      th: "ใช้ Service Jobs เป็นแหล่งข้อมูลหลักของใบงานช่าง การมอบหมาย การประเมิน การปฏิบัติงาน เอกสาร และการรับรองผล",
+      en: "Use Service Jobs as the system of record for intake, assignment, assessment, execution, documents, and acceptance.",
     },
     outcome: {
-      th: "ทุกงานบริการมีเจ้าของงาน สถานะ หลักฐาน และขั้นตอนอนุมัติที่ตรวจสอบย้อนหลังได้",
-      en: "Every service job has an owner, status, evidence, and approval trail that can be audited.",
+      th: "ทุกใบงานช่างมีผู้รับผิดชอบ สถานะ หลักฐาน และขั้นตอนอนุมัติที่ตรวจสอบย้อนหลังได้",
+      en: "Every service work order has an owner, status, evidence, and approval trail that can be audited.",
     },
     steps: [
       {
@@ -636,8 +636,8 @@ export const helpGuides: readonly HelpGuide[] = [
           en: "Sell machines and consume parts from work",
         },
         detail: {
-          th: "การขายต้องอ้างอิงลูกค้าและรายการจริง ส่วนอะไหล่ให้บันทึกผ่านงานซ่อมหรืองานบริการที่ใช้ เพื่อให้ต้นทุนย้อนกลับไปยังงานได้",
-          en: "Sales must reference the actual customer and item. Parts should be consumed from the repair or service job that used them so cost can be traced back to the work.",
+          th: "การขายต้องอ้างอิงลูกค้าและรายการจริง ส่วนอะไหล่ให้บันทึกผ่านงานซ่อมหรือใบงานช่างที่ใช้ เพื่อให้ต้นทุนย้อนกลับไปยังงานได้",
+          en: "Sales must reference the actual customer and item. Parts should be consumed from the repair or service work order that used them so cost can be traced back to the work.",
         },
         href: "/warehouse/sale",
       },
@@ -1105,7 +1105,7 @@ export const helpGuides: readonly HelpGuide[] = [
           en: "Schedule and prepare the technician",
         },
         detail: {
-          th: "กำหนดวันเวลา สถานที่ ผู้รับผิดชอบ เครื่องมือ และอะไหล่ที่จำเป็น ตรวจไม่ให้ชนกับงานบริการอื่น และยืนยันความพร้อมกับลูกค้าหรือสาขา",
+          th: "กำหนดวันเวลา สถานที่ ผู้รับผิดชอบ เครื่องมือ และอะไหล่ที่จำเป็น ตรวจไม่ให้ชนกับใบงานช่างอื่น และยืนยันความพร้อมกับลูกค้าหรือสาขา",
           en: "Set date, time, location, owner, tools, and required parts. Check conflicts with other service work and confirm readiness with the customer or branch.",
         },
         href: "/pm/schedule",
@@ -1212,8 +1212,8 @@ export const helpGuides: readonly HelpGuide[] = [
           en: "Consume parts from the actual job",
         },
         detail: {
-          th: "เลือกงานซ่อมหรืองานบริการที่ใช้อะไหล่ ระบุรายการและจำนวนตามจริง ตรวจผู้รับผิดชอบและเหตุผล เพื่อให้ต้นทุนและประวัติเครื่องย้อนกลับได้",
-          en: "Select the repair or service job that used the part, record the actual item and quantity, and include owner and reason so cost and machine history remain traceable.",
+          th: "เลือกงานซ่อมหรือใบงานช่างที่ใช้อะไหล่ ระบุรายการและจำนวนตามจริง ตรวจผู้รับผิดชอบและเหตุผล เพื่อให้ต้นทุนและประวัติเครื่องย้อนกลับได้",
+          en: "Select the repair or service work order that used the part, record the actual item and quantity, and include owner and reason so cost and machine history remain traceable.",
         },
         href: "/warehouse/movements",
       },
@@ -1268,7 +1268,7 @@ export const helpCategoryLabels: Readonly<Record<HelpCategory, LocalizedText>> =
   {
     "getting-started": { th: "เริ่มต้นใช้งาน", en: "Getting started" },
     "asset-operations": { th: "เครื่องและตัวตน", en: "Machines & identity" },
-    "service-operations": { th: "งานบริการ", en: "Service operations" },
+    "service-operations": { th: "งานบริการช่าง", en: "Service Jobs" },
     warehouse: { th: "คลังและอะไหล่", en: "Warehouse & inventory" },
     administration: { th: "ระบบและการควบคุม", en: "Administration & control" },
   };

@@ -356,7 +356,7 @@ export function ServiceJobIntakePrintDocument({ job }: { job: ServiceJob }) {
     <PrintDocumentShell
       date={job.createdAt}
       documentNumber={job.jobNumber}
-      subtitle="ใบรับงานบริการเครื่องชงกาแฟและอุปกรณ์"
+      subtitle="ใบรับงานช่างสำหรับเครื่องชงกาแฟและอุปกรณ์"
       title="ใบรับงาน"
     >
       <PrintSection title="ข้อมูลลูกค้าและผู้ติดต่อ">
@@ -399,7 +399,7 @@ export function ServiceJobIntakePrintDocument({ job }: { job: ServiceJob }) {
       </div>
       <IntakeTerms />
       <div className="print-contact-note">
-        ติดตามงานบริการ ติดต่อเบอร์โทร 086-4301581, 082-7629258
+        ติดตามงานช่าง ติดต่อเบอร์โทร 086-4301581, 082-7629258
       </div>
       <SignatureRow labels={["พนักงานรับงาน", "ผู้ส่งซ่อม / ผู้ติดต่อ"]} />
     </PrintDocumentShell>
@@ -451,7 +451,7 @@ export function ServiceJobAssessmentPrintDocument({
         </div>
       ) : null}
       <div className="print-contact-note">
-        ติดตามงานบริการ ติดต่อเบอร์โทร 086-4301581, 082-7629258
+        ติดตามงานช่าง ติดต่อเบอร์โทร 086-4301581, 082-7629258
       </div>
       <SignatureRow
         labels={["พนักงานประเมินงาน", "ธุรการช่าง", "ผู้อนุมัติ / ลูกค้า"]}

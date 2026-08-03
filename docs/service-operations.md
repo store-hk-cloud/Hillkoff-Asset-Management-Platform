@@ -1,12 +1,12 @@
-# Service Operations
+# งานบริการช่าง (Service Jobs)
 
-The Service Operations module is the canonical operational queue for repair,
+The Service Jobs (งานบริการช่าง) module is the canonical operational queue for repair,
 installation, and new-machine testing from intake through technician
 execution, assessment, billing, handoff, and customer feedback.
 
 The legacy repair and installation detail/API modules remain read-compatible
 for historical records and the migration backfill, but their duplicate queue
-and create entry points redirect to Service Operations. Preventive maintenance
+and create entry points redirect to งานบริการช่าง (Service Jobs). Preventive maintenance
 remains a separate module because its recurring schedule and history model are
 not yet represented in the service-job aggregate. Inventory and warehouse
 modules remain the source of truth for parts, stock, and movements; service

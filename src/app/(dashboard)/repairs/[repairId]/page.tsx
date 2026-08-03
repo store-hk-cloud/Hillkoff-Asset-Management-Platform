@@ -104,7 +104,7 @@ export default async function RepairDetailPage({ params }: Props) {
         <Card>
           <CardHeader>
             <CardTitle>
-              {thaiPrimary(locale, "สรุปงานบริการ", "Service summary")}
+              {thaiPrimary(locale, "สรุปงานซ่อม", "Repair summary")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
