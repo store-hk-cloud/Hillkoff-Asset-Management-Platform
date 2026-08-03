@@ -1,10 +1,26 @@
+import type { ServiceJobWorkType } from "@/domain/entities/service-job";
 import { ServiceJobList } from "@/features/service-jobs/components/service-job-list";
 import { requireSession } from "@/lib/auth/dal";
+
+type Props = {
+  searchParams: Promise<{ workType?: string }>;
+};
+
 export const metadata = { title: "Service jobs" };
-export default async function ServiceJobsPage() {
+
+export default async function ServiceJobsPage({ searchParams }: Props) {
   const { profile } = await requireSession();
   const canCreate = ["admin", "sales", "warehouse", "branch"].includes(
     profile.role,
   );
-  return <ServiceJobList canCreate={canCreate} />;
+  const requestedWorkType = (await searchParams).workType;
+  const initialWorkType: ServiceJobWorkType | "all" =
+    requestedWorkType === "repair" ||
+    requestedWorkType === "installation" ||
+    requestedWorkType === "new_machine_test"
+      ? requestedWorkType
+      : "all";
+  return (
+    <ServiceJobList canCreate={canCreate} initialWorkType={initialWorkType} />
+  );
 }

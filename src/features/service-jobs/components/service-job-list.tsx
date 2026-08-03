@@ -6,23 +6,34 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ClipboardList } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ServiceJobWorkType } from "@/domain/entities/service-job";
 import { ServiceJobStatusBadge } from "@/features/service-jobs/components/service-job-status-badge";
 import {
   listServiceJobs,
   type ServiceJobListItem,
 } from "@/features/service-jobs/services/service-job-api.service";
 
-export function ServiceJobList({ canCreate }: { canCreate: boolean }) {
+export function ServiceJobList({
+  canCreate,
+  initialWorkType = "all",
+}: {
+  canCreate: boolean;
+  initialWorkType?: ServiceJobWorkType | "all";
+}) {
   const [jobs, setJobs] = useState<readonly ServiceJobListItem[]>([]);
   const [status, setStatus] = useState("all");
+  const [workType, setWorkType] = useState<ServiceJobWorkType | "all">(
+    initialWorkType,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    listServiceJobs(
-      status === "all" ? "" : `status=${encodeURIComponent(status)}`,
-    )
+    const params = new URLSearchParams();
+    if (status !== "all") params.set("status", status);
+    if (workType !== "all") params.set("workType", workType);
+    listServiceJobs(params.toString())
       .then((items) => {
         if (active) setJobs(items);
       })
@@ -40,7 +51,7 @@ export function ServiceJobList({ canCreate }: { canCreate: boolean }) {
     return () => {
       active = false;
     };
-  }, [status]);
+  }, [status, workType]);
 
   return (
     <section className="space-y-6">
@@ -81,6 +92,24 @@ export function ServiceJobList({ canCreate }: { canCreate: boolean }) {
             {value.replaceAll("_", " ")}
           </button>
         ))}
+      </div>
+      <div
+        className="flex flex-wrap gap-2"
+        role="group"
+        aria-label="Filter service work type"
+      >
+        {(["all", "repair", "installation", "new_machine_test"] as const).map(
+          (value) => (
+            <button
+              className={`rounded-md border px-3 py-2 text-sm ${workType === value ? "bg-primary text-primary-foreground" : "bg-background"}`}
+              key={value}
+              onClick={() => setWorkType(value)}
+              type="button"
+            >
+              {value === "all" ? "All work" : value.replaceAll("_", " ")}
+            </button>
+          ),
+        )}
       </div>
       {loading ? (
         <div aria-live="polite" className="rounded-lg border p-8 text-center">

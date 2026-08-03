@@ -4,9 +4,14 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ServiceJobWorkType } from "@/domain/entities/service-job";
 import { createServiceJob } from "@/features/service-jobs/services/service-job-api.service";
 
-export function ServiceJobIntakeForm() {
+export function ServiceJobIntakeForm({
+  initialWorkType = "repair",
+}: {
+  initialWorkType?: ServiceJobWorkType;
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +83,12 @@ export function ServiceJobIntakeForm() {
         <CardContent className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-sm">
             Work type
-            <select className="input" name="workType" required>
+            <select
+              className="input"
+              defaultValue={initialWorkType}
+              name="workType"
+              required
+            >
               <option value="repair">Repair</option>
               <option value="installation">Installation</option>
               <option value="new_machine_test">New machine test</option>

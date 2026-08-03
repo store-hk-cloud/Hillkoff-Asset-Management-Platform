@@ -18,7 +18,6 @@ import {
   PackageCheck,
   Users,
   Warehouse,
-  Wrench,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -110,22 +109,6 @@ const navigation: readonly NavigationItem[] = [
     icon: Warehouse,
     group: "operations",
     guideId: "warehouse-and-inventory",
-  },
-  {
-    href: "/installations",
-    labelKey: "nav.installations",
-    roles: ["admin", "technician", "sales", "customer", "executive"],
-    icon: PackageCheck,
-    group: "operations",
-    guideId: "installation-and-pm",
-  },
-  {
-    href: "/repairs",
-    labelKey: "nav.repairs",
-    roles: allRoles,
-    icon: Wrench,
-    group: "operations",
-    guideId: "repairs",
   },
   {
     href: "/pm",

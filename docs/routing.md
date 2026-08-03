@@ -54,15 +54,15 @@ data-access layer and route handlers.
 | `/warehouse/transfer`              | Admin or warehouse                                     |
 | `/warehouse/sale`                  | Admin, warehouse, or sales                             |
 | `/warehouse/movements`             | Admin, warehouse, executive, or scoped branch          |
-| `/installations`                   | Admin, sales, executive, assigned technician, customer |
-| `/installations/schedule`          | Admin or sales                                         |
+| `/installations`                   | Redirects to service jobs filtered to installation     |
+| `/installations/schedule`          | Redirects to canonical service-job intake              |
 | `/installations/{id}`              | Role and installation scoped                           |
 | `/api/installations`               | Scoped queue GET; admin/sales schedule POST            |
 | `/api/installations/{id}`          | Scoped installation detail                             |
 | `/api/installations/{id}/start`    | Admin or assigned technician                           |
 | `/api/installations/{id}/complete` | Admin or assigned technician                           |
-| `/repairs`                         | Role-scoped repair ticket list                         |
-| `/repairs/new`                     | Authorized repair ticket creators                      |
+| `/repairs`                         | Redirects to service jobs filtered to repair           |
+| `/repairs/new`                     | Redirects to canonical service-job intake              |
 | `/repairs/{id}`                    | Role and ticket scoped                                 |
 | `/api/repairs`                     | Scoped list and ticket creation                        |
 | `/api/repairs/{id}`                | Scoped detail and repair update                        |

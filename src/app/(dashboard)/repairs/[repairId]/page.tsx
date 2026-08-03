@@ -50,7 +50,7 @@ export default async function RepairDetailPage({ params }: Props) {
       <div>
         <Link
           className="text-muted-foreground hover:text-foreground text-sm"
-          href="/repairs"
+          href="/service-jobs?workType=repair"
         >
           ← {t("repairs.title")}
         </Link>

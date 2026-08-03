@@ -441,7 +441,7 @@ export const helpGuides: readonly HelpGuide[] = [
           th: "ระบุเครื่อง อาการเสีย ระดับความเร่งด่วน ผู้แจ้ง สถานที่ และเวลาที่ต้องการให้ช่างเข้าดำเนินการ แนบหลักฐานที่ช่วยวิเคราะห์ได้",
           en: "Enter machine, symptom, urgency, requester, location, and requested service time. Attach evidence that helps diagnosis.",
         },
-        href: "/repairs/new",
+        href: "/service-jobs/new?workType=repair",
       },
       {
         title: { th: "คัดกรองและมอบหมาย", en: "Triage and assign" },
@@ -449,7 +449,7 @@ export const helpGuides: readonly HelpGuide[] = [
           th: "ตรวจว่าปัญหาเป็นงานซ่อมจริงหรือควรไปกระบวนการติดตั้ง/PM เลือกช่างตามความชำนาญและพื้นที่ แล้วส่งงานให้ตอบรับ",
           en: "Confirm that the issue belongs to Repairs rather than Installation or PM. Assign by skill and location, then send the job for acceptance.",
         },
-        href: "/repairs",
+        href: "/service-jobs?workType=repair",
       },
       {
         title: {
@@ -520,7 +520,7 @@ export const helpGuides: readonly HelpGuide[] = [
           th: "ระบุเครื่อง ลูกค้า สถานที่ ผู้ติดต่อ ความพร้อมของพื้นที่ และวันที่ต้องการ หากเป็นเครื่องใหม่ให้ตรวจข้อมูลรับประกันและเอกสารส่งมอบให้ครบ",
           en: "Enter machine, customer, location, contact, site readiness, and desired date. For a new machine, confirm warranty and delivery documents.",
         },
-        href: "/installations/schedule",
+        href: "/service-jobs/new?workType=installation",
       },
       {
         title: {
@@ -541,7 +541,7 @@ export const helpGuides: readonly HelpGuide[] = [
           th: "เช็กอิน ตรวจ serial/QR ติดตั้งตามขั้นตอน บันทึกรูปถ่ายจุดต่อและสภาพแวดล้อม ทดลองใช้งาน และบันทึกข้อผิดปกติแทนการข้ามรายการ",
           en: "Check in, verify serial/QR, install step by step, photograph connections and site condition, run a test, and record exceptions instead of skipping checklist items.",
         },
-        href: "/installations",
+        href: "/service-jobs?workType=installation",
       },
       {
         title: {

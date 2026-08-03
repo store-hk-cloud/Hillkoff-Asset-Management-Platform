@@ -100,7 +100,7 @@ specific dense admin use case.
 - **Required fields** show a consistent indicator: a `text-destructive`
   asterisk driven by a `required` prop on a shared label/field wrapper — never
   hand-concatenated into the label string (current `AssetForm` pattern) and
-  never silently omitted (current `CreateRepairForm` pattern).
+  never silently omitted (current `ServiceJobIntakeForm` pattern).
 - **Validation errors** render inline, next to the field they belong to,
   using the Zod schema each feature already defines
   (`src/features/*/schemas/*.schema.ts`) — not only as a single page-level

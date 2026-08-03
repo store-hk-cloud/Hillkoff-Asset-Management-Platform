@@ -63,7 +63,7 @@ export default async function InstallationDetailPage({
       <div>
         <Link
           className="text-muted-foreground hover:text-foreground text-sm"
-          href="/installations"
+          href="/service-jobs?workType=installation"
         >
           ← {t("installations.title")}
         </Link>
