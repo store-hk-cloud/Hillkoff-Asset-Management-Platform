@@ -25,6 +25,7 @@ import type {
 import { scanNfcUrl } from "@/features/asset-identity/services/nfc.service";
 import {
   lookupTechnicianWork,
+  respondToServiceJobAssignment,
   respondToTechnicianWork,
 } from "@/features/technician/services/technician-api.service";
 
@@ -57,11 +58,22 @@ export function TechnicianWorkspace({
     setBusyId(item.id);
     setError(null);
     try {
-      await respondToTechnicianWork(item.type, item.id, {
-        expectedVersion: item.version,
-        action,
-        reason,
-      });
+      if (item.type === "service_job") {
+        if (!item.assignmentId) {
+          throw new Error("This service-job assignment is unavailable.");
+        }
+        await respondToServiceJobAssignment(item.id, item.assignmentId, {
+          expectedVersion: item.version,
+          action,
+          reason,
+        });
+      } else {
+        await respondToTechnicianWork(item.type, item.id, {
+          expectedVersion: item.version,
+          action,
+          reason,
+        });
+      }
       router.refresh();
     } catch (responseError) {
       setError(

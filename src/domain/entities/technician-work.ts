@@ -25,6 +25,7 @@ export interface TechnicianSummary {
 
 export interface TechnicianWorkItem {
   readonly id: string;
+  readonly assignmentId: string | null;
   readonly type: TechnicianWorkType;
   readonly number: string;
   readonly title: string;

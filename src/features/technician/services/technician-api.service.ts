@@ -55,6 +55,25 @@ export function respondToTechnicianWork(
   return mutate(`/api/technician/work/${type}/${workId}/respond`, body);
 }
 
+export function respondToServiceJobAssignment(
+  jobId: string,
+  assignmentId: string,
+  input: {
+    expectedVersion: number;
+    action: "accept" | "reject";
+    reason: string;
+  },
+) {
+  return mutate(
+    `/api/service-jobs/${encodeURIComponent(jobId)}/assignments/${encodeURIComponent(assignmentId)}/respond`,
+    {
+      expectedVersion: input.expectedVersion,
+      response: input.action === "accept" ? "accepted" : "rejected",
+      rejectionReason: input.reason,
+    },
+  );
+}
+
 export function assignTechnicianWork(
   type: TechnicianWorkType,
   workId: string,

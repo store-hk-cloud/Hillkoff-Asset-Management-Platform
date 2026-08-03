@@ -42,10 +42,21 @@ function assignmentStatus(data: DocumentData): TechnicianAssignmentStatus {
     : "accepted";
 }
 
+function serviceJobAssignmentStatus(
+  data: DocumentData | undefined,
+): TechnicianAssignmentStatus {
+  return data?.status === "pending" || data?.status === "rejected"
+    ? data.status
+    : "accepted";
+}
+
 function mapWork(
   type: TechnicianWorkType,
   data: DocumentData,
+  assignment: DocumentData | undefined = undefined,
+  assignmentId: string | null = null,
 ): TechnicianWorkItem {
+  const serviceJobAssignment = type === "service_job" ? assignment : undefined;
   const scheduledAt =
     type === "service_job"
       ? (date(data.scheduledStartAt) ?? date(data.updatedAt) ?? new Date(0))
@@ -65,6 +76,7 @@ function mapWork(
     status === "completed" || status === "closed" || status === "cancelled";
   return {
     id: string(data, "id"),
+    assignmentId: type === "service_job" ? assignmentId : null,
     type,
     number:
       type === "service_job"
@@ -94,15 +106,20 @@ function mapWork(
         : string(data, "assetName"),
     scheduledAt,
     workStatus: status,
-    assignmentStatus: assignmentStatus(data),
+    assignmentStatus:
+      type === "service_job"
+        ? serviceJobAssignmentStatus(serviceJobAssignment)
+        : assignmentStatus(data),
     assignedTechnicianId: createUserId(
       type === "service_job"
-        ? string(data, "leadTechnicianId")
+        ? string(serviceJobAssignment ?? data, "technicianId") ||
+            string(data, "leadTechnicianId")
         : string(data, "assignedTechnicianId"),
     ),
     assignedTechnicianName:
       type === "service_job"
-        ? string(data, "leadTechnicianName")
+        ? string(serviceJobAssignment ?? data, "technicianName") ||
+          string(data, "leadTechnicianName")
         : string(data, "assignedTechnicianName"),
     rejectionReason:
       typeof data.assignmentRejectionReason === "string"
@@ -134,13 +151,36 @@ export class FirestoreTechnicianRepository implements TechnicianRepository {
     const results = await Promise.all(
       (Object.entries(COLLECTIONS) as [TechnicianWorkType, string][]).map(
         async ([type, collection]) => {
-          const snapshot = await this.firestore
-            .collection(collection)
-            .where("assignedTechnicianId", "==", technicianId)
-            .limit(limit)
-            .get();
-          return snapshot.docs.map((document) =>
-            mapWork(type, document.data()),
+          const query = this.firestore.collection(collection);
+          const snapshot = await (type === "service_job"
+            ? query
+                .where("assignedTechnicianIds", "array-contains", technicianId)
+                .limit(limit)
+                .get()
+            : query
+                .where("assignedTechnicianId", "==", technicianId)
+                .limit(limit)
+                .get());
+          if (type !== "service_job") {
+            return snapshot.docs.map((document) =>
+              mapWork(type, { ...document.data(), id: document.id }),
+            );
+          }
+          return Promise.all(
+            snapshot.docs.map(async (document) => {
+              const assignmentSnapshot = await document.ref
+                .collection("assignments")
+                .where("technicianId", "==", technicianId)
+                .limit(1)
+                .get();
+              const assignmentDocument = assignmentSnapshot.docs[0];
+              return mapWork(
+                type,
+                { ...document.data(), id: document.id },
+                assignmentDocument?.data(),
+                assignmentDocument?.id ?? null,
+              );
+            }),
           );
         },
       ),
@@ -162,7 +202,16 @@ export class FirestoreTechnicianRepository implements TechnicianRepository {
       .collection(COLLECTIONS[type])
       .doc(id)
       .get();
-    return snapshot.exists ? mapWork(type, snapshot.data() ?? {}) : null;
+    if (!snapshot.exists) return null;
+    const data = { ...(snapshot.data() ?? {}), id: snapshot.id };
+    if (type !== "service_job") return mapWork(type, data);
+    const assignmentSnapshot = await snapshot.ref
+      .collection("assignments")
+      .where("role", "==", "lead")
+      .limit(1)
+      .get();
+    const assignment = assignmentSnapshot.docs[0];
+    return mapWork(type, data, assignment?.data(), assignment?.id ?? null);
   }
 
   async findWorkByAsset(
@@ -172,15 +221,41 @@ export class FirestoreTechnicianRepository implements TechnicianRepository {
     const results = await Promise.all(
       (Object.entries(COLLECTIONS) as [TechnicianWorkType, string][]).map(
         async ([type, collection]) => {
-          const snapshot = await this.firestore
-            .collection(collection)
-            .where("assignedTechnicianId", "==", technicianId)
-            .where("assetId", "==", assetId)
-            .limit(20)
-            .get();
-          return snapshot.docs.map((document) =>
-            mapWork(type, document.data()),
+          const query = this.firestore.collection(collection);
+          const snapshot = await (type === "service_job"
+            ? query
+                .where("assignedTechnicianIds", "array-contains", technicianId)
+                .limit(20)
+                .get()
+            : query
+                .where("assignedTechnicianId", "==", technicianId)
+                .where("assetId", "==", assetId)
+                .limit(20)
+                .get());
+          if (type !== "service_job") {
+            return snapshot.docs.map((document) =>
+              mapWork(type, { ...document.data(), id: document.id }),
+            );
+          }
+          const results = await Promise.all(
+            snapshot.docs
+              .filter((document) => document.data().asset?.assetId === assetId)
+              .map(async (document) => {
+                const assignmentSnapshot = await document.ref
+                  .collection("assignments")
+                  .where("technicianId", "==", technicianId)
+                  .limit(1)
+                  .get();
+                const assignmentDocument = assignmentSnapshot.docs[0];
+                return mapWork(
+                  type,
+                  { ...document.data(), id: document.id },
+                  assignmentDocument?.data(),
+                  assignmentDocument?.id ?? null,
+                );
+              }),
           );
+          return results;
         },
       ),
     );
