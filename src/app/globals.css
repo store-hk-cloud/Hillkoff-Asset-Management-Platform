@@ -1,9 +1,16 @@
 @import "tailwindcss";
 
 @media print {
-  @page { size: A4; margin: 12mm; }
-  body { background: white !important; }
-  .print-document { min-height: 273mm; }
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  body {
+    background: white !important;
+  }
+  .print-document {
+    min-height: 273mm;
+  }
 }
 
 /*
@@ -172,6 +179,29 @@ body {
   transition:
     background-color 150ms ease,
     color 150ms ease;
+}
+
+/* Auth shell uses explicit layout rules so the split-screen breakpoint remains
+ * stable even when utility generation is tree-shaken by the app build. */
+@layer components {
+  .auth-shell {
+    display: block;
+  }
+
+  .auth-brand-panel {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .auth-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(28rem, 0.95fr);
+    }
+
+    .auth-brand-panel {
+      display: flex;
+    }
+  }
 }
 
 /* ---------------------------------------------------------------------- */

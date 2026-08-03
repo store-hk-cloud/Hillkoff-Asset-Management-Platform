@@ -17,6 +17,9 @@ const translations = {
   "nav.notifications": { th: "การแจ้งเตือน", en: "Notifications" },
   "nav.users": { th: "ผู้ใช้งาน", en: "Users" },
   "nav.mobile": { th: "เมนูมือถือ", en: "Mobile navigation" },
+  "nav.workspace": { th: "พื้นที่ทำงาน", en: "Workspace" },
+  "nav.operations": { th: "งานปฏิบัติการ", en: "Operations" },
+  "nav.system": { th: "ระบบ", en: "System" },
   "action.login": { th: "เข้าสู่ระบบ", en: "Sign in" },
   "action.logout": { th: "ออกจากระบบ", en: "Sign out" },
   "action.install": { th: "ติดตั้งแอป", en: "Install app" },
@@ -136,7 +139,10 @@ const translations = {
     th: "สงวนลิขสิทธิ์ บริษัท ฮิลล์คอฟฟ์ จำกัด",
     en: "All rights reserved, Hillkoff Co., Ltd.",
   },
-  "terms.title": { th: "ขอบเขตและเงื่อนไขการใช้งาน", en: "Scope & Terms of Use" },
+  "terms.title": {
+    th: "ขอบเขตและเงื่อนไขการใช้งาน",
+    en: "Scope & Terms of Use",
+  },
   "terms.subtitle": {
     th: "สำหรับพนักงานฮิลล์คอฟฟ์ที่ใช้ระบบจัดการเครื่องนี้",
     en: "For Hillkoff staff using this asset management system",
