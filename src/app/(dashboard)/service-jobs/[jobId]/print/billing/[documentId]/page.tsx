@@ -1,21 +1,20 @@
-import { PrintDocumentShell } from "@/components/shared/print-document-shell";
+import { notFound } from "next/navigation";
+import { ServiceJobBillingPrintDocument } from "@/features/service-jobs/components/service-job-print-document";
+import { serviceJobManagementService } from "@/lib/service-jobs/service";
+import { requireSession } from "@/lib/auth/dal";
 export default async function PrintBillingPage({
   params,
 }: {
   params: Promise<{ jobId: string; documentId: string }>;
 }) {
   const { jobId, documentId } = await params;
+  const { profile } = await requireSession();
+  const [record, document] = await Promise.all([
+    serviceJobManagementService.get(jobId, profile),
+    serviceJobManagementService.getBillingDocument(jobId, documentId, profile),
+  ]);
+  if (!document) notFound();
   return (
-    <PrintDocumentShell
-      copy="Original / Customer copy"
-      title="Billing document"
-    >
-      <p>
-        Service job: <strong>{jobId}</strong>
-      </p>
-      <p>
-        Document: <strong>{documentId}</strong>
-      </p>
-    </PrintDocumentShell>
+    <ServiceJobBillingPrintDocument document={document} job={record.job} />
   );
 }

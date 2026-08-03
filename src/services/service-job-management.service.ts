@@ -23,6 +23,7 @@ import {
   ServiceJobPersistenceError,
   validateServiceJobEventMetadata,
   type BillingDocumentRecord,
+  type ServiceJobAssessmentRecord,
   type ServiceJobAssessmentResponse,
   type ServiceJobEvent,
   type ServiceJobEventMetadataValue,
@@ -263,6 +264,46 @@ export class ServiceJobManagementService {
     if (!record) throw this.notFound(jobId);
     this.accessService.require(profile, "view", this.resource(record));
     return record;
+  }
+
+  async listAssessments(
+    jobId: string,
+    profile: UserProfile,
+  ): Promise<readonly ServiceJobAssessmentRecord[]> {
+    await this.get(jobId, profile);
+    return this.repository.listAssessments(jobId, 50);
+  }
+
+  async getAssessment(
+    jobId: string,
+    assessmentId: string,
+    profile: UserProfile,
+  ): Promise<ServiceJobAssessmentRecord | null> {
+    await this.get(jobId, profile);
+    const assessments = await this.repository.listAssessments(jobId, 50);
+    return (
+      assessments.find((item) => item.assessment.id === assessmentId) ?? null
+    );
+  }
+
+  async listBillingDocuments(
+    jobId: string,
+    profile: UserProfile,
+  ): Promise<readonly BillingDocumentRecord[]> {
+    const record = await this.get(jobId, profile);
+    this.accessService.require(profile, "view_billing", this.resource(record));
+    return this.repository.listBillingDocuments(jobId, 50);
+  }
+
+  async getBillingDocument(
+    jobId: string,
+    documentId: string,
+    profile: UserProfile,
+  ): Promise<BillingDocumentRecord | null> {
+    const record = await this.get(jobId, profile);
+    this.accessService.require(profile, "view_billing", this.resource(record));
+    const documents = await this.repository.listBillingDocuments(jobId, 50);
+    return documents.find((document) => document.id === documentId) ?? null;
   }
 
   async create(

@@ -8,8 +8,391 @@
   body {
     background: white !important;
   }
+  .print-page {
+    min-height: 0 !important;
+    padding: 0 !important;
+  }
   .print-document {
     min-height: 273mm;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+.print-page {
+  min-height: 100dvh;
+  padding: 2rem 1rem;
+  background: #eef2f1;
+}
+
+.print-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  width: min(210mm, 100%);
+  margin: 0 auto 1rem;
+}
+
+.print-document {
+  width: min(210mm, 100%);
+  min-height: 273mm;
+  margin: 0 auto;
+  padding: 12mm 14mm 16mm;
+  overflow: hidden;
+  background: #fff;
+  color: #111;
+  font-family: var(--font-kanit), "Noto Sans Thai", sans-serif;
+  font-size: 10px;
+  line-height: 1.45;
+  box-shadow: 0 12px 30px rgba(10, 45, 43, 0.14);
+}
+
+.print-document-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(14rem, 0.8fr);
+  gap: 1rem;
+  align-items: start;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #111;
+}
+
+.print-brand {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.print-brand img {
+  flex: none;
+  width: 54px;
+  height: 54px;
+}
+
+.print-brand p {
+  margin: 0;
+}
+
+.print-brand-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.print-document-title {
+  text-align: right;
+}
+
+.print-document-title > span {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid #111;
+  font-size: 0.75rem;
+}
+
+.print-document-title h1 {
+  margin: 0.35rem 0 0;
+  font-size: 1.65rem;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.print-document-title > p {
+  margin: 0.15rem 0 0;
+}
+
+.print-document-title dl {
+  margin: 0.4rem 0 0;
+}
+
+.print-document-title dl > div,
+.print-billing-side > div {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 0.35rem;
+  padding: 0.12rem 0;
+  border-bottom: 1px dotted #555;
+}
+
+.print-document-title dt,
+.print-billing-side dt {
+  text-align: left;
+}
+
+.print-document-title dd,
+.print-billing-side dd {
+  margin: 0;
+  text-align: right;
+}
+
+.print-section {
+  margin-top: 0.85rem;
+}
+
+.print-section-title {
+  margin: 0 0 0.35rem;
+  padding: 0.2rem 0.45rem;
+  background: #e8e8f8;
+  color: #111;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.print-fields {
+  display: grid;
+  gap: 0 1rem;
+  margin: 0;
+}
+
+.print-fields-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.print-fields-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.print-field {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.18rem 0;
+  border-bottom: 1px dotted #777;
+}
+
+.print-field dt {
+  color: #444;
+  white-space: nowrap;
+}
+
+.print-field dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.print-field-wide {
+  grid-column: 1 / -1;
+}
+
+.print-mt-3 {
+  margin-top: 0.55rem;
+}
+
+.print-table-wrap {
+  overflow-x: auto;
+}
+
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.78rem;
+}
+
+.print-table th,
+.print-table td {
+  padding: 0.25rem 0.28rem;
+  border: 1px solid #555;
+  vertical-align: top;
+}
+
+.print-table th {
+  background: #e8e8f8;
+  text-align: center;
+  font-weight: 700;
+}
+
+.print-table th:nth-child(1) {
+  width: 2.4rem;
+}
+
+.print-table th:nth-child(2) {
+  width: 6.5rem;
+}
+
+.print-table th:nth-last-child(-n + 4) {
+  width: 5rem;
+}
+
+.print-col-number {
+  white-space: nowrap;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.print-totals-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(16rem, 0.8fr);
+  gap: 0.8rem;
+  margin-top: 0.7rem;
+}
+
+.print-note-box,
+.print-total-box {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #555;
+}
+
+.print-note-box p {
+  margin: 0.2rem 0;
+}
+
+.print-note-title {
+  font-weight: 700;
+}
+
+.print-total-box {
+  margin: 0;
+}
+
+.print-total-box > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.18rem 0;
+  border-bottom: 1px dotted #777;
+}
+
+.print-total-box dt,
+.print-total-box dd {
+  margin: 0;
+}
+
+.print-total-box dd {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.print-total-grand {
+  margin-top: 0.25rem;
+  border-top: 2px solid #111;
+  border-bottom: 0 !important;
+  font-weight: 700;
+}
+
+.print-check-row,
+.print-billing-note,
+.print-response {
+  margin-top: 0.8rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #555;
+}
+
+.print-check-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: center;
+}
+
+.print-check-label {
+  font-weight: 700;
+}
+
+.print-terms {
+  margin-top: 0.8rem;
+}
+
+.print-terms ul {
+  margin: 0.25rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.print-contact-note {
+  margin-top: 0.8rem;
+  font-weight: 600;
+}
+
+.print-signature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.print-signature {
+  min-height: 4.5rem;
+}
+
+.print-signature p {
+  margin: 0;
+  text-align: center;
+}
+
+.print-signature-line {
+  height: 2.5rem;
+  margin: 0.2rem 0 0;
+  border-bottom: 1px solid #111;
+}
+
+.print-signature-date {
+  font-size: 0.75rem;
+}
+
+.print-billing-meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(15rem, 0.85fr);
+  gap: 1rem;
+  margin-top: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #555;
+}
+
+.print-billing-meta p {
+  margin: 0.18rem 0;
+}
+
+.print-billing-side {
+  margin: 0;
+}
+
+.print-disclaimer {
+  margin: 1rem 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+.print-document-footer {
+  margin-top: 1.2rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid #555;
+  color: #444;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.print-avoid-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+@media (max-width: 48rem) {
+  .print-document-header,
+  .print-billing-meta,
+  .print-totals-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .print-document-title {
+    text-align: left;
+  }
+
+  .print-fields-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .print-signature-grid {
+    grid-template-columns: 1fr;
   }
 }
 
