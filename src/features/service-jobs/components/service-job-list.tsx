@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "@/components/shared/empty-state";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, Search } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { useLanguage } from "@/components/providers/language-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import type { ServiceJobWorkType } from "@/domain/entities/service-job";
 import { ServiceJobStatusBadge } from "@/features/service-jobs/components/service-job-status-badge";
 import {
@@ -28,8 +29,27 @@ export function ServiceJobList({
   const [workType, setWorkType] = useState<ServiceJobWorkType | "all">(
     initialWorkType,
   );
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const visibleJobs = useMemo(() => {
+    const normalizedSearch = search.trim().toLocaleLowerCase("th-TH");
+    if (!normalizedSearch) return jobs;
+
+    return jobs.filter((job) =>
+      [
+        job.jobNumber,
+        job.title,
+        job.customerName,
+        job.assetLabel,
+        job.workType,
+        job.fulfillmentMode,
+      ].some((value) =>
+        value.toLocaleLowerCase("th-TH").includes(normalizedSearch),
+      ),
+    );
+  }, [jobs, search]);
 
   useEffect(() => {
     let active = true;
@@ -74,6 +94,20 @@ export function ServiceJobList({
         eyebrow="Service Jobs"
         title="Service Jobs"
       />
+      <div className="relative max-w-2xl">
+        <Search
+          aria-hidden="true"
+          className="text-muted-foreground absolute top-3 left-3 size-4"
+        />
+        <Input
+          aria-label="ค้นหาใบงานช่าง"
+          className="pl-9"
+          onChange={(event) => setSearch(event.currentTarget.value)}
+          placeholder="ค้นหาเลขที่ใบงาน ลูกค้า เครื่อง หรือหัวข้องาน"
+          type="search"
+          value={search}
+        />
+      </div>
       <div
         className="flex flex-wrap gap-2"
         role="group"
@@ -129,11 +163,18 @@ export function ServiceJobList({
         >
           {error}
         </div>
-      ) : jobs.length === 0 ? (
-        <EmptyState icon={ClipboardList} message="ไม่พบใบงานช่างตามตัวกรอง" />
+      ) : visibleJobs.length === 0 ? (
+        <EmptyState
+          icon={ClipboardList}
+          message={
+            search.trim()
+              ? "ไม่พบใบงานช่างจากคำค้นหาและตัวกรองที่เลือก"
+              : "ไม่พบใบงานช่างตามตัวกรอง"
+          }
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {jobs.map((job) => (
+          {visibleJobs.map((job) => (
             <Link href={`/service-jobs/${job.id}`} key={job.id}>
               <Card className="hover:border-primary h-full transition-colors">
                 <CardHeader>
