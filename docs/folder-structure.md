@@ -36,6 +36,11 @@ types must be mapped before leaving this boundary.
 
 Lazy initialization and typed access to Firebase client and admin SDKs.
 
+## `src/proxy.ts`
+
+Next.js 16 request boundary for optimistic authentication redirects and
+correlation ID propagation.
+
 ## `src/middleware`
 
 Composable request policies used by the Next.js `src/proxy.ts` entry point.

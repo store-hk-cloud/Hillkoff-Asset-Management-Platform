@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { TechnicianAssignmentError } from "@/domain/services/technician-assignment.service";
+import { getCorrelationId } from "@/lib/http/correlation";
 import { logger } from "@/lib/logging/logger";
 import type { TechnicianRequestContext } from "@/services/technician-workspace.service";
 
@@ -13,7 +14,7 @@ export function createTechnicianContext(
 ): TechnicianRequestContext {
   return {
     actor,
-    correlationId: crypto.randomUUID(),
+    correlationId: getCorrelationId(request),
     ipAddress:
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
     userAgent: request.headers.get("user-agent"),

@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { AssetError } from "@/domain/errors/asset.error";
 import { RepairError } from "@/domain/errors/repair.error";
+import { getCorrelationId } from "@/lib/http/correlation";
 import { logger } from "@/lib/logging/logger";
 import type { RepairRequestContext } from "@/services/repair-management.service";
 
@@ -14,7 +15,7 @@ export function createRepairContext(
 ): RepairRequestContext {
   return {
     actor,
-    correlationId: crypto.randomUUID(),
+    correlationId: getCorrelationId(request),
     ipAddress:
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
     userAgent: request.headers.get("user-agent"),

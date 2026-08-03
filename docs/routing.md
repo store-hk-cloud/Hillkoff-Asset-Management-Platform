@@ -58,6 +58,9 @@ data-access layer and route handlers.
 | `/installations/schedule`          | Redirects to canonical service-job intake              |
 | `/installations/{id}`              | Role and installation scoped                           |
 | `/api/installations`               | Scoped queue GET; admin/sales schedule POST            |
+| `/service-jobs`                    | Authenticated canonical service operations             |
+| `/service-jobs/{id}`               | Authenticated service-job workbench                    |
+| `/technician`                      | Authenticated technician workspace                     |
 | `/api/installations/{id}`          | Scoped installation detail                             |
 | `/api/installations/{id}/start`    | Admin or assigned technician                           |
 | `/api/installations/{id}/complete` | Admin or assigned technician                           |

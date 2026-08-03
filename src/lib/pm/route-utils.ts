@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { AssetError } from "@/domain/errors/asset.error";
 import { PmError } from "@/domain/errors/pm.error";
+import { getCorrelationId } from "@/lib/http/correlation";
 import { logger } from "@/lib/logging/logger";
 import type { PmRequestContext } from "@/services/pm-management.service";
 
@@ -14,7 +15,7 @@ export function createPmContext(
 ): PmRequestContext {
   return {
     actor,
-    correlationId: crypto.randomUUID(),
+    correlationId: getCorrelationId(request),
     ipAddress:
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
     userAgent: request.headers.get("user-agent"),

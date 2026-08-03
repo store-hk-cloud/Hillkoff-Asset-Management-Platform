@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { AssetError } from "@/domain/errors/asset.error";
 import { WarehouseError } from "@/domain/errors/warehouse.error";
+import { getCorrelationId } from "@/lib/http/correlation";
 import { logger } from "@/lib/logging/logger";
 import type { WarehouseRequestContext } from "@/services/warehouse-management.service";
 
@@ -14,17 +15,14 @@ export function createWarehouseContext(
 ): WarehouseRequestContext {
   return {
     actor,
-    correlationId: crypto.randomUUID(),
+    correlationId: getCorrelationId(request),
     ipAddress:
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
     userAgent: request.headers.get("user-agent"),
   };
 }
 
-export function warehouseErrorResponse(
-  error: unknown,
-  correlationId?: string,
-) {
+export function warehouseErrorResponse(error: unknown, correlationId?: string) {
   if (error instanceof AssetError) {
     logger.warn("Warehouse request rejected", {
       correlationId,

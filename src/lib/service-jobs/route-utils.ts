@@ -9,6 +9,7 @@ import { ServiceJobPersistenceError } from "@/domain/repositories/service-job.re
 import { ServiceJobAccessError } from "@/domain/services/service-job-access.service";
 import { getCurrentSession } from "@/lib/auth/dal";
 import { isTrustedMutationRequest } from "@/lib/auth/mutation-security";
+import { getCorrelationId } from "@/lib/http/correlation";
 import { logger } from "@/lib/logging/logger";
 import type { ServiceJobRequestContext } from "@/services/service-job-management.service";
 
@@ -157,7 +158,7 @@ function sanitizedError(error: unknown) {
 export function createServiceJobContext(
   request: Request,
   actor: UserProfile,
-  correlationId = crypto.randomUUID(),
+  correlationId = getCorrelationId(request),
 ): ServiceJobRequestContext {
   return {
     actor,
@@ -176,7 +177,7 @@ export async function authenticateServiceJobRequest(
     ServiceJobErrorContext,
     "correlationId" | "operation" | "authenticationFailure"
   > = {},
-  correlationId = crypto.randomUUID(),
+  correlationId = getCorrelationId(request),
 ): Promise<AuthenticatedServiceJobRequest> {
   const errorContext = { correlationId, operation, ...routeIds };
 

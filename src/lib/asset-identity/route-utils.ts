@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { AssetIdentityError } from "@/domain/errors/asset-identity.error";
+import { getCorrelationId } from "@/lib/http/correlation";
 import { logger } from "@/lib/logging/logger";
 import type { IdentityRequestContext } from "@/services/asset-identity-management.service";
 
@@ -13,7 +14,7 @@ export function createIdentityContext(
 ): IdentityRequestContext {
   return {
     actor,
-    correlationId: crypto.randomUUID(),
+    correlationId: getCorrelationId(request),
     ipAddress:
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
     userAgent: request.headers.get("user-agent"),
