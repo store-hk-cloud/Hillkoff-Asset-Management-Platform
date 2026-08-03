@@ -61,9 +61,7 @@ export function TechnicianWorkspace({
     try {
       if (item.type === "service_job") {
         if (!item.assignmentId) {
-          throw new Error(
-            "ไม่พบข้อมูลการมอบหมายใบงานช่าง / This service work order assignment is unavailable.",
-          );
+          throw new Error("ไม่พบข้อมูลการมอบหมายใบงานช่าง");
         }
         await respondToServiceJobAssignment(item.id, item.assignmentId, {
           expectedVersion: item.version,
@@ -343,7 +341,7 @@ function typeLabel(type: TechnicianWorkItem["type"], locale: "th" | "en") {
     repair: ["งานซ่อม", "Repair"],
     pm: ["งานบำรุงรักษา PM", "Preventive maintenance (PM)"],
     installation: ["งานติดตั้ง", "Installation"],
-    service_job: ["ใบงานช่าง", "Service Work Order"],
+    service_job: ["ใบงานช่าง", "ใบงานช่าง"],
   } as const;
   const [thai, english] = labels[type];
   return thaiPrimary(locale, thai, english);

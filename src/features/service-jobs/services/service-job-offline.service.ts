@@ -67,8 +67,6 @@ export function assertOnlineOnlyAction(
   online = typeof navigator === "undefined" || navigator.onLine,
 ) {
   if (!online) {
-    throw new Error(
-      `${action} ต้องเชื่อมต่ออินเทอร์เน็ต / requires an online connection.`,
-    );
+    throw new Error(`${action} ต้องเชื่อมต่ออินเทอร์เน็ต`);
   }
 }

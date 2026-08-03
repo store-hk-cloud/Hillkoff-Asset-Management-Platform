@@ -19,7 +19,7 @@ export function ServiceJobAssignmentForm({
       }}
     >
       <fieldset className="grid gap-2">
-        <legend className="font-medium">ทีมช่าง / Technicians</legend>
+        <legend className="font-medium">ทีมช่าง</legend>
         {technicians.map((technician) => (
           <label
             className="flex items-center gap-2 text-sm"
@@ -41,13 +41,13 @@ export function ServiceJobAssignmentForm({
         ))}
       </fieldset>
       <label className="grid gap-2 text-sm">
-        ช่างหลัก / Lead technician
+        ช่างหลัก
         <select
           className="input"
           value={lead}
           onChange={(event) => setLead(event.target.value)}
         >
-          <option value="">เลือกช่างหลัก / Select lead</option>
+          <option value="">เลือกช่างหลัก</option>
           {technicians
             .filter((item) => selected.includes(item.id))
             .map((technician) => (
@@ -58,7 +58,7 @@ export function ServiceJobAssignmentForm({
         </select>
       </label>
       <Button disabled={!lead || selected.length === 0} type="submit">
-        มอบหมายทีม / Assign team
+        มอบหมายทีม
       </Button>
       <input name="jobId" type="hidden" value={jobId} />
     </form>

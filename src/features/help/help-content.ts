@@ -1268,7 +1268,7 @@ export const helpCategoryLabels: Readonly<Record<HelpCategory, LocalizedText>> =
   {
     "getting-started": { th: "เริ่มต้นใช้งาน", en: "Getting started" },
     "asset-operations": { th: "เครื่องและตัวตน", en: "Machines & identity" },
-    "service-operations": { th: "งานบริการช่าง", en: "Service Jobs" },
+    "service-operations": { th: "Service Jobs", en: "Service Jobs" },
     warehouse: { th: "คลังและอะไหล่", en: "Warehouse & inventory" },
     administration: { th: "ระบบและการควบคุม", en: "Administration & control" },
   };

@@ -4,7 +4,9 @@ import { validateServiceJobUpload } from "@/features/service-jobs/services/servi
 
 describe("service-job offline boundaries", () => {
   it("keeps irreversible actions online-only", () => {
-    expect(() => assertOnlineOnlyAction("handoff", false)).toThrow(/online/);
+    expect(() => assertOnlineOnlyAction("handoff", false)).toThrow(
+      /อินเทอร์เน็ต/,
+    );
     expect(() => assertOnlineOnlyAction("handoff", true)).not.toThrow();
   });
   it("validates evidence storage metadata", () => {

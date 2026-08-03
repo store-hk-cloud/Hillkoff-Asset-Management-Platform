@@ -48,7 +48,7 @@ export function ServiceJobList({
               : thaiPrimary(
                   locale,
                   "โหลดรายการใบงานช่างไม่สำเร็จ",
-                  "Unable to load service work orders.",
+                  "โหลดรายการใบงานช่างไม่สำเร็จ",
                 ),
           );
       })
@@ -66,18 +66,18 @@ export function ServiceJobList({
         action={
           canCreate ? (
             <Link className="primary-button" href="/service-jobs/new">
-              สร้างใบงานช่าง / Create Service Work Order
+              สร้างใบงานช่าง
             </Link>
           ) : undefined
         }
-        description="รวมคิวงานซ่อม งานติดตั้ง และทดสอบเครื่องใหม่ไว้ในระบบบริการกลาง / One operational queue for repair, installation, and new-machine testing."
-        eyebrow="งานบริการช่าง / Service Jobs"
-        title="งานบริการช่าง / Service Jobs"
+        description="รวมคิวงานซ่อม งานติดตั้ง และทดสอบเครื่องใหม่ไว้ในระบบกลาง"
+        eyebrow="Service Jobs"
+        title="Service Jobs"
       />
       <div
         className="flex flex-wrap gap-2"
         role="group"
-        aria-label="กรองใบงานช่าง / Filter service work orders"
+        aria-label="กรองใบงานช่าง"
       >
         {(
           [
@@ -103,7 +103,7 @@ export function ServiceJobList({
       <div
         className="flex flex-wrap gap-2"
         role="group"
-        aria-label="กรองประเภทงานช่าง / Filter service work type"
+        aria-label="กรองประเภทงานช่าง"
       >
         {(["all", "repair", "installation", "new_machine_test"] as const).map(
           (value) => (
@@ -120,7 +120,7 @@ export function ServiceJobList({
       </div>
       {loading ? (
         <div aria-live="polite" className="rounded-lg border p-8 text-center">
-          กำลังโหลดใบงานช่าง… / Loading service work orders…
+          กำลังโหลดใบงานช่าง…
         </div>
       ) : error ? (
         <div
@@ -130,10 +130,7 @@ export function ServiceJobList({
           {error}
         </div>
       ) : jobs.length === 0 ? (
-        <EmptyState
-          icon={ClipboardList}
-          message="ไม่พบใบงานช่างตามตัวกรอง / No service work orders match this filter."
-        />
+        <EmptyState icon={ClipboardList} message="ไม่พบใบงานช่างตามตัวกรอง" />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {jobs.map((job) => (
@@ -167,32 +164,32 @@ export function ServiceJobList({
 
 function statusLabel(status: string): string {
   const labels: Record<string, string> = {
-    all: "ทั้งหมด / All",
-    received: "รับเรื่องแล้ว / Received",
-    scheduled: "นัดหมายแล้ว / Scheduled",
-    assigned: "มอบหมายแล้ว / Assigned",
-    in_progress: "กำลังดำเนินการ / In progress",
-    assessment_pending: "รอประเมิน / Assessment pending",
-    completed: "เสร็จสิ้น / Completed",
+    all: "ทั้งหมด",
+    received: "รับเรื่องแล้ว",
+    scheduled: "นัดหมายแล้ว",
+    assigned: "มอบหมายแล้ว",
+    in_progress: "กำลังดำเนินการ",
+    assessment_pending: "รอประเมิน",
+    completed: "เสร็จสิ้น",
   };
   return labels[status] ?? status.replaceAll("_", " ");
 }
 
 function workTypeLabel(workType: string): string {
   const labels: Record<string, string> = {
-    all: "งานทั้งหมด / All work",
-    repair: "งานซ่อม / Repair",
-    installation: "งานติดตั้ง / Installation",
-    new_machine_test: "ทดสอบเครื่องใหม่ / New-machine test",
+    all: "งานทั้งหมด",
+    repair: "งานซ่อม",
+    installation: "งานติดตั้ง",
+    new_machine_test: "ทดสอบเครื่องใหม่",
   };
   return labels[workType] ?? workType.replaceAll("_", " ");
 }
 
 function fulfillmentLabel(mode: string): string {
   const labels: Record<string, string> = {
-    onsite: "หน้างาน / On-site",
-    carry_in: "นำเครื่องเข้าศูนย์ / Carry-in",
-    carrier: "ขนส่ง / Carrier",
+    onsite: "หน้างาน",
+    carry_in: "นำเครื่องเข้าศูนย์",
+    carrier: "ขนส่ง",
   };
   return labels[mode] ?? mode.replaceAll("_", " ");
 }

@@ -15,7 +15,7 @@ export function ServiceJobAssessmentForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>รายการประเมินค่าใช้จ่าย / Assessment lines</CardTitle>
+        <CardTitle>รายการประเมินค่าใช้จ่าย</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {lines.map((line, index) => (
@@ -24,9 +24,9 @@ export function ServiceJobAssessmentForm() {
             key={line.id}
           >
             <input
-              aria-label={`รายละเอียดรายการที่ ${index + 1} / Description ${index + 1}`}
+              aria-label={`รายละเอียดรายการที่ ${index + 1}`}
               className="input"
-              placeholder="รายละเอียดค่าบริการหรืออะไหล่ / Service or part description"
+              placeholder="รายละเอียดค่าบริการหรืออะไหล่"
               value={line.description}
               onChange={(event) =>
                 setLines((items) =>
@@ -39,7 +39,7 @@ export function ServiceJobAssessmentForm() {
               }
             />
             <select
-              aria-label={`ประเภทรายการที่ ${index + 1} / Type ${index + 1}`}
+              aria-label={`ประเภทรายการที่ ${index + 1}`}
               className="input"
               value={line.type}
               onChange={(event) =>
@@ -52,11 +52,11 @@ export function ServiceJobAssessmentForm() {
                 )
               }
             >
-              <option value="service">ค่าบริการ / Service</option>
-              <option value="part">อะไหล่ / Part</option>
+              <option value="service">ค่าบริการ</option>
+              <option value="part">อะไหล่</option>
             </select>
             <input
-              aria-label={`ราคาที่ ${index + 1} / Price ${index + 1}`}
+              aria-label={`ราคาที่ ${index + 1}`}
               className="input"
               min="0"
               type="number"
@@ -83,7 +83,7 @@ export function ServiceJobAssessmentForm() {
               type="button"
               variant="outline"
             >
-              ลบรายการ / Remove
+              ลบรายการ
             </Button>
           </div>
         ))}
@@ -103,7 +103,7 @@ export function ServiceJobAssessmentForm() {
           type="button"
           variant="outline"
         >
-          เพิ่มรายการ / Add line
+          เพิ่มรายการ
         </Button>
       </CardContent>
     </Card>
