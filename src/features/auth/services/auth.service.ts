@@ -85,9 +85,17 @@ export async function logout(): Promise<void> {
 
   await Promise.allSettled([
     signOut(auth),
-    fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "same-origin",
-    }),
+    (async () => {
+      const csrfResponse = await fetch("/api/auth/csrf", {
+        cache: "no-store",
+        credentials: "same-origin",
+      });
+      const { csrfToken } = (await csrfResponse.json()) as CsrfResponse;
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { "X-CSRF-Token": csrfToken },
+        credentials: "same-origin",
+      });
+    })(),
   ]);
 }
