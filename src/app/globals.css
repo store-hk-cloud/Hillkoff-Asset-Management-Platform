@@ -411,6 +411,11 @@
   --primary-soft: rgba(5, 133, 129, 0.1);
   --brand-accent: #00bac6;
   --brand-mint: #51ddd7;
+  /* Always-dark brand hero panel (auth screen) — intentionally does not
+     flip with the light/dark theme toggle, so it is not redeclared in
+     .dark below. */
+  --brand-panel: #03211f;
+  --brand-panel-glow: #0aa39c;
 
   /* Surfaces */
   --page: #f1f5f4;
