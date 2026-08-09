@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
+import { ServiceJobPersistenceError } from "@/domain/repositories/service-job.repository";
 import { ServiceJobPrintActions } from "@/features/service-jobs/components/service-job-print-actions";
 import { ServiceJobStatusBadge } from "@/features/service-jobs/components/service-job-status-badge";
 import { ServiceJobWorkbench } from "@/features/service-jobs/components/service-job-workbench";
@@ -12,8 +13,17 @@ export default async function ServiceJobDetailsPage({
 }) {
   const { jobId } = await params;
   const { profile } = await requireSession();
-  const result = await serviceJobManagementService.get(jobId, profile);
-  if (!result) notFound();
+  const result = await serviceJobManagementService.get(jobId, profile).catch(
+    (error: unknown) => {
+      if (
+        error instanceof ServiceJobPersistenceError &&
+        error.code === "SERVICE_JOB_NOT_FOUND"
+      ) {
+        notFound();
+      }
+      throw error;
+    },
+  );
   const [assessments, billingDocuments] = await Promise.all([
     serviceJobManagementService.listAssessments(jobId, profile),
     ["admin", "executive", "sales", "warehouse", "customer"].includes(

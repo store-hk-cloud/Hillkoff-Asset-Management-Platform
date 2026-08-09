@@ -49,6 +49,12 @@ export function UserForm({
   const [role, setRole] = useState<UserRole>(
     initialValues?.role ?? "technician",
   );
+  const [warehouseId, setWarehouseId] = useState(
+    initialValues?.warehouseId ?? "",
+  );
+  const [customerId, setCustomerId] = useState(
+    initialValues?.customerId ?? "",
+  );
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -222,10 +228,11 @@ export function UserForm({
             </Label>
             <Select
               className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
-              defaultValue={initialValues?.warehouseId ?? ""}
+              onChange={(event) => setWarehouseId(event.target.value)}
               id="warehouseId"
               name="warehouseId"
               required
+              value={warehouseId}
             >
               <option value="">
                 {locale === "th" ? "เลือกคลัง" : "Select warehouse"}
@@ -245,11 +252,12 @@ export function UserForm({
               {t("field.customerId")}
             </Label>
             <Input
-              defaultValue={initialValues?.customerId ?? ""}
               id="customerId"
               maxLength={120}
               name="customerId"
+              onChange={(event) => setCustomerId(event.target.value)}
               required
+              value={customerId}
             />
           </div>
         ) : null}

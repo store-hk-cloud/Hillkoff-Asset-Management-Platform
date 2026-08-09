@@ -12,7 +12,8 @@ export async function GET(_request: Request, context: RouteContext) {
   try {
     const { publicId } = await context.params;
     const session = await getCurrentSession();
-    const asset = await service.lookupPublic(publicId, Boolean(session));
+    const isStaff = Boolean(session) && session?.profile.role !== "customer";
+    const asset = await service.lookupPublic(publicId, isStaff);
     return NextResponse.json(
       { success: true, data: asset },
       {

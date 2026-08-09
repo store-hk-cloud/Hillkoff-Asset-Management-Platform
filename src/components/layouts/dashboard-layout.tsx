@@ -194,13 +194,11 @@ export function DashboardLayout({
     };
   }, [mobileOpen]);
 
-  const currentItem =
-    [...visibleNavigation]
-      .sort((left, right) => right.href.length - left.href.length)
-      .find(
-        (item) =>
-          pathname === item.href || pathname.startsWith(`${item.href}/`),
-      ) ?? visibleNavigation[0];
+  const currentItem = [...visibleNavigation]
+    .sort((left, right) => right.href.length - left.href.length)
+    .find(
+      (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
+    );
 
   return (
     <div className="bg-background text-foreground min-h-dvh">
@@ -345,11 +343,11 @@ export function DashboardLayout({
                     className="hidden size-3 sm:inline"
                   />
                   <span className="truncate">
-                    {currentItem ? t(currentItem.labelKey) : t("nav.dashboard")}
+                    {currentItem ? t(currentItem.labelKey) : t("app.name")}
                   </span>
                 </div>
                 <p className="text-foreground truncate text-sm font-medium sm:text-base">
-                  {currentItem ? t(currentItem.labelKey) : t("nav.dashboard")}
+                  {currentItem ? t(currentItem.labelKey) : t("app.name")}
                 </p>
               </div>
             </div>

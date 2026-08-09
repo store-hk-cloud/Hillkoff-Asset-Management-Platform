@@ -24,7 +24,7 @@ export default async function TechnicianPage() {
           "ดูงานที่ได้รับมอบหมายและอัปเดตสถานะจากหน้างาน",
           "Review assigned work and update status from the field.",
         )}
-        eyebrow={thaiPrimary(locale, "พื้นที่ทำงานภาคสนาม", "พื้นที่ทำงานช่าง")}
+        eyebrow={thaiPrimary(locale, "พื้นที่ทำงานภาคสนาม", "Field workspace")}
         title={thaiPrimary(locale, "งานของฉัน", "My technician work")}
       />
       <TechnicianWorkspace workspace={workspace} />

@@ -27,13 +27,18 @@ export function ServiceJobAssignmentForm({
           >
             <input
               checked={selected.includes(technician.id)}
-              onChange={(event) =>
+              onChange={(event) => {
                 setSelected((current) =>
                   event.target.checked
                     ? [...current, technician.id]
                     : current.filter((id) => id !== technician.id),
-                )
-              }
+                );
+                if (!event.target.checked) {
+                  setLead((current) =>
+                    current === technician.id ? "" : current,
+                  );
+                }
+              }}
               type="checkbox"
             />
             {technician.name}

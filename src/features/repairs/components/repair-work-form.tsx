@@ -169,25 +169,35 @@ export function RepairWorkForm({
     value: string,
   ) {
     setParts((current) =>
-      current.map((part, partIndex) =>
-        partIndex === index
-          ? {
-              ...part,
-              [field]:
-                field === "quantity" || field === "unitCost"
-                  ? Number(value)
-                  : value,
-            }
-          : part,
-      ),
+      current.map((part, partIndex) => {
+        if (partIndex !== index) return part;
+        if (field === "quantity" || field === "unitCost") {
+          const parsed = Number(value);
+          return {
+            ...part,
+            [field]: Number.isFinite(parsed) ? parsed : part[field],
+          };
+        }
+        return { ...part, [field]: value };
+      }),
     );
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    setBusy(true);
     setError(null);
+    if (parts.some((part) => !(part.quantity > 0) || !(part.unitCost >= 0))) {
+      setError(
+        thaiPrimary(
+          locale,
+          "จำนวนอะไหล่ต้องมากกว่า 0 และต้นทุนต้องไม่ติดลบ",
+          "Part quantity must be greater than 0 and cost cannot be negative.",
+        ),
+      );
+      return;
+    }
+    setBusy(true);
     try {
       const result = await updateRepairTicket(repairId, {
         expectedVersion: version,
