@@ -401,35 +401,37 @@
  * Single source of truth — opaque, information-dense, and clearly layered.
  * Content surfaces use restrained borders and elevation so controls never
  * disappear into the page background.
- * Colors are sourced from hillkoff.com's live brand (teal/cyan/mint).
+ * Colors are sourced from the internal ManualPro reference app's dark
+ * forest-green palette (page/header/accent measured directly from its
+ * running UI), replacing the earlier hillkoff.com teal tokens.
  */
 
 :root {
   /* Brand */
-  --primary: #058581;
-  --primary-strong: #046662;
-  --primary-soft: rgba(5, 133, 129, 0.1);
-  --brand-accent: #00bac6;
-  --brand-mint: #51ddd7;
-  /* Always-dark brand hero panel (auth screen) — intentionally does not
-     flip with the light/dark theme toggle, so it is not redeclared in
-     .dark below. */
-  --brand-panel: #03211f;
-  --brand-panel-glow: #0aa39c;
+  --primary: #1f6f52;
+  --primary-strong: #175940;
+  --primary-soft: rgba(31, 111, 82, 0.1);
+  --brand-accent: #2f8f6c;
+  --brand-mint: #62bda0;
+  /* Always-dark brand hero panel (auth screen, dashboard top nav) —
+     intentionally does not flip with the light/dark theme toggle, so it
+     is not redeclared in .dark below. */
+  --brand-panel: #133b2e;
+  --brand-panel-glow: #62bda0;
 
   /* Surfaces */
-  --page: #f1f5f4;
-  --page-soft: #e7eeec;
+  --page: #eef4f1;
+  --page-soft: #e3ece7;
   --surface: #ffffff;
-  --surface-soft: #f5f8f7;
+  --surface-soft: #f3f8f6;
 
   /* Text */
-  --text: #333333;
-  --muted: #6b6b6b;
+  --text: #16241d;
+  --muted: #5c6b62;
 
   /* Lines */
-  --line: rgba(10, 45, 43, 0.16);
-  --line-strong: rgba(10, 45, 43, 0.28);
+  --line: rgba(16, 36, 26, 0.14);
+  --line-strong: rgba(16, 36, 26, 0.26);
 
   /* Status (semantic — not brand-tinted) */
   --success: #1e7d34;
@@ -483,22 +485,22 @@
 }
 
 .dark {
-  --primary: #1aa39d;
-  --primary-strong: #51ddd7;
-  --primary-soft: rgba(26, 163, 157, 0.16);
-  --brand-accent: #00bac6;
-  --brand-mint: #51ddd7;
+  --primary: #19352a;
+  --primary-strong: #234a3a;
+  --primary-soft: rgba(98, 189, 160, 0.16);
+  --brand-accent: #62bda0;
+  --brand-mint: #8fd4bb;
 
-  --page: #061614;
-  --page-soft: #0b211e;
-  --surface: #162c29;
-  --surface-soft: #10231f;
+  --page: #07130f;
+  --page-soft: #0c1f18;
+  --surface: #133b2e;
+  --surface-soft: #0f2e24;
 
-  --text: #f5f5f7;
-  --muted: #9aa5a3;
+  --text: #e7f1e9;
+  --muted: #aebfb3;
 
-  --line: rgba(245, 245, 247, 0.2);
-  --line-strong: rgba(245, 245, 247, 0.34);
+  --line: rgba(231, 241, 233, 0.16);
+  --line-strong: rgba(231, 241, 233, 0.28);
 
   --success: #4caf6b;
   --success-bg: rgba(76, 175, 107, 0.14);
@@ -519,7 +521,7 @@
     0 4px 12px rgba(0, 0, 0, 0.28), 0 14px 30px rgba(0, 0, 0, 0.18);
   --shadow-sm: var(--shadow-card);
 
-  --primary-foreground: #04211f;
+  --primary-foreground: #ffffff;
 }
 
 @theme {

@@ -6,8 +6,13 @@ import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePwa } from "@/components/pwa/pwa-provider";
 import { useLanguage } from "@/components/providers/language-provider";
+import { cn } from "@/lib/utils";
 
-export function InstallAppButton() {
+export function InstallAppButton({
+  className,
+}: {
+  className?: string;
+}) {
   const { locale, t } = useLanguage();
   const { canInstall, install, isIos } = usePwa();
   const [message, setMessage] = useState<string | null>(null);
@@ -34,7 +39,7 @@ export function InstallAppButton() {
   return (
     <div className="flex flex-col items-end gap-1">
       <Button
-        className="h-9"
+        className={cn("h-9", className)}
         onClick={handleInstall}
         type="button"
         variant="outline"
