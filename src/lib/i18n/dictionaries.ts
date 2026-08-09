@@ -117,8 +117,8 @@ const translations = {
     en: "Hillkoff Machine Verification",
   },
   "brand.tagline": {
-    th: "กลิ่นหอมพาเปลี่ยนแปลง รสชาติถึงซึ่งความรับผิดชอบ ดื่มด่ำย้ำเตือนความยั่งยืน",
-    en: "Where aroma sparks change, where taste meets responsibility, where every sip is a reminder of sustainability",
+    th: "“H-Innovation for Lives” ปรัชญาการทำงานของฮิลล์คอฟฟ์",
+    en: "“H-Innovation for Lives” — our work philosophy",
   },
   "brand.pillar.highland": {
     th: "H: เกษตรพื้นที่สูง",
