@@ -219,42 +219,50 @@ export function DashboardLayout({
           mobileOpen && "translate-x-0",
         )}
       >
-        <div className="flex items-center justify-between px-2">
-          <Link
-            className="focus-visible:ring-ring flex min-w-0 items-center gap-3 rounded-lg outline-none focus-visible:ring-2"
-            href="/dashboard"
-            onClick={() => setMobileOpen(false)}
-          >
-            <Image
-              alt={t("app.name")}
-              className="size-10 shrink-0"
-              height={40}
-              priority
-              src="/icons/hillkoff-emblem.png"
-              width={40}
-            />
-            <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold tracking-tight">
-                Hillkoff
+        <div className="relative -mx-4 -mt-5 mb-6 overflow-hidden px-4 py-5">
+          <Image
+            alt=""
+            className="object-cover"
+            fill
+            priority
+            src="/images/hillkoff-highland.jpg"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-[var(--brand-panel)]/80" />
+          <div className="relative flex items-center justify-between">
+            <Link
+              className="focus-visible:ring-ring flex min-w-0 items-center gap-3 rounded-lg text-white outline-none focus-visible:ring-2"
+              href="/dashboard"
+              onClick={() => setMobileOpen(false)}
+            >
+              <Image
+                alt={t("app.name")}
+                className="size-10 shrink-0"
+                height={40}
+                priority
+                src="/icons/hillkoff-emblem.png"
+                width={40}
+              />
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-semibold tracking-tight">
+                  Hillkoff
+                </span>
+                <span className="block truncate text-[11px] text-white/60">
+                  Machine Management
+                </span>
               </span>
-              <span className="text-muted-foreground block truncate text-[11px]">
-                Machine Management
-              </span>
-            </span>
-          </Link>
-          <Button
-            aria-label={locale === "th" ? "ปิดเมนูนำทาง" : "Close navigation"}
-            className="lg:hidden"
-            onClick={() => setMobileOpen(false)}
-            size="icon"
-            type="button"
-            variant="ghost"
-          >
-            <X aria-hidden="true" className="size-4" />
-          </Button>
+            </Link>
+            <Button
+              aria-label={locale === "th" ? "ปิดเมนูนำทาง" : "Close navigation"}
+              className="text-white hover:bg-white/10 hover:text-white lg:hidden"
+              onClick={() => setMobileOpen(false)}
+              size="icon"
+              type="button"
+              variant="ghost"
+            >
+              <X aria-hidden="true" className="size-4" />
+            </Button>
+          </div>
         </div>
-
-        <div className="my-6 border-t" />
 
         <nav
           className="min-h-0 flex-1 space-y-6 overflow-y-auto"
