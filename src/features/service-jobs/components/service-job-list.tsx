@@ -8,28 +8,52 @@ import { PageHeader } from "@/components/shared/page-header";
 import { useLanguage } from "@/components/providers/language-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import type { ServiceJobWorkType } from "@/domain/entities/service-job";
+import type { ServiceJobStatus, ServiceJobWorkType } from "@/domain/entities/service-job";
 import { ServiceJobStatusBadge } from "@/features/service-jobs/components/service-job-status-badge";
+import type { ServiceJobSearchCriteria } from "@/features/service-jobs/schemas/service-job.schema";
 import {
   listServiceJobs,
   type ServiceJobListItem,
 } from "@/features/service-jobs/services/service-job-api.service";
 import { thaiPrimary } from "@/lib/i18n/thai-primary";
 
+const STATUS_FILTER_OPTIONS: readonly (ServiceJobStatus | "all")[] = [
+  "all",
+  "received",
+  "scheduled",
+  "assigned",
+  "in_progress",
+  "assessment_pending",
+  "completed",
+];
+
+const WORK_TYPE_FILTER_OPTIONS: readonly (ServiceJobWorkType | "all")[] = [
+  "all",
+  "repair",
+  "installation",
+  "new_machine_test",
+];
+
+function buildHref(criteria: ServiceJobSearchCriteria, overrides: Partial<ServiceJobSearchCriteria>) {
+  const merged = { ...criteria, ...overrides };
+  const params = new URLSearchParams();
+  if (merged.status !== "all") params.set("status", merged.status);
+  if (merged.workType !== "all") params.set("workType", merged.workType);
+  if (merged.limit !== 50) params.set("limit", String(merged.limit));
+  const search = params.toString();
+  return `/service-jobs${search ? `?${search}` : ""}`;
+}
+
 export function ServiceJobList({
   canCreate,
-  initialWorkType = "all",
+  criteria,
 }: {
   canCreate: boolean;
-  initialWorkType?: ServiceJobWorkType | "all";
+  criteria: ServiceJobSearchCriteria;
 }) {
   const { locale } = useLanguage();
   const [jobs, setJobs] = useState<readonly ServiceJobListItem[]>([]);
-  const [status, setStatus] = useState("all");
-  const [workType, setWorkType] = useState<ServiceJobWorkType | "all">(
-    initialWorkType,
-  );
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(criteria.query);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,8 +78,9 @@ export function ServiceJobList({
   useEffect(() => {
     let active = true;
     const params = new URLSearchParams();
-    if (status !== "all") params.set("status", status);
-    if (workType !== "all") params.set("workType", workType);
+    if (criteria.status !== "all") params.set("status", criteria.status);
+    if (criteria.workType !== "all") params.set("workType", criteria.workType);
+    params.set("limit", String(criteria.limit));
     listServiceJobs(params.toString())
       .then((items) => {
         if (active) setJobs(items);
@@ -78,7 +103,7 @@ export function ServiceJobList({
     return () => {
       active = false;
     };
-  }, [locale, status, workType]);
+  }, [locale, criteria.status, criteria.workType, criteria.limit]);
 
   return (
     <section className="space-y-6">
@@ -113,25 +138,14 @@ export function ServiceJobList({
         role="group"
         aria-label="กรองใบงานช่าง"
       >
-        {(
-          [
-            "all",
-            "received",
-            "scheduled",
-            "assigned",
-            "in_progress",
-            "assessment_pending",
-            "completed",
-          ] as const
-        ).map((value) => (
-          <button
-            className={`rounded-md border px-3 py-2 text-sm ${status === value ? "bg-primary text-primary-foreground" : "bg-background"}`}
+        {STATUS_FILTER_OPTIONS.map((value) => (
+          <Link
+            className={`rounded-md border px-3 py-2 text-sm ${criteria.status === value ? "border-primary bg-primary/5 text-primary" : "hover:bg-accent/40"}`}
+            href={buildHref(criteria, { status: value, limit: 50 })}
             key={value}
-            onClick={() => setStatus(value)}
-            type="button"
           >
             {statusLabel(value)}
-          </button>
+          </Link>
         ))}
       </div>
       <div
@@ -139,18 +153,15 @@ export function ServiceJobList({
         role="group"
         aria-label="กรองประเภทงานช่าง"
       >
-        {(["all", "repair", "installation", "new_machine_test"] as const).map(
-          (value) => (
-            <button
-              className={`rounded-md border px-3 py-2 text-sm ${workType === value ? "bg-primary text-primary-foreground" : "bg-background"}`}
-              key={value}
-              onClick={() => setWorkType(value)}
-              type="button"
-            >
-              {workTypeLabel(value)}
-            </button>
-          ),
-        )}
+        {WORK_TYPE_FILTER_OPTIONS.map((value) => (
+          <Link
+            className={`rounded-md border px-3 py-2 text-sm ${criteria.workType === value ? "border-primary bg-primary/5 text-primary" : "hover:bg-accent/40"}`}
+            href={buildHref(criteria, { workType: value, limit: 50 })}
+            key={value}
+          >
+            {workTypeLabel(value)}
+          </Link>
+        ))}
       </div>
       {loading ? (
         <div aria-live="polite" className="rounded-lg border p-8 text-center">
@@ -173,31 +184,50 @@ export function ServiceJobList({
           }
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {visibleJobs.map((job) => (
-            <Link href={`/service-jobs/${job.id}`} key={job.id}>
-              <Card className="hover:border-primary h-full transition-colors">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-3">
-                    <CardTitle className="text-base">{job.title}</CardTitle>
-                    <ServiceJobStatusBadge status={job.status} />
-                  </div>
-                  <p className="text-muted-foreground font-mono text-xs">
-                    {job.jobNumber}
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <p>{job.customerName}</p>
-                  <p className="text-muted-foreground">{job.assetLabel}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {workTypeLabel(job.workType)} ·{" "}
-                    {fulfillmentLabel(job.fulfillmentMode)}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <>
+          <p className="text-muted-foreground text-sm">
+            {search.trim()
+              ? `พบ ${visibleJobs.length} รายการจาก ${jobs.length} ที่โหลดไว้`
+              : `แสดง ${jobs.length} รายการ`}
+          </p>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {visibleJobs.map((job) => (
+              <Link href={`/service-jobs/${job.id}`} key={job.id}>
+                <Card className="hover:border-primary h-full transition-colors">
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-3">
+                      <CardTitle className="text-base">{job.title}</CardTitle>
+                      <ServiceJobStatusBadge status={job.status} />
+                    </div>
+                    <p className="text-muted-foreground font-mono text-xs">
+                      {job.jobNumber}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-1 text-sm">
+                    <p>{job.customerName}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {job.assetLabel} · {workTypeLabel(job.workType)}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+          {jobs.length === criteria.limit && criteria.limit < 200 ? (
+            <div className="flex justify-center">
+              <Link
+                className="ghost-button rounded-md border px-4 py-2 text-sm"
+                href={buildHref(criteria, { limit: criteria.limit + 50 })}
+              >
+                โหลดเพิ่ม
+              </Link>
+            </div>
+          ) : jobs.length === criteria.limit ? (
+            <p className="text-muted-foreground text-center text-xs">
+              แสดงผลสูงสุด {criteria.limit} รายการแล้ว ลองปรับตัวกรองให้แคบลง
+            </p>
+          ) : null}
+        </>
       )}
     </section>
   );
@@ -224,13 +254,4 @@ function workTypeLabel(workType: string): string {
     new_machine_test: "ทดสอบเครื่องใหม่",
   };
   return labels[workType] ?? workType.replaceAll("_", " ");
-}
-
-function fulfillmentLabel(mode: string): string {
-  const labels: Record<string, string> = {
-    onsite: "หน้างาน",
-    carry_in: "นำเครื่องเข้าศูนย์",
-    carrier: "ขนส่ง",
-  };
-  return labels[mode] ?? mode.replaceAll("_", " ");
 }

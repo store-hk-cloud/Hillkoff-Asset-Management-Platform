@@ -95,6 +95,9 @@ in the field (`assets`, `repairs`, `installations`). The unused `.data-table`
 CSS was removed; a future `<DataTable>` should be introduced only with a
 specific dense admin use case.
 
+See `docs/list-filtering-and-density.md` for how individual list pages must
+filter, cap, and paginate the data inside this card-grid shell.
+
 ## 5. Forms
 
 - **Required fields** show a consistent indicator: a `text-destructive`

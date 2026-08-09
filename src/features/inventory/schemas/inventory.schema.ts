@@ -15,6 +15,13 @@ export const updateInventoryPartSchema = inventoryPartSchema.extend({
   expectedVersion: z.number().int().nonnegative(),
 });
 
+export const inventorySearchSchema = z.object({
+  status: z.enum(["all", "active", "inactive", "low"]).default("all"),
+  query: z.string().trim().max(160).default(""),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+});
+export type InventorySearchCriteria = z.infer<typeof inventorySearchSchema>;
+
 export const inventoryMovementSchema = z
   .object({
     partId: z.string().min(1),

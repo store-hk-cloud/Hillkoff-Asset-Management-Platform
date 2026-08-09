@@ -51,4 +51,6 @@ export const transferAssetBulkSchema = z.object({
 
 export const movementSearchSchema = z.object({
   type: z.enum([...MOVEMENT_TYPES, "all"]).default("all"),
+  limit: z.coerce.number().int().min(1).max(150).default(50),
 });
+export type MovementSearchCriteria = z.infer<typeof movementSearchSchema>;

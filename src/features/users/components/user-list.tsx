@@ -9,11 +9,17 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import type { UserProfile } from "@/domain/entities/user-profile";
 import { Users } from "lucide-react";
 
-export function UserList({ users }: { users: readonly UserProfile[] }) {
+export function UserList({
+  users,
+  emptyMessage,
+}: {
+  users: readonly UserProfile[];
+  emptyMessage?: string | undefined;
+}) {
   const { locale, t } = useLanguage();
 
   if (users.length === 0) {
-    return <EmptyState icon={Users} message={t("users.empty")} />;
+    return <EmptyState icon={Users} message={emptyMessage ?? t("users.empty")} />;
   }
 
   return (

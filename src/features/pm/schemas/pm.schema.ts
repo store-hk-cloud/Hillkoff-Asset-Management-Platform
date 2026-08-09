@@ -28,3 +28,9 @@ export const completePmSchema = z.object({
   checklist: z.array(checklistItemSchema).min(1),
   completionNotes: z.string().trim().max(3000),
 });
+
+export const pmSearchSchema = z.object({
+  status: z.enum(["scheduled", "completed", "all"]).default("scheduled"),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+});
+export type PmSearchCriteria = z.infer<typeof pmSearchSchema>;

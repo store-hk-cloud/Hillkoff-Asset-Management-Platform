@@ -233,6 +233,7 @@ export class WarehouseManagementService {
   async listMovements(
     profile: UserProfile,
     type: MovementType | "all",
+    limit = 100,
   ): Promise<readonly MovementLog[]> {
     if (!this.canView(profile)) {
       throw new WarehouseError(
@@ -243,7 +244,7 @@ export class WarehouseManagementService {
     return this.warehouseRepository.listMovements({
       type,
       warehouseId: profile.role === "branch" ? profile.warehouseId : null,
-      limit: 100,
+      limit: Math.min(Math.max(limit, 1), 150),
     });
   }
 

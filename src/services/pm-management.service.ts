@@ -61,6 +61,7 @@ export class PmManagementService {
       status: "scheduled" | "completed" | "all";
       from?: Date | null;
       to?: Date | null;
+      limit?: number;
     },
   ): Promise<readonly PmJob[]> {
     if (!this.canView(profile)) {
@@ -79,7 +80,7 @@ export class PmManagementService {
       status: options.status,
       from: options.from ?? null,
       to: options.to ?? null,
-      limit: 200,
+      limit: Math.min(Math.max(options.limit ?? 200, 1), 200),
     });
     return options.status === "scheduled"
       ? [...jobs].sort(

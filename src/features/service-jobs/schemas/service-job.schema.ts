@@ -308,6 +308,14 @@ export function createExecutionSchema(jobId: string) {
   });
 }
 
+export const serviceJobSearchSchema = z.object({
+  status: z.enum([...SERVICE_JOB_STATUSES, "all"]).default("all"),
+  workType: z.enum([...SERVICE_JOB_WORK_TYPES, "all"]).default("all"),
+  query: z.string().trim().max(160).default(""),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+});
+export type ServiceJobSearchCriteria = z.infer<typeof serviceJobSearchSchema>;
+
 export type CreateServiceJobPayload = z.infer<typeof createServiceJobSchema>;
 export type UpdateServiceJobPayload = z.infer<typeof updateServiceJobSchema>;
 export type ServiceJobAssignmentPayload = z.infer<

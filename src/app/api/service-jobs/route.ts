@@ -27,7 +27,7 @@ const listSchema = z
       .max(120)
       .transform(createUserId)
       .nullable(),
-    limit: z.coerce.number().int().min(1).max(100),
+    limit: z.coerce.number().int().min(1).max(200),
   })
   .strict();
 
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
       warehouseId: search.get("warehouseId"),
       customerId: search.get("customerId"),
       assignedTechnicianId: search.get("assignedTechnicianId"),
-      limit: search.get("limit") ?? "100",
+      limit: search.get("limit") ?? "50",
     });
     const jobs = await serviceJobManagementService.list(
       criteria,

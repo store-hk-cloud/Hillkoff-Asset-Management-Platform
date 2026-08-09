@@ -1606,7 +1606,7 @@ export class FirestoreServiceJobRepository implements ServiceJobRepository {
     }
     const snapshot = await query
       .orderBy("updatedAt", "desc")
-      .limit(Math.min(Math.max(criteria.limit, 1), 100))
+      .limit(Math.min(Math.max(criteria.limit, 1), 200))
       .get();
     return snapshot.docs.map((document) =>
       mapPersistedServiceJobListItem(document.data(), document.id),

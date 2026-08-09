@@ -1,8 +1,9 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PageHeader } from "@/components/shared/page-header";
-import { Select } from "@/components/ui/select";
 import { MovementList } from "@/features/warehouse/components/movement-list";
+import { MovementSearchForm } from "@/features/warehouse/components/movement-search-form";
 import { movementSearchSchema } from "@/features/warehouse/schemas/movement.schema";
 import { requireSession } from "@/lib/auth/dal";
 import { getServerTranslator } from "@/lib/i18n/server";
@@ -11,7 +12,7 @@ import { WarehouseManagementService } from "@/services/warehouse-management.serv
 const warehouseService = new WarehouseManagementService();
 
 type MovementsPageProps = {
-  searchParams: Promise<{ type?: string; success?: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 };
 
 export const metadata = { title: "Movement Logs" };
@@ -24,10 +25,15 @@ export default async function MovementsPage({
   if (!warehouseService.canView(profile)) notFound();
 
   const params = await searchParams;
-  const type = movementSearchSchema.parse({
-    type: params.type ?? "all",
-  }).type;
-  const movements = await warehouseService.listMovements(profile, type);
+  const criteria = movementSearchSchema.parse({
+    type: params.type,
+    limit: params.limit,
+  });
+  const movements = await warehouseService.listMovements(
+    profile,
+    criteria.type,
+    criteria.limit,
+  );
 
   return (
     <section className="space-y-6">
@@ -50,30 +56,31 @@ export default async function MovementsPage({
             : `Transaction ${params.success} was recorded successfully`}
         </p>
       ) : null}
-      <form
-        action="/warehouse/movements"
-        className="flex flex-col gap-3 sm:flex-row"
-        method="get"
-      >
-        <Select
-          className="border-input bg-background h-10 rounded-md border px-3 text-sm"
-          defaultValue={type}
-          name="type"
-        >
-          <option value="all">
-            {locale === "th" ? "ทุกการเคลื่อนไหว" : "All movements"}
-          </option>
-          <option value="warehouse_movement">{t("warehouse.transfer")}</option>
-          <option value="customer_sale">{t("warehouse.sale")}</option>
-        </Select>
-        <button
-          className="bg-primary text-primary-foreground h-10 rounded-md px-4 text-sm font-medium"
-          type="submit"
-        >
-          {locale === "th" ? "กรองรายการ" : "Apply filter"}
-        </button>
-      </form>
+      <MovementSearchForm type={criteria.type} />
+      {movements.length > 0 ? (
+        <p className="text-muted-foreground text-sm">
+          {locale === "th"
+            ? `แสดง ${movements.length} รายการ`
+            : `Showing ${movements.length} results`}
+        </p>
+      ) : null}
       <MovementList movements={movements} />
+      {movements.length === criteria.limit && criteria.limit < 150 ? (
+        <div className="flex justify-center">
+          <Link
+            className="ghost-button rounded-md border px-4 py-2 text-sm"
+            href={`/warehouse/movements?type=${criteria.type}&limit=${criteria.limit + 50}`}
+          >
+            {locale === "th" ? "โหลดเพิ่ม" : "Load more"}
+          </Link>
+        </div>
+      ) : movements.length === criteria.limit ? (
+        <p className="text-muted-foreground text-center text-xs">
+          {locale === "th"
+            ? `แสดงผลสูงสุด ${criteria.limit} รายการแล้ว ลองปรับตัวกรองให้แคบลง`
+            : `Showing the first ${criteria.limit} results — narrow your filters to see more.`}
+        </p>
+      ) : null}
     </section>
   );
 }

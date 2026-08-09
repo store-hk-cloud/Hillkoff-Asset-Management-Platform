@@ -20,6 +20,14 @@ export const managedUserCreateSchema = z.object({
   customerId: nullableScope,
 });
 
+export const userSearchSchema = z.object({
+  role: z.enum([...USER_ROLES, "all"]).default("all"),
+  status: z.enum([...USER_STATUSES, "all"]).default("all"),
+  query: z.string().trim().max(160).default(""),
+  limit: z.coerce.number().int().min(1).max(150).default(50),
+});
+export type UserSearchCriteria = z.infer<typeof userSearchSchema>;
+
 export const managedUserUpdateSchema = z.object({
   displayName: z.string().trim().min(1).max(120),
   role: z.enum(USER_ROLES),
