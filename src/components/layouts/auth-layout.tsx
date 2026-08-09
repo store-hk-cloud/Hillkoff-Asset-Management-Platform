@@ -15,14 +15,6 @@ export async function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="auth-shell bg-background min-h-dvh">
       <section className="auth-brand-panel relative overflow-hidden bg-[var(--brand-panel)] p-10 text-white">
-        <Image
-          alt=""
-          className="object-cover opacity-30"
-          fill
-          priority
-          src="/images/hillkoff-highland.jpg"
-        />
-        <div className="pointer-events-none absolute inset-0 bg-[var(--brand-panel)]/70" />
         <div className="pointer-events-none absolute -top-32 -right-32 size-96 rounded-full bg-[var(--brand-panel-glow)]/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-40 -left-32 size-[28rem] rounded-full bg-[var(--brand-accent)]/10 blur-3xl" />
         <div className="relative flex items-center gap-3">
