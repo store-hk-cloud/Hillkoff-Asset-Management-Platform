@@ -245,7 +245,7 @@ export function InstallationWorkForm({
 
   if (status === "completed") {
     return (
-      <p className="rounded-lg bg-green-50 p-4 text-sm text-green-800">
+      <p className="bg-[var(--success-bg)] text-success rounded-lg p-4 text-sm">
         {thaiPrimary(
           locale,
           "งานติดตั้งเสร็จสมบูรณ์และเปิดการรับประกันแล้ว",

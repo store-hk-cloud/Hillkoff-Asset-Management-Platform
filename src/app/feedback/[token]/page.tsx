@@ -7,7 +7,7 @@ export default async function PublicFeedbackPage({
 }) {
   const { token } = await params;
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl items-center bg-slate-50 px-4 py-10">
+    <main className="bg-background mx-auto flex min-h-screen max-w-xl items-center px-4 py-10">
       <ServiceFeedbackForm token={token} />
     </main>
   );

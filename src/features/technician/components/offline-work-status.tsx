@@ -29,8 +29,8 @@ export function OfflineWorkStatus({
     <div
       className={
         online
-          ? "rounded-lg border bg-green-50 p-3 text-sm text-green-800"
-          : "rounded-lg border bg-amber-50 p-3 text-sm text-amber-900"
+          ? "text-success rounded-lg border bg-[var(--success-bg)] p-3 text-sm"
+          : "text-warning rounded-lg border bg-[var(--warning-bg)] p-3 text-sm"
       }
     >
       <div className="flex items-center gap-2">

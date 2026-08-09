@@ -56,7 +56,7 @@ export default async function UserDetailPage({ params, searchParams }: Props) {
             </Button>
           ) : null}
           {invitation === "sent" ? (
-            <p className="mb-5 text-sm text-emerald-700">
+            <p className="text-success mb-5 text-sm">
               สร้างบัญชีและส่งคำเชิญตั้งรหัสผ่านแล้ว
             </p>
           ) : invitation === "failed" ? (

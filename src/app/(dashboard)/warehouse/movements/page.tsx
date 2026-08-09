@@ -42,7 +42,7 @@ export default async function MovementsPage({
       />
       {params.success ? (
         <p
-          className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800"
+          className="border-[var(--success-line)] bg-[var(--success-bg)] text-success rounded-lg border p-3 text-sm"
           role="status"
         >
           {locale === "th"

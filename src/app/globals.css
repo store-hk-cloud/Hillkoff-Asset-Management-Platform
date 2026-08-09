@@ -445,10 +445,11 @@
   --info-bg: rgba(29, 95, 168, 0.1);
   --info-line: rgba(29, 95, 168, 0.32);
 
-  /* Shape */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
+  /* Shape — square corners, matching hillkoff.com's own buttons/cards
+     (0px). Pills/avatars stay fully round via --radius-full. */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
   --radius-full: 999px;
 
   /* Elevation — enough separation for dense operational screens. */
@@ -522,11 +523,12 @@
 }
 
 @theme {
-  /* Static — radius doesn't vary between light/dark. */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --radius-xl: 10px;
+  /* Static — radius doesn't vary between light/dark. Square corners,
+     matching hillkoff.com's own buttons/cards (0px). */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
 }
 
 @theme inline {

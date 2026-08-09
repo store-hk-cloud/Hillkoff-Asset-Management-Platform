@@ -109,7 +109,7 @@ export function NfcRegistration({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+        <p className="bg-[var(--warning-bg)] text-warning rounded-lg p-3 text-sm">
           {locale === "th"
             ? "Web NFC ต้องใช้ Chrome บน Android ผ่าน HTTPS และเปิด NFC"
             : "Web NFC requires Chrome on Android over HTTPS with NFC enabled."}

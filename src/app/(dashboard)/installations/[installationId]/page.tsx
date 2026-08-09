@@ -165,7 +165,7 @@ export default async function InstallationDetailPage({
               </span>
             </div>
             {installation.completedAt ? (
-              <div className="flex items-center gap-2 text-green-700">
+              <div className="text-success flex items-center gap-2">
                 <CheckCircle2 aria-hidden="true" className="size-4" />
                 <span>
                   {thaiPrimary(locale, "เสร็จสิ้น", "Completed")}{" "}

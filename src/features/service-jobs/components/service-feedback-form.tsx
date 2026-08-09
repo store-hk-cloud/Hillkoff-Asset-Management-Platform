@@ -38,7 +38,7 @@ export function ServiceFeedbackForm({ token }: { token: string }) {
 
   if (state === "submitted") {
     return (
-      <p className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+      <p className="border-[var(--success-line)] bg-[var(--success-bg)] text-success rounded-lg border p-4 text-sm">
         ขอบคุณสำหรับความคิดเห็นของคุณ
       </p>
     );
@@ -46,7 +46,7 @@ export function ServiceFeedbackForm({ token }: { token: string }) {
 
   return (
     <form
-      className="space-y-5 rounded-xl border bg-white p-6 shadow-sm"
+      className="bg-card space-y-5 rounded-lg border p-6 shadow-sm"
       onSubmit={submit}
     >
       <div className="space-y-1">
@@ -92,7 +92,7 @@ export function ServiceFeedbackForm({ token }: { token: string }) {
         />
       </label>
       {state === "error" && (
-        <p className="text-sm text-red-700">
+        <p className="text-destructive text-sm">
           ลิงก์นี้หมดอายุหรือส่งความคิดเห็นไม่สำเร็จ
         </p>
       )}

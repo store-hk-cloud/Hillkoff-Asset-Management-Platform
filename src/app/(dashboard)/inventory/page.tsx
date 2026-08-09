@@ -40,9 +40,9 @@ export default async function InventoryPage() {
       />
 
       {lowStock.length > 0 ? (
-        <Card className="border-amber-300 bg-amber-50">
+        <Card className="border-[var(--warning-line)] bg-[var(--warning-bg)]">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base text-amber-900">
+            <CardTitle className="text-warning flex items-center gap-2 text-base">
               <AlertTriangle aria-hidden="true" className="size-5" />
               {thaiPrimary(
                 locale,
@@ -52,7 +52,7 @@ export default async function InventoryPage() {
               ({lowStock.length})
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-2 text-sm text-amber-900 sm:grid-cols-2">
+          <CardContent className="text-warning grid gap-2 text-sm sm:grid-cols-2">
             {lowStock.map((part) => (
               <p key={part.id}>
                 {part.partNumber} · {part.name}: {part.quantityOnHand}{" "}

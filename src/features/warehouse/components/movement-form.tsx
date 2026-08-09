@@ -458,14 +458,14 @@ export function MovementForm({ action }: MovementFormProps) {
                 : "Load machines"}
           </Button>
           {bulkNotFound.length > 0 ? (
-            <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            <div className="border-[var(--warning-line)] bg-[var(--warning-bg)] text-warning rounded-md border p-3 text-sm">
               <p className="font-medium">
                 {locale === "th" ? "ไม่พบรายการต่อไปนี้" : "Not found"}:
               </p>
               <div className="mt-1 flex flex-wrap gap-1">
                 {bulkNotFound.map((c) => (
                   <span
-                    className="rounded bg-amber-100 px-2 py-0.5 font-mono text-xs"
+                    className="rounded bg-[var(--warning-line)] px-2 py-0.5 font-mono text-xs"
                     key={c}
                   >
                     {c}

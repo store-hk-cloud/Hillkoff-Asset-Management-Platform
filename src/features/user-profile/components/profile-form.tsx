@@ -168,7 +168,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         </p>
       ) : null}
       {message ? (
-        <p className="text-sm text-green-700" role="status">
+        <p className="text-success text-sm" role="status">
           {message}
         </p>
       ) : null}

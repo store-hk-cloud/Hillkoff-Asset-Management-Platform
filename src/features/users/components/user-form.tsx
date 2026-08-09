@@ -264,7 +264,7 @@ export function UserForm({
       </div>
 
       {message ? (
-        <p className="text-sm text-emerald-700" role="status">
+        <p className="text-success text-sm" role="status">
           {message}
         </p>
       ) : null}

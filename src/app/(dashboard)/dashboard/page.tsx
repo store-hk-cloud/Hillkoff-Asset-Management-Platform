@@ -91,7 +91,7 @@ export default async function DashboardPage() {
       />
 
       {analyticsDegraded ? (
-        <Card className="border-amber-500/50 bg-amber-500/5">
+        <Card className="border-[var(--warning-line)] bg-[var(--warning-bg)]">
           <CardContent className="space-y-1 py-4 text-sm" role="status">
             <p className="font-medium">
               {locale === "th"
