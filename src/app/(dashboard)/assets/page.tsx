@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, Plus } from "lucide-react";
+import { Download, Package, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -80,14 +80,22 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
     <section className="space-y-6">
       <PageHeader
         action={
-          canWrite ? (
-            <Button asChild>
-              <Link href="/assets/new">
-                <Plus aria-hidden="true" className="size-4" />
-                {t("assets.add")}
+          <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <Link href="/api/assets/export/csv">
+                <Download aria-hidden="true" className="size-4" />
+                {locale === "th" ? "ส่งออก CSV" : "Export CSV"}
               </Link>
             </Button>
-          ) : null
+            {canWrite ? (
+              <Button asChild>
+                <Link href="/assets/new">
+                  <Plus aria-hidden="true" className="size-4" />
+                  {t("assets.add")}
+                </Link>
+              </Button>
+            ) : null}
+          </div>
         }
         description={
           locale === "th"
